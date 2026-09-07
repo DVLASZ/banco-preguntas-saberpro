@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>co.unicauca.saberpro</groupId>
+        <artifactId>banco-preguntas-saberpro</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>modulo-simulacros</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Modulo de Simulacros</name>
+    <description>
+        Generacion de simulacros por el Docente y presentacion/calificacion
+        por el Estudiante (HU-12 a HU-14). Depende de modulo-preguntas
+        (reutiliza QuestionService.buscarPublicadas y la entidad Question)
+        y de modulo-usuarios (la ventana del Estudiante necesita saber que
+        usuario esta presentando el simulacro).
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>co.unicauca.saberpro</groupId>
+            <artifactId>modulo-preguntas</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>co.unicauca.saberpro</groupId>
+            <artifactId>modulo-usuarios</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+        </dependency>
+    </dependencies>
+</project>

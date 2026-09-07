@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>co.unicauca.saberpro</groupId>
+        <artifactId>banco-preguntas-saberpro</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>modulo-preguntas</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Modulo de Preguntas</name>
+    <description>
+        Gestion del banco de preguntas: redaccion, ciclo de vida RF-14 y
+        revision por pares (RF-15/RF-16). Aplica capas + MVC + Observer.
+        No depende de ningun otro modulo del proyecto — es intencional:
+        el modulo de simulacros depende de este, y no al reves, para no
+        crear un ciclo entre modulos.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+        </dependency>
+    </dependencies>
+</project>
