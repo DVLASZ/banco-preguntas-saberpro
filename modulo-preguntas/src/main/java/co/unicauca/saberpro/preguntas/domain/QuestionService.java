@@ -55,6 +55,19 @@ public class QuestionService implements Subject {
     }
 
     /**
+     * Registra una pregunta ya construida por fuera del servicio (Taller 5:
+     * los plugins de {@code QuestionMicrokernel} generan la {@link Question}
+     * ellos mismos, tras pasar su propio pipeline de validación) y notifica
+     * a los observadores — así una pregunta generada por un plugin también
+     * aparece de inmediato en las vistas de estadísticas y gráfica, igual
+     * que una creada por el Autor.
+     */
+    public void registrarPreguntaGenerada(Question pregunta) {
+        repository.crear(pregunta);
+        notificarObservadores();
+    }
+
+    /**
      * Actualiza el contenido (nombre, enunciado, opciones, respuesta,
      * competencia, tema, dificultad) de una pregunta existente sin tocar
      * su estado. Es la operación propia del Autor al corregir una de sus

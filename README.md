@@ -32,7 +32,8 @@ banco-preguntas-saberpro/          (pom padre — packaging "pom")
 ├── modulo-usuarios/                Autenticación, registro y roles (RF-01 a RF-03)
 ├── modulo-preguntas/                Banco de preguntas: redacción y ciclo de vida RF-14 (depende de: nada)
 ├── modulo-simulacros/               Generación y presentación de simulacros HU-12 a HU-14 (depende de: modulo-preguntas, modulo-usuarios)
-└── app/                             Composition root: arma los módulos y arranca la app (depende de: los 3 anteriores)
+├── modulo-microkernel/              Generación de preguntas por plugins (Taller 5) (depende de: modulo-preguntas)
+└── app/                             Composition root: arma los módulos y arranca la app (depende de: los 4 anteriores)
 ```
 
 Grafo de dependencias entre módulos (siempre en una sola dirección, sin
@@ -42,15 +43,18 @@ ciclos):
 app  →  modulo-simulacros  →  modulo-preguntas
  │                          ↘
  │                            modulo-usuarios
- └────────────────────────────────↗
+ ├──────────────────────────────────↗
+ └→  modulo-microkernel  →  modulo-preguntas
 ```
 
 `modulo-preguntas` y `modulo-usuarios` no dependen de ningún otro módulo
 del proyecto — son la base. `modulo-simulacros` depende de ambos (necesita
 preguntas publicadas y necesita saber qué usuario presenta el simulacro).
-`app` es el único módulo que conoce a los cuatro: arma la inyección de
-dependencias manualmente y define `SesionRouter`, que decide qué ventana
-abrir según el rol autenticado.
+`modulo-microkernel` solo depende de `modulo-preguntas` (genera preguntas
+reales del banco a partir de plugins). `app` es el único módulo que
+conoce a los cuatro: arma la inyección de dependencias manualmente y
+define `SesionRouter`, que decide qué ventana abrir según el rol
+autenticado.
 
 Cada módulo, a su vez, aplica internamente arquitectura en capas
 (dominio / acceso a datos / presentación) y el micropatrón MVC — ver el
@@ -61,7 +65,7 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 73 pruebas de los 3 módulos con lógica de negocio
+mvn test      # ejecuta las 107 pruebas de los 4 módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
@@ -91,6 +95,12 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
   calificación automática al finalizar (HU-13/HU-14).
 - Vista de estadísticas y gráfica de pastel del banco de preguntas para
   el Administrador (patrón Observer).
+- Generación de preguntas por plugins (Taller 5): arquitectura
+  Microkernel con carga dinámica por Reflexión desde `plugins.properties`
+  (3 plugins: selección múltiple, caso de estudio, multimedia), cada uno
+  validado por un pipeline de Tuberías y Filtros (4 filtros) antes de
+  crear la pregunta real y notificar a las vistas observadoras — ver
+  `modulo-microkernel`.
 
 **Pendiente** (ver el desglose completo de qué falta y en qué orden
 convendría abordarlo en el historial de la conversación/planeación del

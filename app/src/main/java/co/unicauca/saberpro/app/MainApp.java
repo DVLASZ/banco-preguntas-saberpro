@@ -1,5 +1,7 @@
 package co.unicauca.saberpro.app;
 
+import co.unicauca.saberpro.microkernel.core.QuestionMicrokernel;
+import co.unicauca.saberpro.microkernel.presentation.GUIMicrokernel;
 import co.unicauca.saberpro.preguntas.access.QuestionImplRepository;
 import co.unicauca.saberpro.preguntas.domain.QuestionRepository;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
@@ -51,6 +53,9 @@ public class MainApp {
             SimulacroRepository simulacroRepository = new SimulacroImplRepository();
             SimulacroService simulacroService = new SimulacroService(questionService, simulacroRepository);
 
+            // --- Módulo de microkernel (Taller 5: generación de preguntas por plugins) ---
+            QuestionMicrokernel questionMicrokernel = new QuestionMicrokernel(questionService);
+
             // Las vistas de estadísticas y gráfica son un reporte agregado de
             // todo el banco de preguntas (HU-17): eso es competencia del
             // Administrador, no de todos los roles — por eso se crean y se
@@ -75,7 +80,10 @@ public class MainApp {
             // --- El puente entre ambos: qué ventana abrir según el rol ---
             new LoginFrame(userService, user -> {
                 switch (user.getRole()) {
-                    case AUTOR_PREGUNTAS -> new GUIQuestions(questionService).setVisible(true);
+                    case AUTOR_PREGUNTAS -> {
+                        new GUIQuestions(questionService).setVisible(true);
+                        new GUIMicrokernel(questionMicrokernel).setVisible(true);
+                    }
                     case REVISOR -> new GUIRevisor(questionService).setVisible(true);
                     case DOCENTE -> new GUIDocente(simulacroService).setVisible(true);
                     case ESTUDIANTE -> new GUIEstudiante(user, simulacroService).setVisible(true);

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>co.unicauca.saberpro</groupId>
+        <artifactId>banco-preguntas-saberpro</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>modulo-microkernel</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Modulo Microkernel (Taller 5)</name>
+    <description>
+        Arquitectura Microkernel (Plug-in) para tipos de pregunta
+        extensibles, combinada con el patron Tuberias y Filtros para
+        validar el contenido antes de generarlas. Los plugins se cargan
+        dinamicamente por Reflexion desde plugins.properties. Depende de
+        modulo-preguntas porque las preguntas que generan los plugins son
+        preguntas reales del banco (Question, Competencia, Dificultad),
+        no una entidad de juguete aparte.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>co.unicauca.saberpro</groupId>
+            <artifactId>modulo-preguntas</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+        </dependency>
+    </dependencies>
+</project>

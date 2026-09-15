@@ -28,6 +28,7 @@
         <module>modulo-usuarios</module>
         <module>modulo-preguntas</module>
         <module>modulo-simulacros</module>
+        <module>modulo-microkernel</module>
         <module>app</module>
     </modules>
 
@@ -68,6 +69,11 @@
             <dependency>
                 <groupId>co.unicauca.saberpro</groupId>
                 <artifactId>modulo-simulacros</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>co.unicauca.saberpro</groupId>
+                <artifactId>modulo-microkernel</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
