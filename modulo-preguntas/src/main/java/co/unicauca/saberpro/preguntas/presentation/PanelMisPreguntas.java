@@ -36,8 +36,8 @@ public class PanelMisPreguntas extends JPanel implements MisPreguntasVista {
     private final JComboBox<EstadoPregunta> comboEstado = comboConTodos(EstadoPregunta.values(), "Todos los estados");
     private final JComboBox<Competencia> comboCompetencia = comboConTodos(Competencia.values(), "Todas las competencias");
     private final JTextField txtBuscar = new JTextField(14);
-    private final JButton btnFiltrar = new JButton("Filtrar");
-    private final JButton btnLimpiar = new JButton("Limpiar");
+    private final JButton btnFiltrar = new JButton("Buscar");
+    private final JButton btnLimpiar = new JButton("Limpiar filtros");
 
     private final ModeloTabla modelo = new ModeloTabla();
     private final JTable tabla = new JTable(modelo);
@@ -81,7 +81,7 @@ public class PanelMisPreguntas extends JPanel implements MisPreguntasVista {
         btnAnterior.setEnabled(pagina.hayAnterior());
         btnSiguiente.setEnabled(pagina.haySiguiente());
         lblPagina.setText(pagina.totalElementos() == 0
-                ? "Sin resultados"
+                ? "No se encontraron preguntas"
                 : "Página " + pagina.numero() + " de " + pagina.totalPaginas()
                 + " · " + pagina.totalElementos() + (pagina.totalElementos() == 1 ? " pregunta" : " preguntas"));
         btnAbrir.setEnabled(false);
@@ -129,8 +129,9 @@ public class PanelMisPreguntas extends JPanel implements MisPreguntasVista {
         });
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
-        scroll.setPreferredSize(new Dimension(700, 24 * 5 + 30));
+        scroll.setPreferredSize(new Dimension(700, 24 * 6 + 30));
 
+        comboTamano.setSelectedItem(MisPreguntasController.TAMANO_INICIAL);
         comboTamano.addActionListener(e -> controlador.cambiarTamanoDePagina((Integer) comboTamano.getSelectedItem()));
         btnAnterior.addActionListener(e -> controlador.paginaAnterior());
         btnSiguiente.addActionListener(e -> controlador.paginaSiguiente());

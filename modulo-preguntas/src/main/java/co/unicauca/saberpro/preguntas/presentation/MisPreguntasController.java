@@ -15,7 +15,7 @@ import co.unicauca.saberpro.preguntas.domain.QuestionService;
  */
 public class MisPreguntasController {
 
-    static final int TAMANO_INICIAL = 5;
+    static final int TAMANO_INICIAL = 10;
 
     private final QuestionService modelo;
     private final String autor;

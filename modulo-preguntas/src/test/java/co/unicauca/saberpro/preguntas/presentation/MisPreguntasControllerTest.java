@@ -35,12 +35,15 @@ class MisPreguntasControllerTest {
     void iniciar_muestraLaPrimeraPaginaSinFiltros() {
         assertEquals(1, mostradas.size());
         assertEquals(1, ultima().numero());
-        assertEquals(MisPreguntasController.TAMANO_INICIAL, ultima().elementos().size());
+        assertEquals(10, MisPreguntasController.TAMANO_INICIAL);
+        assertEquals(6, ultima().elementos().size());
         assertEquals(6, ultima().totalElementos());
+        assertFalse(ultima().haySiguiente());
     }
 
     @Test
     void siguienteYAnterior_recorrenLasPaginas() {
+        controlador.cambiarTamanoDePagina(5);
         controlador.paginaSiguiente();
         assertEquals(2, ultima().numero());
         assertEquals(1, ultima().elementos().size());
@@ -51,8 +54,10 @@ class MisPreguntasControllerTest {
 
     @Test
     void siguienteEnLaUltimaPaginaYAnteriorEnLaPrimera_noHacenNada() {
+        controlador.cambiarTamanoDePagina(5);
+        int inicial = mostradas.size();
         controlador.paginaAnterior();
-        assertEquals(1, mostradas.size());
+        assertEquals(inicial, mostradas.size());
 
         controlador.paginaSiguiente();
         int vistas = mostradas.size();
@@ -63,7 +68,9 @@ class MisPreguntasControllerTest {
 
     @Test
     void filtrar_vuelveALaPrimeraPaginaConLosResultadosDelFiltro() {
+        controlador.cambiarTamanoDePagina(1);
         controlador.paginaSiguiente();
+        assertEquals(2, ultima().numero());
 
         controlador.filtrar(EstadoPregunta.BORRADOR, null, "");
 
