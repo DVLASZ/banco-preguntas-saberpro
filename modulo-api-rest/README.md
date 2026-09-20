@@ -56,10 +56,14 @@ model/       QuestionEntity (@Entity) ◀── QuestionMapper ──▶ Questio
   responde `204`. La pregunta sigue existiendo y se puede consultar.
 - **El servidor decide el id y el estado.** El cuerpo de POST/PUT no incluye
   `id` ni `estado`: el id (`P-013`, `P-014`, …) lo genera el adaptador
-  continuando el mayor consecutivo guardado, y una pregunta nueva nace en el
-  estado que define el dominio (hoy `PENDIENTE_REVISION`).
-- **PUT solo cambia el contenido**, nunca el estado (igual que
+  continuando el mayor consecutivo guardado, y una pregunta nueva nace siempre
+  en `BORRADOR`, como en la aplicación de escritorio.
+- **PUT solo cambia el contenido**, nunca el estado, y solo mientras la
+  pregunta esté en `BORRADOR` y lo pida su autor (igual que
   `QuestionService.actualizarContenido`).
+- **La validación estructural es la misma del dominio** (contexto obligatorio,
+  una única pregunta directa, cuatro opciones distintas, sin "todas/ninguna de
+  las anteriores", longitud y estructura), aplicada al crear y al actualizar.
 
 ## Endpoints
 
@@ -70,7 +74,7 @@ Base: `http://localhost:8080/api/questions`
 | GET | `/api/questions` | Lista todas las preguntas | `200` + arreglo JSON |
 | GET | `/api/questions/{id}` | Consulta una pregunta | `200` / `404` |
 | POST | `/api/questions` | Crea una pregunta | `201` + cabecera `Location` / `400` |
-| PUT | `/api/questions/{id}` | Actualiza el contenido | `200` / `400` / `404` |
+| PUT | `/api/questions/{id}` | Actualiza el contenido de un borrador | `200` / `400` / `403` / `404` / `409` |
 | DELETE | `/api/questions/{id}` | Archiva la pregunta | `204` / `404` |
 
 Cuerpo de POST y PUT:
@@ -78,15 +82,20 @@ Cuerpo de POST y PUT:
 ```json
 {
   "nombre": "Patrón Strategy",
+  "contexto": "Un sistema de envíos debe calcular el costo de forma distinta según el país...",
   "enunciado": "¿Qué permite el patrón Strategy?",
   "opcionA": "Intercambiar algoritmos en tiempo de ejecución",
   "opcionB": "Crear objetos sin exponer su clase concreta",
   "opcionC": "Recorrer una colección sin exponer su estructura",
   "opcionD": "Notificar cambios a varios observadores",
   "respuestaCorrecta": "A",
+  "justificacion": "Strategy encapsula algoritmos intercambiables y permite elegirlos en tiempo de ejecución.",
+  "bibliografia": "Gamma, E., Helm, R., Johnson, R. y Vlissides, J. (1994). Design Patterns. Addison-Wesley.",
   "competencia": "LECTURA_CRITICA",
   "tema": "Patrones de diseño",
-  "dificultad": "INTERMEDIO"
+  "subtema": "Strategy",
+  "dificultad": "INTERMEDIO",
+  "autor": "autor1"
 }
 ```
 
@@ -113,8 +122,11 @@ Todos los errores tienen el mismo formato:
 |---|---|
 | Falta un campo, texto demasiado largo o letra fuera de A–D | `400` con el detalle de cada campo |
 | JSON mal formado, o competencia/dificultad desconocida (se listan los valores válidos) | `400` |
+| La pregunta no cumple la validación estructural (p. ej. contexto vacío, opciones repetidas, "todas las anteriores") | `400` con el campo y el motivo de cada incumplimiento |
 | El dominio rechaza los datos (`IllegalArgumentException`) | `400` |
+| Quien pide modificarla no es su autor | `403` |
 | No existe la pregunta con ese id | `404` |
+| La pregunta ya no está en `BORRADOR` (no se puede modificar) | `409` |
 | Error inesperado | `500` con mensaje genérico (el detalle solo queda en el log) |
 
 ## Cómo ejecutarlo
@@ -149,16 +161,16 @@ en la variable `questionId` que usan el PUT, el DELETE y el GET final.
 
 ## Pruebas
 
-43 pruebas automatizadas (JUnit 5, Mockito, Spring Boot Test):
+52 pruebas automatizadas (JUnit 5, Mockito, Spring Boot Test):
 
 | Clase | Pruebas | Qué cubre |
 |---|---|---|
-| `QuestionMapperTest` | 3 | Ida y vuelta dominio ↔ entidad ↔ respuesta |
-| `QuestionJpaAdapterTest` | 10 | Adaptador JPA contra H2: crear, leer, actualizar, orden y generación de ids |
-| `QuestionApiServiceImplTest` | 8 | Traducción JSON → dominio, limpieza de espacios, DELETE = archivar |
-| `QuestionControllerTest` | 13 | Códigos HTTP, `Location`, validación y formato de errores (MockMvc) |
-| `QuestionApiIntegrationTest` | 7 | Flujo completo sin dobles: API → dominio → JPA → H2 |
-| `SampleDataSeederTest` | 2 | Carga inicial de 12 preguntas e idempotencia |
+| `QuestionMapperTest` | 4 | Ida y vuelta dominio ↔ entidad ↔ respuesta y solicitud → contenido |
+| `QuestionJpaAdapterTest` | 11 | Adaptador JPA contra H2: crear, leer, actualizar, contenido extendido, orden y ids |
+| `QuestionApiServiceImplTest` | 8 | Traducción JSON → dominio, creación de borradores, DELETE = archivar |
+| `QuestionControllerTest` | 16 | Códigos HTTP (200, 201, 204, 400, 403, 404, 409, 500), `Location` y formato de errores (MockMvc) |
+| `QuestionApiIntegrationTest` | 10 | Flujo completo sin dobles: API → dominio → JPA → H2 |
+| `SampleDataSeederTest` | 3 | Carga inicial de 12 preguntas con su contenido completo e idempotencia |
 
 ```bash
 mvn -pl modulo-api-rest -am test
@@ -172,7 +184,8 @@ mvn -pl modulo-api-rest -am test
 - La aplicación de escritorio sigue usando su repositorio en memoria; este
   microservicio tiene su propia base de datos.
 - Las reglas de estados siguen las del dominio actual (una pregunta nueva nace
-  en `PENDIENTE_REVISION`); cuando el dominio cambie, la API las hereda.
+  en `BORRADOR`); cuando el dominio cambie, la API las hereda. Todavía no
+  expone la acción "enviar a revisión".
 
 ## Autores
 

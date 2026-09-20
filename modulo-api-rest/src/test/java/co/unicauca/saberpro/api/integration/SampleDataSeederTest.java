@@ -26,6 +26,17 @@ class SampleDataSeederTest {
     }
 
     @Test
+    void laCargaInicialIncluyeElContenidoCompletoYElAutor() {
+        var pregunta = jpa.findById("P-001").orElseThrow();
+
+        assertEquals("autor1", pregunta.getAutor());
+        assertTrue(!pregunta.getContexto().isBlank());
+        assertTrue(!pregunta.getJustificacion().isBlank());
+        assertTrue(!pregunta.getBibliografia().isBlank());
+        assertTrue(!pregunta.getSubtema().isBlank());
+    }
+
+    @Test
     void ejecutarloOtraVezNoDuplicaLasPreguntas() {
         seeder.run(null);
 

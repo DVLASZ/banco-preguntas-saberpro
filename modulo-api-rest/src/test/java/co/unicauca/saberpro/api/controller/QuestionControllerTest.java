@@ -3,9 +3,13 @@ package co.unicauca.saberpro.api.controller;
 import co.unicauca.saberpro.api.dto.QuestionRequest;
 import co.unicauca.saberpro.api.dto.QuestionResponse;
 import co.unicauca.saberpro.api.service.IQuestionApiService;
+import co.unicauca.saberpro.preguntas.domain.AccesoDenegadoException;
 import co.unicauca.saberpro.preguntas.domain.Competencia;
 import co.unicauca.saberpro.preguntas.domain.Dificultad;
 import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
+import co.unicauca.saberpro.preguntas.domain.OperacionNoPermitidaException;
+import co.unicauca.saberpro.preguntas.domain.validation.QuestionValidationException;
+import co.unicauca.saberpro.preguntas.domain.validation.Violacion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +50,14 @@ class QuestionControllerTest {
     private IQuestionApiService service;
 
     private static QuestionResponse respuesta(String id) {
-        return new QuestionResponse(id, "Nombre " + id, "Enunciado " + id, "A1", "B1", "C1", "D1", "B",
-                EstadoPregunta.PENDIENTE_REVISION, Competencia.INGLES, "Tema", Dificultad.BASICO);
+        return new QuestionResponse(id, "Nombre " + id, "Contexto " + id, "¿Enunciado " + id + "?", "A1", "B1", "C1",
+                "D1", "B", "Justificación", "Libro", EstadoPregunta.BORRADOR, Competencia.INGLES, "Tema",
+                "Subtema", Dificultad.BASICO, "autor1");
     }
 
     private static QuestionRequest solicitudValida() {
-        return new QuestionRequest("Nombre", "Enunciado", "A1", "B1", "C1", "D1", "B",
-                Competencia.INGLES, "Tema", Dificultad.BASICO);
+        return new QuestionRequest("Nombre", "Contexto", "¿Enunciado?", "A1", "B1", "C1", "D1", "B",
+                "Justificación", "Libro", Competencia.INGLES, "Tema", "Subtema", Dificultad.BASICO, "autor1");
     }
 
     private String json(Object cuerpo) throws Exception {
@@ -67,7 +72,9 @@ class QuestionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value("P-001"))
-                .andExpect(jsonPath("$[1].estado").value("PENDIENTE_REVISION"));
+                .andExpect(jsonPath("$[1].estado").value("BORRADOR"))
+                .andExpect(jsonPath("$[1].contexto").value("Contexto P-002"))
+                .andExpect(jsonPath("$[1].autor").value("autor1"));
     }
 
     @Test
@@ -105,8 +112,8 @@ class QuestionControllerTest {
 
     @Test
     void postConDatosInvalidosRetorna400ConElDetalleDeCadaCampo() throws Exception {
-        QuestionRequest invalida = new QuestionRequest("", "Enunciado", "A1", "B1", "C1", "D1", "Z",
-                Competencia.INGLES, "Tema", Dificultad.BASICO);
+        QuestionRequest invalida = new QuestionRequest("", "Contexto", "¿Enunciado?", "A1", "B1", "C1", "D1", "Z",
+                "Justificación", "Libro", Competencia.INGLES, "Tema", "Subtema", Dificultad.BASICO, "autor1");
 
         mockMvc.perform(post("/api/questions")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,6 +155,44 @@ class QuestionControllerTest {
                         .content(json(solicitudValida())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Las 4 opciones son obligatorias"));
+    }
+
+    @Test
+    void postQueNoPasaLaValidacionEstructuralRetorna400ConElDetalleDeCadaCampo() throws Exception {
+        when(service.save(any(QuestionRequest.class))).thenThrow(new QuestionValidationException(List.of(
+                new Violacion("opcionB", "La opción B usa una expresión no permitida"),
+                new Violacion("enunciado", "Debe existir una única pregunta directa"))));
+
+        mockMvc.perform(post("/api/questions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(solicitudValida())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("La pregunta no cumple la validación estructural"))
+                .andExpect(jsonPath("$.details", hasItem("opcionB: La opción B usa una expresión no permitida")))
+                .andExpect(jsonPath("$.details", hasItem("enunciado: Debe existir una única pregunta directa")));
+    }
+
+    @Test
+    void putSobreUnaPreguntaQueYaNoEsBorradorRetorna409() throws Exception {
+        when(service.update(eq("P-002"), any(QuestionRequest.class)))
+                .thenThrow(new OperacionNoPermitidaException("Solo se puede modificar una pregunta en estado Borrador"));
+
+        mockMvc.perform(put("/api/questions/P-002")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(solicitudValida())))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Solo se puede modificar una pregunta en estado Borrador"));
+    }
+
+    @Test
+    void putDeUnAutorQueNoEsElDuenoRetorna403() throws Exception {
+        when(service.update(eq("P-001"), any(QuestionRequest.class)))
+                .thenThrow(new AccesoDenegadoException("Solo el autor de la pregunta puede modificarla"));
+
+        mockMvc.perform(put("/api/questions/P-001")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(solicitudValida())))
+                .andExpect(status().isForbidden());
     }
 
     @Test

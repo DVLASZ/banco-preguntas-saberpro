@@ -1,64 +1,109 @@
 package co.unicauca.saberpro.preguntas.presentation;
 
 import co.unicauca.saberpro.preguntas.domain.Competencia;
+import co.unicauca.saberpro.preguntas.domain.ContenidoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Dificultad;
+import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Question;
-import co.unicauca.saberpro.preguntas.domain.QuestionDistractors;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
+import co.unicauca.saberpro.preguntas.domain.validation.QuestionValidationException;
+import co.unicauca.saberpro.preguntas.domain.validation.Violacion;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Ventana del rol <b>Autor de preguntas</b>: redacta el contenido de sus
- * preguntas — crea preguntas nuevas y edita las existentes (nombre,
- * enunciado, opciones, respuesta correcta) — (HU-04). Al crear una
- * pregunta esta queda en {@code PENDIENTE_REVISION}: el Autor la redacta
- * y la envía, pero no decide su aprobación ni cambia su estado por
- * ningún otro medio — esa es competencia exclusiva del rol Revisor (ver
- * {@link GUIRevisor}), tal como se distribuyó en el modelo C4 del
- * Taller 3.
+ * Ventana del rol <b>Autor de preguntas</b>: redacta sus preguntas (HU-01),
+ * las guarda como {@code BORRADOR} y las envía a revisión (HU-02). Solo
+ * puede modificar una pregunta mientras esté en Borrador (RF-06); en
+ * cualquier otro estado el formulario queda de solo lectura.
+ *
+ * <p>Al guardar o enviar se aplica la validación estructural (HU03): si algo
+ * incumple, no se guarda nada y los campos afectados se resaltan en rojo.
+ * Guardar y enviar a revisión son acciones distintas; enviar pide
+ * confirmación, y cancelar pide confirmación si hay cambios sin guardar.
  */
 public class GUIQuestions extends JFrame {
 
     private static final Color GRIS_TEXTO = new Color(0x475569);
     private static final Color FONDO_CAMPO = new Color(0xF1F5F9);
+    private static final Color ROJO_ERROR = new Color(0xDC2626);
+    private static final String SIN_SELECCION = "— Seleccione —";
 
     private final QuestionService service;
+    private final String usuario;
 
     private final JComboBox<Question> comboPreguntas = new JComboBox<>();
     private final JButton btnCargar = new JButton("Cargar pregunta");
     private final JButton btnNueva = new JButton("Nueva pregunta");
-    private final JButton btnGuardar = new JButton("Guardar");
+    private final JButton btnGuardar = new JButton("Guardar borrador");
+    private final JButton btnEnviar = new JButton("Enviar a revisión");
+    private final JButton btnCancelar = new JButton("Cancelar");
 
     private final JTextField txtId = new JTextField();
     private final JTextField txtNombre = new JTextField();
-    private final JTextArea txtEnunciado = new JTextArea(3, 30);
+    private final JTextArea txtContexto = new JTextArea(3, 30);
+    private final JTextArea txtEnunciado = new JTextArea(2, 30);
     private final JTextField txtOpcionA = new JTextField();
     private final JTextField txtOpcionB = new JTextField();
     private final JTextField txtOpcionC = new JTextField();
     private final JTextField txtOpcionD = new JTextField();
-    private final JTextField txtRespuestaCorrecta = new JTextField();
-    private final JComboBox<Competencia> comboCompetencia = new JComboBox<>(Competencia.values());
+    private final JComboBox<String> comboRespuesta = new JComboBox<>(new String[]{"", "A", "B", "C", "D"});
+    private final JTextArea txtJustificacion = new JTextArea(3, 30);
+    private final JTextArea txtBibliografia = new JTextArea(2, 30);
+    private final JComboBox<Competencia> comboCompetencia = comboConSeleccion(Competencia.values());
     private final JTextField txtTema = new JTextField();
-    private final JComboBox<Dificultad> comboDificultad = new JComboBox<>(Dificultad.values());
+    private final JTextField txtSubtema = new JTextField();
+    private final JComboBox<Dificultad> comboDificultad = comboConSeleccion(Dificultad.values());
     private final EstadoBadge badgeEstadoActual = new EstadoBadge();
+    private final JLabel lblAviso = new JLabel(" ");
+
+    /** Componente de la interfaz que corresponde a cada campo de la validación, para resaltarlo. */
+    private final Map<String, JComponent> componentesPorCampo = new HashMap<>();
+    private final Map<JComponent, Border> bordesOriginales = new HashMap<>();
 
     /** {@code null} mientras se redacta una pregunta nueva aún no guardada. */
     private String idPreguntaEnEdicion;
+    private boolean edicionPermitida;
+    /** Contenido tal como se cargó o se guardó, para detectar cambios sin guardar. */
+    private ContenidoPregunta instantanea;
 
-    public GUIQuestions(QuestionService service) {
+    public GUIQuestions(QuestionService service, String usuario) {
         super("Banco de Preguntas Saber Pro - Autor de Preguntas");
         this.service = service;
+        this.usuario = usuario;
         construirInterfaz();
         cargarComboPreguntas();
-        habilitarFormulario(false);
+        limpiarFormulario();
+        habilitarFormulario(false, "Seleccione una pregunta o cree una nueva.");
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(560, 700);
+        setSize(780, 860);
         setLocationRelativeTo(null);
+    }
+
+    private static <T> JComboBox<T> comboConSeleccion(T[] valores) {
+        DefaultComboBoxModel<T> modelo = new DefaultComboBoxModel<>();
+        modelo.addElement(null);
+        for (T valor : valores) {
+            modelo.addElement(valor);
+        }
+        JComboBox<T> combo = new JComboBox<>(modelo);
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                return super.getListCellRendererComponent(list, value == null ? SIN_SELECCION : value,
+                        index, isSelected, cellHasFocus);
+            }
+        });
+        return combo;
     }
 
     private void construirInterfaz() {
@@ -66,13 +111,21 @@ public class GUIQuestions extends JFrame {
         setLayout(new BorderLayout(12, 12));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel rol = new JLabel("Rol: Autor de preguntas");
+        JLabel rol = new JLabel("Rol: Autor de preguntas — usuario: " + usuario);
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 
         JPanel panelSeleccion = new JPanel(new BorderLayout(8, 8));
         panelSeleccion.setBackground(Color.WHITE);
-        panelSeleccion.setBorder(tituloSeccion("Seleccionar o crear pregunta"));
+        panelSeleccion.setBorder(tituloSeccion("Mis preguntas"));
+        comboPreguntas.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                String texto = value instanceof Question q ? q + "   [" + q.getEstado() + "]" : "";
+                return super.getListCellRendererComponent(list, texto, index, isSelected, cellHasFocus);
+            }
+        });
         panelSeleccion.add(comboPreguntas, BorderLayout.CENTER);
         JPanel botonesSeleccion = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         botonesSeleccion.setOpaque(false);
@@ -91,38 +144,28 @@ public class GUIQuestions extends JFrame {
         panelFormulario.setBackground(Color.WHITE);
         panelFormulario.setBorder(tituloSeccion("Redacción de la pregunta"));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6);
+        gbc.insets = new Insets(5, 6, 5, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        agregarCampo(panelFormulario, gbc, "Id:", txtId);
-        agregarCampo(panelFormulario, gbc, "Nombre:", txtNombre);
-
-        gbc.gridx = 0;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        panelFormulario.add(etiqueta("Pregunta:"), gbc);
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        txtEnunciado.setLineWrap(true);
-        txtEnunciado.setWrapStyleWord(true);
-        txtEnunciado.setFont(txtEnunciado.getFont().deriveFont(13f));
-        txtEnunciado.setBorder(new EmptyBorder(6, 8, 6, 8));
-        JScrollPane scrollEnunciado = new JScrollPane(txtEnunciado);
-        scrollEnunciado.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
-        panelFormulario.add(scrollEnunciado, gbc);
-        gbc.gridy++;
-
-        agregarCampo(panelFormulario, gbc, "A.", txtOpcionA);
-        agregarCampo(panelFormulario, gbc, "B.", txtOpcionB);
-        agregarCampo(panelFormulario, gbc, "C.", txtOpcionC);
-        agregarCampo(panelFormulario, gbc, "D.", txtOpcionD);
-        agregarCampo(panelFormulario, gbc, "Respuesta correcta (A-D):", txtRespuestaCorrecta);
-        agregarCampo(panelFormulario, gbc, "Competencia:", comboCompetencia);
-        agregarCampo(panelFormulario, gbc, "Tema:", txtTema);
-        agregarCampo(panelFormulario, gbc, "Dificultad:", comboDificultad);
+        txtId.setEditable(false);
+        txtId.setBackground(FONDO_CAMPO);
+        agregarCampo(panelFormulario, gbc, "Id:", txtId, null);
+        agregarCampo(panelFormulario, gbc, "Nombre:", txtNombre, "nombre");
+        agregarArea(panelFormulario, gbc, "Contexto:", txtContexto, "contexto");
+        agregarArea(panelFormulario, gbc, "Pregunta directa:", txtEnunciado, "enunciado");
+        agregarCampo(panelFormulario, gbc, "Opción A:", txtOpcionA, "opcionA");
+        agregarCampo(panelFormulario, gbc, "Opción B:", txtOpcionB, "opcionB");
+        agregarCampo(panelFormulario, gbc, "Opción C:", txtOpcionC, "opcionC");
+        agregarCampo(panelFormulario, gbc, "Opción D:", txtOpcionD, "opcionD");
+        agregarCampo(panelFormulario, gbc, "Respuesta correcta:", comboRespuesta, "respuestaCorrecta");
+        agregarArea(panelFormulario, gbc, "Justificación:", txtJustificacion, "justificacion");
+        agregarArea(panelFormulario, gbc, "Bibliografía:", txtBibliografia, "bibliografia");
+        agregarCampo(panelFormulario, gbc, "Competencia:", comboCompetencia, "competencia");
+        agregarCampo(panelFormulario, gbc, "Tema:", txtTema, "tema");
+        agregarCampo(panelFormulario, gbc, "Subtema:", txtSubtema, "subtema");
+        agregarCampo(panelFormulario, gbc, "Dificultad:", comboDificultad, "dificultad");
 
         gbc.gridx = 0;
         gbc.weightx = 0;
@@ -134,17 +177,29 @@ public class GUIQuestions extends JFrame {
         envolturaBadge.add(badgeEstadoActual);
         panelFormulario.add(envolturaBadge, gbc);
 
-        txtId.setEditable(false);
-        txtId.setBackground(FONDO_CAMPO);
+        JScrollPane scrollFormulario = new JScrollPane(panelFormulario);
+        scrollFormulario.setBorder(BorderFactory.createEmptyBorder());
+        scrollFormulario.getVerticalScrollBar().setUnitIncrement(16);
 
-        JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
-        panelAcciones.setOpaque(false);
+        lblAviso.setForeground(GRIS_TEXTO);
+        lblAviso.setFont(lblAviso.getFont().deriveFont(Font.ITALIC, 12f));
         btnGuardar.putClientProperty("JButton.buttonType", "default");
-        btnGuardar.addActionListener(e -> guardar());
-        panelAcciones.add(btnGuardar);
+        btnGuardar.addActionListener(e -> guardarBorrador());
+        btnEnviar.addActionListener(e -> enviarARevision());
+        btnCancelar.addActionListener(e -> cancelar());
+
+        JPanel panelAcciones = new JPanel(new BorderLayout(8, 0));
+        panelAcciones.setOpaque(false);
+        panelAcciones.add(lblAviso, BorderLayout.CENTER);
+        JPanel botones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        botones.setOpaque(false);
+        botones.add(btnCancelar);
+        botones.add(btnEnviar);
+        botones.add(btnGuardar);
+        panelAcciones.add(botones, BorderLayout.EAST);
 
         add(panelNorte, BorderLayout.NORTH);
-        add(panelFormulario, BorderLayout.CENTER);
+        add(scrollFormulario, BorderLayout.CENTER);
         add(panelAcciones, BorderLayout.SOUTH);
     }
 
@@ -162,120 +217,264 @@ public class GUIQuestions extends JFrame {
         return label;
     }
 
-    private void agregarCampo(JPanel panel, GridBagConstraints gbc, String etiqueta, JComponent campo) {
+    private void agregarCampo(JPanel panel, GridBagConstraints gbc, String etiqueta, JComponent campo, String nombreCampo) {
         gbc.gridx = 0;
         gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
         panel.add(etiqueta(etiqueta), gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
         panel.add(campo, gbc);
         gbc.gridy++;
+        if (nombreCampo != null) {
+            registrarCampo(nombreCampo, campo);
+        }
     }
+
+    private void agregarArea(JPanel panel, GridBagConstraints gbc, String etiqueta, JTextArea area, String nombreCampo) {
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setBorder(new EmptyBorder(4, 6, 4, 6));
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
+        gbc.gridx = 0;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        panel.add(etiqueta(etiqueta), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(scroll, gbc);
+        gbc.gridy++;
+        registrarCampo(nombreCampo, scroll);
+    }
+
+    private void registrarCampo(String nombreCampo, JComponent componente) {
+        componentesPorCampo.put(nombreCampo, componente);
+        bordesOriginales.put(componente, componente.getBorder());
+    }
+
+    // ---- selección y carga ----
 
     private void cargarComboPreguntas() {
         comboPreguntas.removeAllItems();
-        for (Question pregunta : service.listarPreguntas()) {
+        for (Question pregunta : service.listarPorAutor(usuario)) {
             comboPreguntas.addItem(pregunta);
         }
     }
 
     private void cargarPreguntaSeleccionada() {
         Question seleccionada = (Question) comboPreguntas.getSelectedItem();
-        if (seleccionada == null) {
+        if (seleccionada == null || !confirmarDescarteDeCambios()) {
             return;
         }
-        Question pregunta = service.obtenerPregunta(seleccionada.getId());
-        idPreguntaEnEdicion = pregunta.getId();
-        txtId.setText(pregunta.getId());
-        txtNombre.setText(pregunta.getNombre());
-        txtEnunciado.setText(pregunta.getEnunciado());
-        txtOpcionA.setText(pregunta.getOpciones().getOpcionA());
-        txtOpcionB.setText(pregunta.getOpciones().getOpcionB());
-        txtOpcionC.setText(pregunta.getOpciones().getOpcionC());
-        txtOpcionD.setText(pregunta.getOpciones().getOpcionD());
-        txtRespuestaCorrecta.setText(String.valueOf(pregunta.getRespuestaCorrecta()));
-        comboCompetencia.setSelectedItem(pregunta.getCompetencia());
-        txtTema.setText(pregunta.getTema());
-        comboDificultad.setSelectedItem(pregunta.getDificultad());
-        badgeEstadoActual.mostrar(pregunta.getEstado());
-        habilitarFormulario(true);
+        mostrarPregunta(service.obtenerPregunta(seleccionada.getId()));
     }
 
-    /** Limpia el formulario para redactar una pregunta completamente nueva. */
+    private void mostrarPregunta(Question pregunta) {
+        limpiarResaltados();
+        idPreguntaEnEdicion = pregunta.getId();
+        txtId.setText(pregunta.getId());
+        cargarFormulario(ContenidoPregunta.de(pregunta));
+        badgeEstadoActual.mostrar(pregunta.getEstado());
+        boolean editable = pregunta.getEstado() == EstadoPregunta.BORRADOR;
+        habilitarFormulario(editable, editable ? "Puede modificarla mientras esté en Borrador."
+                : "Solo lectura: la pregunta está " + pregunta.getEstado() + ".");
+    }
+
     private void iniciarPreguntaNueva() {
-        idPreguntaEnEdicion = null;
+        if (!confirmarDescarteDeCambios()) {
+            return;
+        }
+        limpiarResaltados();
         comboPreguntas.setSelectedItem(null);
-        txtId.setText("(nueva)");
-        txtNombre.setText("");
-        txtEnunciado.setText("");
-        txtOpcionA.setText("");
-        txtOpcionB.setText("");
-        txtOpcionC.setText("");
-        txtOpcionD.setText("");
-        txtRespuestaCorrecta.setText("");
-        comboCompetencia.setSelectedIndex(0);
-        txtTema.setText("");
-        comboDificultad.setSelectedIndex(0);
-        badgeEstadoActual.setText("");
-        habilitarFormulario(true);
+        limpiarFormulario();
+        habilitarFormulario(true, "Complete todos los campos y guarde el borrador.");
         txtNombre.requestFocusInWindow();
     }
 
-    private void guardar() {
-        String respuesta = txtRespuestaCorrecta.getText().trim();
-        try {
-            QuestionDistractors opciones = new QuestionDistractors(
-                    txtOpcionA.getText().trim(), txtOpcionB.getText().trim(),
-                    txtOpcionC.getText().trim(), txtOpcionD.getText().trim());
-            char respuestaCorrecta = respuesta.isEmpty() ? ' ' : respuesta.charAt(0);
-            Competencia competencia = (Competencia) comboCompetencia.getSelectedItem();
-            String tema = txtTema.getText().trim();
-            Dificultad dificultad = (Dificultad) comboDificultad.getSelectedItem();
+    private void limpiarFormulario() {
+        idPreguntaEnEdicion = null;
+        txtId.setText("(nueva)");
+        cargarFormulario(new ContenidoPregunta("", "", "", "", "", "", "", "", "", "", null, "", "", null));
+        badgeEstadoActual.setText("");
+    }
 
-            if (idPreguntaEnEdicion == null) {
-                Question creada = service.crearPregunta(txtNombre.getText().trim(),
-                        txtEnunciado.getText().trim(), opciones, respuestaCorrecta,
-                        competencia, tema, dificultad);
-                idPreguntaEnEdicion = creada.getId();
-                JOptionPane.showMessageDialog(this,
-                        "Pregunta " + creada.getId() + " creada y enviada a revisión.",
-                        "Pregunta creada", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                service.actualizarContenido(idPreguntaEnEdicion, txtNombre.getText().trim(),
-                        txtEnunciado.getText().trim(), opciones, respuestaCorrecta,
-                        competencia, tema, dificultad);
-                JOptionPane.showMessageDialog(this,
-                        "Cambios guardados en " + idPreguntaEnEdicion + ".",
-                        "Pregunta actualizada", JOptionPane.INFORMATION_MESSAGE);
-            }
+    private void cargarFormulario(ContenidoPregunta c) {
+        txtNombre.setText(c.nombre());
+        txtContexto.setText(c.contexto());
+        txtEnunciado.setText(c.enunciado());
+        txtOpcionA.setText(c.opcionA());
+        txtOpcionB.setText(c.opcionB());
+        txtOpcionC.setText(c.opcionC());
+        txtOpcionD.setText(c.opcionD());
+        comboRespuesta.setSelectedItem(c.respuestaCorrecta());
+        txtJustificacion.setText(c.justificacion());
+        txtBibliografia.setText(c.bibliografia());
+        comboCompetencia.setSelectedItem(c.competencia());
+        txtTema.setText(c.tema());
+        txtSubtema.setText(c.subtema());
+        comboDificultad.setSelectedItem(c.dificultad());
+        instantanea = leerFormulario();
+    }
 
-            cargarComboPreguntas();
-            comboPreguntas.setSelectedItem(service.obtenerPregunta(idPreguntaEnEdicion));
-            cargarPreguntaSeleccionada();
-        } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(),
-                    "No se pudo guardar la pregunta", JOptionPane.ERROR_MESSAGE);
+    private ContenidoPregunta leerFormulario() {
+        return new ContenidoPregunta(
+                txtNombre.getText(), txtContexto.getText(), txtEnunciado.getText(),
+                txtOpcionA.getText(), txtOpcionB.getText(), txtOpcionC.getText(), txtOpcionD.getText(),
+                (String) comboRespuesta.getSelectedItem(), txtJustificacion.getText(), txtBibliografia.getText(),
+                (Competencia) comboCompetencia.getSelectedItem(), txtTema.getText(), txtSubtema.getText(),
+                (Dificultad) comboDificultad.getSelectedItem());
+    }
+
+    // ---- acciones ----
+
+    /** HU-01: guarda (o actualiza) el borrador aplicando la validación estructural. */
+    private void guardarBorrador() {
+        if (guardar()) {
+            JOptionPane.showMessageDialog(this,
+                    "Pregunta " + idPreguntaEnEdicion + " guardada como Borrador.",
+                    "Borrador guardado", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    private void habilitarFormulario(boolean habilitado) {
-        txtNombre.setEditable(habilitado);
-        txtEnunciado.setEditable(habilitado);
-        txtOpcionA.setEditable(habilitado);
-        txtOpcionB.setEditable(habilitado);
-        txtOpcionC.setEditable(habilitado);
-        txtOpcionD.setEditable(habilitado);
-        txtRespuestaCorrecta.setEditable(habilitado);
-        txtTema.setEditable(habilitado);
+    /** HU-02: tras confirmar, guarda los cambios pendientes y envía la pregunta a revisión. */
+    private void enviarARevision() {
+        int decision = JOptionPane.showConfirmDialog(this,
+                "¿Enviar la pregunta a revisión?\nUna vez enviada ya no podrá modificarla.",
+                "Enviar a revisión", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (decision != JOptionPane.YES_OPTION) {
+            return;
+        }
+        if (!guardar()) {
+            return;
+        }
+        try {
+            service.enviarARevision(idPreguntaEnEdicion, usuario);
+        } catch (QuestionValidationException ex) {
+            mostrarViolaciones(ex);
+            return;
+        } catch (RuntimeException ex) {
+            mostrarError("No se pudo enviar a revisión", ex.getMessage());
+            return;
+        }
+        String id = idPreguntaEnEdicion;
+        JOptionPane.showMessageDialog(this,
+                "Pregunta " + id + " enviada a revisión: quedó en estado Pendiente de revisión.",
+                "Pregunta enviada", JOptionPane.INFORMATION_MESSAGE);
+        recargarDespuesDeGuardar(id);
+    }
+
+    /** @return {@code true} si la pregunta quedó guardada; si no, ya mostró qué corregir */
+    private boolean guardar() {
+        limpiarResaltados();
+        ContenidoPregunta contenido = leerFormulario();
+        try {
+            if (idPreguntaEnEdicion == null) {
+                idPreguntaEnEdicion = service.crearBorrador(contenido, usuario).getId();
+            } else {
+                service.actualizarContenido(idPreguntaEnEdicion, contenido, usuario);
+            }
+        } catch (QuestionValidationException ex) {
+            mostrarViolaciones(ex);
+            return false;
+        } catch (RuntimeException ex) {
+            mostrarError("No se pudo guardar la pregunta", ex.getMessage());
+            return false;
+        }
+        recargarDespuesDeGuardar(idPreguntaEnEdicion);
+        return true;
+    }
+
+    private void recargarDespuesDeGuardar(String id) {
+        cargarComboPreguntas();
+        Question guardada = service.obtenerPregunta(id);
+        comboPreguntas.setSelectedItem(comboPreguntas.getItemCount() == 0 ? null : itemConId(id));
+        mostrarPregunta(guardada);
+    }
+
+    private Question itemConId(String id) {
+        for (int i = 0; i < comboPreguntas.getItemCount(); i++) {
+            if (comboPreguntas.getItemAt(i).getId().equals(id)) {
+                return comboPreguntas.getItemAt(i);
+            }
+        }
+        return null;
+    }
+
+    /** Cancela la edición: si hay cambios sin guardar pide confirmación antes de descartarlos. */
+    private void cancelar() {
+        if (!confirmarDescarteDeCambios()) {
+            return;
+        }
+        limpiarResaltados();
+        if (idPreguntaEnEdicion == null) {
+            limpiarFormulario();
+            habilitarFormulario(false, "Seleccione una pregunta o cree una nueva.");
+        } else {
+            mostrarPregunta(service.obtenerPregunta(idPreguntaEnEdicion));
+        }
+    }
+
+    private boolean confirmarDescarteDeCambios() {
+        if (!edicionPermitida || leerFormulario().equals(instantanea)) {
+            return true;
+        }
+        int decision = JOptionPane.showConfirmDialog(this,
+                "Hay cambios sin guardar. ¿Desea descartarlos?",
+                "Descartar cambios", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        return decision == JOptionPane.YES_OPTION;
+    }
+
+    // ---- errores y resaltado ----
+
+    private void mostrarViolaciones(QuestionValidationException ex) {
+        resaltar(ex.getViolaciones());
+        StringBuilder mensaje = new StringBuilder("La pregunta no cumple la validación estructural.\n"
+                + "Corrija los campos resaltados en rojo:\n");
+        for (Violacion violacion : ex.getViolaciones()) {
+            mensaje.append("\n  • ").append(violacion.mensaje());
+        }
+        JOptionPane.showMessageDialog(this, mensaje.toString(), "No se pudo guardar la pregunta",
+                JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostrarError(String titulo, String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, titulo, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void resaltar(List<Violacion> violaciones) {
+        for (Violacion violacion : violaciones) {
+            JComponent componente = componentesPorCampo.get(violacion.campo());
+            if (componente != null) {
+                componente.setBorder(BorderFactory.createLineBorder(ROJO_ERROR, 2));
+            }
+        }
+    }
+
+    private void limpiarResaltados() {
+        bordesOriginales.forEach(JComponent::setBorder);
+    }
+
+    // ---- estado del formulario ----
+
+    private void habilitarFormulario(boolean habilitado, String aviso) {
+        edicionPermitida = habilitado;
+        for (JTextField campo : new JTextField[]{txtNombre, txtOpcionA, txtOpcionB, txtOpcionC, txtOpcionD,
+                txtTema, txtSubtema}) {
+            campo.setEditable(habilitado);
+            campo.setBackground(habilitado ? Color.WHITE : FONDO_CAMPO);
+        }
+        for (JTextArea area : new JTextArea[]{txtContexto, txtEnunciado, txtJustificacion, txtBibliografia}) {
+            area.setEditable(habilitado);
+            area.setBackground(habilitado ? Color.WHITE : FONDO_CAMPO);
+        }
+        comboRespuesta.setEnabled(habilitado);
         comboCompetencia.setEnabled(habilitado);
         comboDificultad.setEnabled(habilitado);
         btnGuardar.setEnabled(habilitado);
-
-        Color fondo = habilitado ? Color.WHITE : FONDO_CAMPO;
-        for (JTextField campo : new JTextField[]{txtNombre, txtOpcionA, txtOpcionB,
-                txtOpcionC, txtOpcionD, txtRespuestaCorrecta, txtTema}) {
-            campo.setBackground(fondo);
-        }
-        txtEnunciado.setBackground(fondo);
+        btnEnviar.setEnabled(habilitado);
+        btnCancelar.setEnabled(habilitado);
+        lblAviso.setText(aviso);
     }
 }

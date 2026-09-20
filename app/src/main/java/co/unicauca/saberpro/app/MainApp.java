@@ -81,7 +81,7 @@ public class MainApp {
             new LoginFrame(userService, user -> {
                 switch (user.getRole()) {
                     case AUTOR_PREGUNTAS -> {
-                        new GUIQuestions(questionService).setVisible(true);
+                        new GUIQuestions(questionService, user.getUsername()).setVisible(true);
                         new GUIMicrokernel(questionMicrokernel).setVisible(true);
                     }
                     case REVISOR -> new GUIRevisor(questionService).setVisible(true);

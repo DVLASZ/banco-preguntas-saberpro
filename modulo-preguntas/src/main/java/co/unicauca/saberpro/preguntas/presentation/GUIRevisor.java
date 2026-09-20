@@ -29,7 +29,9 @@ public class GUIRevisor extends JFrame {
 
     private final JTextField txtId = new JTextField();
     private final JTextField txtNombre = new JTextField();
-    private final JTextArea txtEnunciado = new JTextArea(3, 30);
+    private final JTextArea txtContexto = new JTextArea(3, 30);
+    private final JTextArea txtEnunciado = new JTextArea(2, 30);
+    private final JTextArea txtJustificacion = new JTextArea(3, 30);
     private final JTextField txtOpcionA = new JTextField();
     private final JTextField txtOpcionB = new JTextField();
     private final JTextField txtOpcionC = new JTextField();
@@ -49,7 +51,7 @@ public class GUIRevisor extends JFrame {
         habilitarAcciones(false);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(560, 600);
+        setSize(640, 780);
         setLocationRelativeTo(null);
     }
 
@@ -86,30 +88,15 @@ public class GUIRevisor extends JFrame {
 
         agregarCampo(panelFormulario, gbc, "Id:", txtId);
         agregarCampo(panelFormulario, gbc, "Nombre:", txtNombre);
-
-        gbc.gridx = 0;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        panelFormulario.add(etiqueta("Pregunta:"), gbc);
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        txtEnunciado.setLineWrap(true);
-        txtEnunciado.setWrapStyleWord(true);
-        txtEnunciado.setEditable(false);
-        txtEnunciado.setBackground(FONDO_CAMPO);
-        txtEnunciado.setFont(txtEnunciado.getFont().deriveFont(13f));
-        txtEnunciado.setBorder(new EmptyBorder(6, 8, 6, 8));
-        JScrollPane scrollEnunciado = new JScrollPane(txtEnunciado);
-        scrollEnunciado.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
-        panelFormulario.add(scrollEnunciado, gbc);
-        gbc.gridy++;
+        agregarAreaSoloLectura(panelFormulario, gbc, "Contexto:", txtContexto);
+        agregarAreaSoloLectura(panelFormulario, gbc, "Pregunta:", txtEnunciado);
 
         agregarCampo(panelFormulario, gbc, "A.", txtOpcionA);
         agregarCampo(panelFormulario, gbc, "B.", txtOpcionB);
         agregarCampo(panelFormulario, gbc, "C.", txtOpcionC);
         agregarCampo(panelFormulario, gbc, "D.", txtOpcionD);
         agregarCampo(panelFormulario, gbc, "Respuesta correcta:", txtRespuestaCorrecta);
+        agregarAreaSoloLectura(panelFormulario, gbc, "Justificación:", txtJustificacion);
 
         gbc.gridx = 0;
         gbc.weightx = 0;
@@ -154,6 +141,26 @@ public class GUIRevisor extends JFrame {
         return label;
     }
 
+    private void agregarAreaSoloLectura(JPanel panel, GridBagConstraints gbc, String etiqueta, JTextArea area) {
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setEditable(false);
+        area.setBackground(FONDO_CAMPO);
+        area.setFont(area.getFont().deriveFont(13f));
+        area.setBorder(new EmptyBorder(6, 8, 6, 8));
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
+        gbc.gridx = 0;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        panel.add(etiqueta(etiqueta), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(scroll, gbc);
+        gbc.gridy++;
+    }
+
     private void agregarCampo(JPanel panel, GridBagConstraints gbc, String etiqueta, JComponent campo) {
         gbc.gridx = 0;
         gbc.weightx = 0;
@@ -188,22 +195,32 @@ public class GUIRevisor extends JFrame {
 
         txtId.setText(preguntaCargada.getId());
         txtNombre.setText(preguntaCargada.getNombre());
+        txtContexto.setText(preguntaCargada.getContexto());
         txtEnunciado.setText(preguntaCargada.getEnunciado());
         txtOpcionA.setText(preguntaCargada.getOpciones().getOpcionA());
         txtOpcionB.setText(preguntaCargada.getOpciones().getOpcionB());
         txtOpcionC.setText(preguntaCargada.getOpciones().getOpcionC());
         txtOpcionD.setText(preguntaCargada.getOpciones().getOpcionD());
         txtRespuestaCorrecta.setText(String.valueOf(preguntaCargada.getRespuestaCorrecta()));
+        txtJustificacion.setText(preguntaCargada.getJustificacion());
         badgeEstadoActual.mostrar(preguntaCargada.getEstado());
-        habilitarAcciones(true);
+        // Solo una pregunta en revisión se puede aprobar o rechazar (RF-15).
+        habilitarAcciones(preguntaCargada.getEstado() == EstadoPregunta.EN_REVISION);
     }
 
     private void decidir(EstadoPregunta decision) {
         if (preguntaCargada == null) {
             return;
         }
-        service.cambiarEstado(preguntaCargada.getId(), decision);
+        try {
+            service.cambiarEstado(preguntaCargada.getId(), decision);
+        } catch (RuntimeException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),
+                    "No se pudo registrar la revisión", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         badgeEstadoActual.mostrar(decision);
+        habilitarAcciones(false);
         JOptionPane.showMessageDialog(this,
                 "Pregunta " + preguntaCargada.getId() + " marcada como: " + decision,
                 "Revisión registrada", JOptionPane.INFORMATION_MESSAGE);

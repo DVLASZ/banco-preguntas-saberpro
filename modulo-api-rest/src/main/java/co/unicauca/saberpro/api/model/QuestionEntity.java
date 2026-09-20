@@ -13,7 +13,8 @@ import jakarta.persistence.Table;
 /**
  * Entidad JPA de una pregunta. Vive solo en el modulo de la API: el dominio
  * ({@code Question}) queda libre de anotaciones de persistencia y este
- * adaptador se encarga de convertir entre ambos (ver {@code QuestionMapper}).
+ * adaptador se encarga de convertir entre ambos (ver {@code QuestionMapper},
+ * el unico que la llena).
  */
 @Entity
 @Table(name = "questions")
@@ -25,6 +26,9 @@ public class QuestionEntity {
 
     @Column(nullable = false, length = 200)
     private String nombre;
+
+    @Column(length = 4000)
+    private String contexto;
 
     @Column(nullable = false, length = 2000)
     private String enunciado;
@@ -44,6 +48,12 @@ public class QuestionEntity {
     @Column(name = "respuesta_correcta", nullable = false, length = 1)
     private String respuestaCorrecta;
 
+    @Column(length = 4000)
+    private String justificacion;
+
+    @Column(length = 1000)
+    private String bibliografia;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private EstadoPregunta estado;
@@ -55,28 +65,17 @@ public class QuestionEntity {
     @Column(nullable = false, length = 200)
     private String tema;
 
+    @Column(length = 200)
+    private String subtema;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Dificultad dificultad;
 
-    protected QuestionEntity() {
-    }
+    @Column(length = 50)
+    private String autor;
 
-    public QuestionEntity(String id, String nombre, String enunciado, String opcionA, String opcionB,
-                          String opcionC, String opcionD, String respuestaCorrecta, EstadoPregunta estado,
-                          Competencia competencia, String tema, Dificultad dificultad) {
-        this.id = id;
-        this.nombre = nombre;
-        this.enunciado = enunciado;
-        this.opcionA = opcionA;
-        this.opcionB = opcionB;
-        this.opcionC = opcionC;
-        this.opcionD = opcionD;
-        this.respuestaCorrecta = respuestaCorrecta;
-        this.estado = estado;
-        this.competencia = competencia;
-        this.tema = tema;
-        this.dificultad = dificultad;
+    protected QuestionEntity() {
     }
 
     public String getId() {
@@ -85,6 +84,10 @@ public class QuestionEntity {
 
     public String getNombre() {
         return nombre;
+    }
+
+    public String getContexto() {
+        return contexto;
     }
 
     public String getEnunciado() {
@@ -111,6 +114,14 @@ public class QuestionEntity {
         return respuestaCorrecta;
     }
 
+    public String getJustificacion() {
+        return justificacion;
+    }
+
+    public String getBibliografia() {
+        return bibliografia;
+    }
+
     public EstadoPregunta getEstado() {
         return estado;
     }
@@ -123,7 +134,83 @@ public class QuestionEntity {
         return tema;
     }
 
+    public String getSubtema() {
+        return subtema;
+    }
+
     public Dificultad getDificultad() {
         return dificultad;
+    }
+
+    public String getAutor() {
+        return autor;
+    }
+
+    void setId(String id) {
+        this.id = id;
+    }
+
+    void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    void setContexto(String contexto) {
+        this.contexto = contexto;
+    }
+
+    void setEnunciado(String enunciado) {
+        this.enunciado = enunciado;
+    }
+
+    void setOpcionA(String opcionA) {
+        this.opcionA = opcionA;
+    }
+
+    void setOpcionB(String opcionB) {
+        this.opcionB = opcionB;
+    }
+
+    void setOpcionC(String opcionC) {
+        this.opcionC = opcionC;
+    }
+
+    void setOpcionD(String opcionD) {
+        this.opcionD = opcionD;
+    }
+
+    void setRespuestaCorrecta(String respuestaCorrecta) {
+        this.respuestaCorrecta = respuestaCorrecta;
+    }
+
+    void setJustificacion(String justificacion) {
+        this.justificacion = justificacion;
+    }
+
+    void setBibliografia(String bibliografia) {
+        this.bibliografia = bibliografia;
+    }
+
+    void setEstado(EstadoPregunta estado) {
+        this.estado = estado;
+    }
+
+    void setCompetencia(Competencia competencia) {
+        this.competencia = competencia;
+    }
+
+    void setTema(String tema) {
+        this.tema = tema;
+    }
+
+    void setSubtema(String subtema) {
+        this.subtema = subtema;
+    }
+
+    void setDificultad(Dificultad dificultad) {
+        this.dificultad = dificultad;
+    }
+
+    void setAutor(String autor) {
+        this.autor = autor;
     }
 }

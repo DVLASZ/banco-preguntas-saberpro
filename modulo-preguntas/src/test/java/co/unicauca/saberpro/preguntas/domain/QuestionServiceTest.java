@@ -1,5 +1,7 @@
 package co.unicauca.saberpro.preguntas.domain;
 
+import co.unicauca.saberpro.preguntas.domain.validation.ContenidoDePrueba;
+import co.unicauca.saberpro.preguntas.domain.validation.QuestionValidationException;
 import co.unicauca.saberpro.preguntas.infra.Observer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,10 +15,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionServiceTest {
+
+    private static final String AUTOR = "autor1";
 
     @Mock
     private QuestionRepository repository;
@@ -30,10 +35,20 @@ class QuestionServiceTest {
     @BeforeEach
     void setUp() {
         service = new QuestionService(repository);
-        pregunta = new Question("P-001", "Pregunta sobre DDD", "¿Objetivo de DDD?",
-                new QuestionDistractors("a", "b", "c", "d"), 'B', EstadoPregunta.BORRADOR,
-                Competencia.LECTURA_CRITICA, "DDD", Dificultad.BASICO);
+        pregunta = preguntaDe("P-001", EstadoPregunta.BORRADOR, AUTOR);
     }
+
+    /** Pregunta que cumple la validación estructural, con el estado y autor dados. */
+    private static Question preguntaDe(String id, EstadoPregunta estado, String autor) {
+        ContenidoPregunta c = ContenidoDePrueba.valido().build();
+        return Question.builder().id(id).nombre(c.nombre()).contexto(c.contexto()).enunciado(c.enunciado())
+                .opciones(new QuestionDistractors(c.opcionA(), c.opcionB(), c.opcionC(), c.opcionD()))
+                .respuestaCorrecta(c.respuestaCorrecta().charAt(0)).justificacion(c.justificacion())
+                .bibliografia(c.bibliografia()).estado(estado).competencia(c.competencia()).tema(c.tema())
+                .subtema(c.subtema()).dificultad(c.dificultad()).autor(autor).build();
+    }
+
+    // ---- consulta ----
 
     @Test
     void listarPreguntas_delegaEnElRepositorio() {
@@ -46,20 +61,195 @@ class QuestionServiceTest {
     }
 
     @Test
+    void listarPorAutor_soloDevuelveLasPreguntasDeEseAutor() {
+        Question ajena = preguntaDe("P-002", EstadoPregunta.BORRADOR, "otro");
+        when(repository.obtenerTodas()).thenReturn(List.of(pregunta, ajena));
+
+        assertEquals(List.of(pregunta), service.listarPorAutor(AUTOR));
+    }
+
+    @Test
     void obtenerPregunta_lanzaExcepcionSiNoExiste() {
         when(repository.obtenerPorId("NO-EXISTE")).thenReturn(null);
 
         assertThrows(NoSuchElementException.class, () -> service.obtenerPregunta("NO-EXISTE"));
     }
 
+    // ---- HU-01: crear el borrador con validación estructural ----
+
     @Test
-    void cambiarEstado_actualizaLaPreguntaYPersisteElCambio() {
+    void crearBorrador_quedaEnBorradorConSuAutorYNoEnRevision() {
+        when(repository.generarNuevoId()).thenReturn("P-013");
+
+        Question creada = service.crearBorrador(ContenidoDePrueba.valido().build(), " autor1 ");
+
+        assertEquals("P-013", creada.getId());
+        assertEquals(EstadoPregunta.BORRADOR, creada.getEstado());
+        assertEquals("autor1", creada.getAutor());
+        assertEquals("Observer", creada.getSubtema());
+        assertFalse(creada.getContexto().isBlank());
+        verify(repository).crear(creada);
+    }
+
+    @Test
+    void crearBorrador_notificaATodosLosObservadoresSuscritos() {
+        when(repository.generarNuevoId()).thenReturn("P-013");
+        service.agregarObservador(observador);
+
+        service.crearBorrador(ContenidoDePrueba.valido().build(), AUTOR);
+
+        verify(observador, times(1)).actualizar();
+    }
+
+    @Test
+    void crearBorrador_conContenidoInvalidoNoGuardaNadaNiNotifica() {
+        service.agregarObservador(observador);
+
+        QuestionValidationException ex = assertThrows(QuestionValidationException.class,
+                () -> service.crearBorrador(ContenidoDePrueba.valido().contexto("").opcionA("Todas las anteriores").build(), AUTOR));
+
+        assertEquals(2, ex.getViolaciones().size());
+        verify(repository, never()).crear(any());
+        verify(observador, never()).actualizar();
+    }
+
+    @Test
+    void crearBorrador_exigeUnAutor() {
+        assertThrows(IllegalArgumentException.class, () -> service.crearBorrador(ContenidoDePrueba.valido().build(), " "));
+        assertThrows(IllegalArgumentException.class, () -> service.crearBorrador(ContenidoDePrueba.valido().build(), null));
+    }
+
+    @Test
+    void registrarPreguntaGenerada_guardaYNotifica() {
+        service.agregarObservador(observador);
+
+        service.registrarPreguntaGenerada(pregunta);
+
+        verify(repository).crear(pregunta);
+        verify(observador).actualizar();
+    }
+
+    // ---- RF-06: modificar solo en Borrador y solo su autor ----
+
+    @Test
+    void actualizarContenido_conservaElEstadoYElAutorYCambiaElContenido() {
         when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
 
-        service.cambiarEstado("P-001", EstadoPregunta.PENDIENTE_REVISION);
+        service.actualizarContenido("P-001", ContenidoDePrueba.valido().nombre("Nuevo nombre")
+                .competencia(Competencia.INGLES).tema("nuevo tema").dificultad(Dificultad.AVANZADO).build(), AUTOR);
+
+        ArgumentCaptor<Question> captor = ArgumentCaptor.forClass(Question.class);
+        verify(repository).actualizar(captor.capture());
+        Question actualizada = captor.getValue();
+        assertEquals("Nuevo nombre", actualizada.getNombre());
+        assertEquals(EstadoPregunta.BORRADOR, actualizada.getEstado());
+        assertEquals(AUTOR, actualizada.getAutor());
+        assertEquals(Competencia.INGLES, actualizada.getCompetencia());
+        assertEquals("nuevo tema", actualizada.getTema());
+        assertEquals(Dificultad.AVANZADO, actualizada.getDificultad());
+    }
+
+    @Test
+    void actualizarContenido_soloPermiteModificarPreguntasEnBorrador() {
+        Question enRevision = preguntaDe("P-002", EstadoPregunta.EN_REVISION, AUTOR);
+        when(repository.obtenerPorId("P-002")).thenReturn(enRevision);
+
+        OperacionNoPermitidaException ex = assertThrows(OperacionNoPermitidaException.class,
+                () -> service.actualizarContenido("P-002", ContenidoDePrueba.valido().build(), AUTOR));
+
+        assertTrue(ex.getMessage().contains("Borrador"));
+        verify(repository, never()).actualizar(any());
+    }
+
+    @Test
+    void actualizarContenido_soloLoPuedeHacerElAutor() {
+        when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
+
+        assertThrows(AccesoDenegadoException.class,
+                () -> service.actualizarContenido("P-001", ContenidoDePrueba.valido().build(), "otro"));
+        assertThrows(AccesoDenegadoException.class,
+                () -> service.actualizarContenido("P-001", ContenidoDePrueba.valido().build(), null));
+        verify(repository, never()).actualizar(any());
+    }
+
+    @Test
+    void actualizarContenido_aplicaLaValidacionEstructural() {
+        when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
+
+        assertThrows(QuestionValidationException.class,
+                () -> service.actualizarContenido("P-001", ContenidoDePrueba.valido().justificacion("").build(), AUTOR));
+        verify(repository, never()).actualizar(any());
+    }
+
+    // ---- HU-02: enviar a revisión ----
+
+    @Test
+    void enviarARevision_pasaElBorradorAPendienteDeRevision() {
+        when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
+        service.agregarObservador(observador);
+
+        service.enviarARevision("P-001", AUTOR);
 
         assertEquals(EstadoPregunta.PENDIENTE_REVISION, pregunta.getEstado());
         verify(repository).actualizar(pregunta);
+        verify(observador, times(1)).actualizar();
+    }
+
+    @Test
+    void enviarARevision_noCambiaElEstadoSiLaPreguntaNoPasaLaValidacion() {
+        Question sinContexto = Question.builder().id("P-002").nombre("n").enunciado("¿Enunciado?")
+                .opciones(new QuestionDistractors("Aa1", "Bb2", "Cc3", "Dd4")).respuestaCorrecta('A')
+                .estado(EstadoPregunta.BORRADOR).competencia(Competencia.INGLES).tema("tema")
+                .dificultad(Dificultad.BASICO).autor(AUTOR).build();
+        when(repository.obtenerPorId("P-002")).thenReturn(sinContexto);
+
+        QuestionValidationException ex = assertThrows(QuestionValidationException.class,
+                () -> service.enviarARevision("P-002", AUTOR));
+
+        assertTrue(ex.getViolaciones().stream().anyMatch(v -> v.campo().equals("contexto")));
+        assertEquals(EstadoPregunta.BORRADOR, sinContexto.getEstado());
+        verify(repository, never()).actualizar(any());
+    }
+
+    @Test
+    void enviarARevision_soloDesdeBorrador() {
+        Question yaEnviada = preguntaDe("P-002", EstadoPregunta.PENDIENTE_REVISION, AUTOR);
+        when(repository.obtenerPorId("P-002")).thenReturn(yaEnviada);
+
+        assertThrows(OperacionNoPermitidaException.class, () -> service.enviarARevision("P-002", AUTOR));
+    }
+
+    @Test
+    void enviarARevision_soloLoPuedeHacerElAutor() {
+        when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
+
+        assertThrows(AccesoDenegadoException.class, () -> service.enviarARevision("P-001", "otro"));
+        assertEquals(EstadoPregunta.BORRADOR, pregunta.getEstado());
+    }
+
+    // ---- RF-15: transiciones válidas ----
+
+    @Test
+    void cambiarEstado_aplicaUnaTransicionValidaYPersisteElCambio() {
+        Question pendiente = preguntaDe("P-003", EstadoPregunta.PENDIENTE_REVISION, AUTOR);
+        when(repository.obtenerPorId("P-003")).thenReturn(pendiente);
+
+        service.cambiarEstado("P-003", EstadoPregunta.EN_REVISION);
+
+        assertEquals(EstadoPregunta.EN_REVISION, pendiente.getEstado());
+        verify(repository).actualizar(pendiente);
+    }
+
+    @Test
+    void cambiarEstado_rechazaUnaTransicionInvalida() {
+        when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
+
+        OperacionNoPermitidaException ex = assertThrows(OperacionNoPermitidaException.class,
+                () -> service.cambiarEstado("P-001", EstadoPregunta.PUBLICADA));
+
+        assertTrue(ex.getMessage().contains("Borrador") && ex.getMessage().contains("Publicada"));
+        assertEquals(EstadoPregunta.BORRADOR, pregunta.getEstado());
+        verify(repository, never()).actualizar(any());
     }
 
     @Test
@@ -83,63 +273,13 @@ class QuestionServiceTest {
         verify(observador, never()).actualizar();
     }
 
-    @Test
-    void crearPregunta_quedaPendienteDeRevisionYNoAprobadaPorElAutor() {
-        when(repository.generarNuevoId()).thenReturn("P-009");
-
-        Question creada = service.crearPregunta("Nueva pregunta", "¿Enunciado?",
-                new QuestionDistractors("a", "b", "c", "d"), 'A',
-                Competencia.RAZONAMIENTO_CUANTITATIVO, "tema nuevo", Dificultad.INTERMEDIO);
-
-        assertEquals("P-009", creada.getId());
-        assertEquals(EstadoPregunta.PENDIENTE_REVISION, creada.getEstado());
-        assertEquals(Competencia.RAZONAMIENTO_CUANTITATIVO, creada.getCompetencia());
-        assertEquals("tema nuevo", creada.getTema());
-        assertEquals(Dificultad.INTERMEDIO, creada.getDificultad());
-        verify(repository).crear(creada);
-    }
-
-    @Test
-    void crearPregunta_notificaATodosLosObservadoresSuscritos() {
-        when(repository.generarNuevoId()).thenReturn("P-009");
-        service.agregarObservador(observador);
-
-        service.crearPregunta("Nueva pregunta", "¿Enunciado?",
-                new QuestionDistractors("a", "b", "c", "d"), 'A',
-                Competencia.RAZONAMIENTO_CUANTITATIVO, "tema nuevo", Dificultad.INTERMEDIO);
-
-        verify(observador, times(1)).actualizar();
-    }
-
-    @Test
-    void actualizarContenido_conservaElEstadoYCambiaElContenido() {
-        when(repository.obtenerPorId("P-001")).thenReturn(pregunta);
-
-        service.actualizarContenido("P-001", "Nuevo nombre", "¿Nuevo enunciado?",
-                new QuestionDistractors("w", "x", "y", "z"), 'C',
-                Competencia.INGLES, "nuevo tema", Dificultad.AVANZADO);
-
-        ArgumentCaptor<Question> captor = ArgumentCaptor.forClass(Question.class);
-        verify(repository).actualizar(captor.capture());
-        Question actualizada = captor.getValue();
-        assertEquals("Nuevo nombre", actualizada.getNombre());
-        assertEquals(EstadoPregunta.BORRADOR, actualizada.getEstado());
-        assertEquals(Competencia.INGLES, actualizada.getCompetencia());
-        assertEquals("nuevo tema", actualizada.getTema());
-        assertEquals(Dificultad.AVANZADO, actualizada.getDificultad());
-    }
+    // ---- consultas agregadas ----
 
     @Test
     void contarPorEstado_agrupaCorrectamentePorEstado() {
-        Question p1 = new Question("P-001", "n1", "e1",
-                new QuestionDistractors("a", "b", "c", "d"), 'A', EstadoPregunta.BORRADOR,
-                Competencia.LECTURA_CRITICA, "t1", Dificultad.BASICO);
-        Question p2 = new Question("P-002", "n2", "e2",
-                new QuestionDistractors("a", "b", "c", "d"), 'A', EstadoPregunta.BORRADOR,
-                Competencia.LECTURA_CRITICA, "t2", Dificultad.BASICO);
-        Question p3 = new Question("P-003", "n3", "e3",
-                new QuestionDistractors("a", "b", "c", "d"), 'A', EstadoPregunta.ARCHIVADA,
-                Competencia.LECTURA_CRITICA, "t3", Dificultad.BASICO);
+        Question p1 = preguntaDe("P-001", EstadoPregunta.BORRADOR, AUTOR);
+        Question p2 = preguntaDe("P-002", EstadoPregunta.BORRADOR, AUTOR);
+        Question p3 = preguntaDe("P-003", EstadoPregunta.ARCHIVADA, AUTOR);
         when(repository.obtenerTodas()).thenReturn(List.of(p1, p2, p3));
 
         Map<EstadoPregunta, Long> conteo = service.contarPorEstado();
@@ -151,12 +291,8 @@ class QuestionServiceTest {
 
     @Test
     void buscarPublicadas_soloIncluyePreguntasPublicadas() {
-        Question publicada = new Question("P-001", "n1", "e1",
-                new QuestionDistractors("a", "b", "c", "d"), 'A', EstadoPregunta.PUBLICADA,
-                Competencia.LECTURA_CRITICA, "t1", Dificultad.BASICO);
-        Question borrador = new Question("P-002", "n2", "e2",
-                new QuestionDistractors("a", "b", "c", "d"), 'A', EstadoPregunta.BORRADOR,
-                Competencia.LECTURA_CRITICA, "t1", Dificultad.BASICO);
+        Question publicada = preguntaDe("P-001", EstadoPregunta.PUBLICADA, AUTOR);
+        Question borrador = preguntaDe("P-002", EstadoPregunta.BORRADOR, AUTOR);
         when(repository.obtenerTodas()).thenReturn(List.of(publicada, borrador));
 
         List<Question> resultado = service.buscarPublicadas(null, null, null);

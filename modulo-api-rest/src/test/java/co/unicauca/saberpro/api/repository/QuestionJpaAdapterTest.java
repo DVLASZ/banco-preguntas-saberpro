@@ -52,6 +52,23 @@ class QuestionJpaAdapterTest {
     }
 
     @Test
+    void conservaElContenidoExtendidoYElAutor() {
+        adapter.crear(Question.builder().id("P-002").nombre("Completa").contexto("Un contexto largo")
+                .enunciado("¿Pregunta?").opciones(new QuestionDistractors("Opción A", "Opción B", "Opción C", "Opción D"))
+                .respuestaCorrecta('A').justificacion("Una justificación").bibliografia("Un libro")
+                .estado(EstadoPregunta.PENDIENTE_REVISION).competencia(Competencia.INGLES).tema("Tema")
+                .subtema("Subtema").dificultad(Dificultad.BASICO).autor("autor1").build());
+
+        Question leida = adapter.obtenerPorId("P-002");
+
+        assertEquals("Un contexto largo", leida.getContexto());
+        assertEquals("Una justificación", leida.getJustificacion());
+        assertEquals("Un libro", leida.getBibliografia());
+        assertEquals("Subtema", leida.getSubtema());
+        assertEquals("autor1", leida.getAutor());
+    }
+
+    @Test
     void obtenerPorIdInexistenteRetornaNull() {
         assertNull(adapter.obtenerPorId("P-999"));
     }
