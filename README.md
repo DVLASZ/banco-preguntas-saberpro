@@ -121,9 +121,7 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
   Data JPA + H2 detrás del puerto `QuestionRepository`, y DELETE que archiva
   en vez de borrar (RNF-16) — ver `modulo-api-rest`.
 
-**Pendiente** (ver el desglose completo de qué falta y en qué orden
-convendría abordarlo en el historial de la conversación/planeación del
-proyecto — o pídele a Claude que te lo resuma de nuevo):
+**Pendiente:**
 - Persistencia real de preguntas y simulacros (hoy son en memoria; solo
   usuarios usa SQLite).
 - Asignación de uno o más revisores por pregunta (HU-09) e historial de
