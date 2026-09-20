@@ -29,6 +29,7 @@
         <module>modulo-preguntas</module>
         <module>modulo-simulacros</module>
         <module>modulo-microkernel</module>
+        <module>modulo-revision</module>
         <module>modulo-api-rest</module>
         <module>app</module>
     </modules>
@@ -75,6 +76,11 @@
             <dependency>
                 <groupId>co.unicauca.saberpro</groupId>
                 <artifactId>modulo-microkernel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>co.unicauca.saberpro</groupId>
+                <artifactId>modulo-revision</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -41,6 +41,10 @@
             <artifactId>modulo-microkernel</artifactId>
         </dependency>
         <dependency>
+            <groupId>co.unicauca.saberpro</groupId>
+            <artifactId>modulo-revision</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
         </dependency>

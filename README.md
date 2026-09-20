@@ -33,8 +33,9 @@ banco-preguntas-saberpro/          (pom padre — packaging "pom")
 ├── modulo-preguntas/                Banco de preguntas: redacción y ciclo de vida RF-14 (depende de: nada)
 ├── modulo-simulacros/               Generación y presentación de simulacros HU-12 a HU-14 (depende de: modulo-preguntas, modulo-usuarios)
 ├── modulo-microkernel/              Generación de preguntas por plugins (Taller 5) (depende de: modulo-preguntas)
+├── modulo-revision/                 Asignación de revisores a preguntas pendientes, HU-04 (depende de: modulo-preguntas, modulo-usuarios)
 ├── modulo-api-rest/                 Microservicio REST con Spring Boot + JPA (Taller 6) (depende de: modulo-preguntas)
-└── app/                             Composition root: arma los módulos y arranca la app de escritorio (depende de: usuarios, preguntas, simulacros y microkernel)
+└── app/                             Composition root: arma los módulos y arranca la app de escritorio (depende de: usuarios, preguntas, simulacros, microkernel y revisión)
 ```
 
 Grafo de dependencias entre módulos (siempre en una sola dirección, sin
@@ -45,7 +46,8 @@ app  →  modulo-simulacros  →  modulo-preguntas
  │                          ↘
  │                            modulo-usuarios
  ├──────────────────────────────────↗
- └→  modulo-microkernel  →  modulo-preguntas
+ ├→  modulo-microkernel  →  modulo-preguntas
+ └→  modulo-revision  →  modulo-preguntas, modulo-usuarios
 
 modulo-api-rest  →  modulo-preguntas      (aparte: app no depende de él)
 ```
@@ -54,7 +56,9 @@ modulo-api-rest  →  modulo-preguntas      (aparte: app no depende de él)
 del proyecto — son la base. `modulo-simulacros` depende de ambos (necesita
 preguntas publicadas y necesita saber qué usuario presenta el simulacro).
 `modulo-microkernel` solo depende de `modulo-preguntas` (genera preguntas
-reales del banco a partir de plugins). `modulo-api-rest` también solo
+reales del banco a partir de plugins). `modulo-revision` depende de
+`modulo-preguntas` (las preguntas y sus estados) y de `modulo-usuarios`
+(para saber quiénes son los revisores). `modulo-api-rest` también solo
 depende de `modulo-preguntas`: expone su servicio de dominio por HTTP y le
 conecta una base de datos con JPA sin que el dominio sepa de Spring ni de
 JPA. `app` es el único módulo que arma la aplicación de escritorio: hace la
@@ -70,7 +74,7 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 150 pruebas de los 5 módulos con lógica de negocio
+mvn test      # ejecuta las 223 pruebas de los módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
@@ -90,20 +94,25 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 
 | Usuario | Rol | Ventana que abre |
 |---|---|---|
-| `autor1` | Autor de preguntas | Redactar/crear preguntas |
+| `autor1` | Autor de preguntas | Redactar preguntas (borrador → enviar a revisión) |
 | `revisor1` | Revisor | Evaluar y decidir (Aprobar/Rechazar) |
 | `docente1` | Docente | Generar simulacros |
 | `estudiante1` | Estudiante | Presentar simulacros |
-| `admin1` | Administrador | Tablero + estadísticas/gráfica del banco de preguntas |
+| `admin1` | Administrador | Tablero, estadísticas/gráfica del banco y asignación de revisores (HU-04, en desarrollo) |
 
 ## Estado actual del proyecto
 
 **Implementado:**
 - Login, registro y roles (RF-01 a RF-03), con SQLite y hash Argon2id.
-- Redacción de preguntas por el Autor, con competencia/tema/dificultad y
-  ciclo de vida RF-14 completo (7 estados).
-- Revisión por un Revisor: aprobar/rechazar (RF-15/RF-16, versión con un
-  solo revisor por pregunta).
+- Redacción de preguntas por el Autor con todos sus campos (contexto,
+  pregunta directa, cuatro opciones, respuesta correcta, justificación,
+  bibliografía, competencia, tema, subtema y dificultad). Al guardar se aplica
+  la validación estructural HU03 (RF-08 a RF-13), con una regla independiente
+  por requisito, y los campos que incumplen se resaltan en rojo.
+- Ciclo de vida RF-14 con transiciones válidas (RF-15): el Autor guarda un
+  **borrador** (solo él puede modificarlo mientras lo sea, RF-06) y lo
+  **envía a revisión** con confirmación; los estados se muestran con color.
+- Revisión por un Revisor: aprobar/rechazar preguntas En revisión.
 - Generación de simulacros por el Docente filtrando por competencia,
   tema y dificultad (HU-12), usando solo preguntas publicadas.
 - Presentación de un simulacro por el Estudiante con cronómetro y
@@ -124,14 +133,13 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 **Pendiente:**
 - Persistencia real de preguntas y simulacros (hoy son en memoria; solo
   usuarios usa SQLite).
-- Asignación de uno o más revisores por pregunta (HU-09) e historial de
+- Asignación de uno o más revisores por pregunta con notificación simulada
+  por correo (HU-04, en desarrollo en `modulo-revision`) e historial de
   revisiones con observaciones (HU-10/HU-11) — hoy el Revisor decide sin
   dejar un registro de sus observaciones más allá del estado.
-- Validaciones estructurales automáticas al crear una pregunta (HU-06,
-  HU-07): contexto obligatorio, 4 distractores, prohibir frases como
-  "todas las anteriores", reglas de longitud/gramática.
-- Búsqueda/filtro de preguntas por competencia, tema, dificultad o
-  estado para todos los roles (HU-05) — hoy solo existe internamente
+- Listado de "mis preguntas" con paginación y filtros por estado,
+  competencia o tema (HU-03) y búsqueda para todos los roles (HU-05) — hoy
+  el Autor elige de una lista y la búsqueda solo existe internamente
   (`QuestionService.buscarPublicadas`) para armar simulacros.
 - Historial de simulacros de un estudiante (HU-15) y estadísticas
   individuales de desempeño (HU-16).
@@ -157,3 +165,4 @@ el repositorio [`ingenieria-software-2`](https://github.com/DVLASZ/ingenieria-so
 
 - Edward Dávila — edwarddavila@unicauca.edu.co
 - Laura Isabel Sánchez Fernández
+- Kevin Yesid Castaño Herrera

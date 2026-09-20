@@ -1,6 +1,7 @@
 package co.unicauca.saberpro.preguntas.presentation;
 
 import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
+import co.unicauca.saberpro.preguntas.domain.FuenteDePreguntasParaRevisar;
 import co.unicauca.saberpro.preguntas.domain.Question;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
 
@@ -23,6 +24,8 @@ public class GUIRevisor extends JFrame {
     private static final Color FONDO_CAMPO = new Color(0xF1F5F9);
 
     private final QuestionService service;
+    private final FuenteDePreguntasParaRevisar fuente;
+    private final String usuario;
 
     private final JComboBox<Question> comboPreguntas = new JComboBox<>();
     private final JButton btnCargar = new JButton("Cargar pregunta");
@@ -43,9 +46,11 @@ public class GUIRevisor extends JFrame {
 
     private Question preguntaCargada;
 
-    public GUIRevisor(QuestionService service) {
+    public GUIRevisor(QuestionService service, FuenteDePreguntasParaRevisar fuente, String usuario) {
         super("Banco de Preguntas Saber Pro - Revisor");
         this.service = service;
+        this.fuente = fuente;
+        this.usuario = usuario;
         construirInterfaz();
         cargarComboPreguntas();
         habilitarAcciones(false);
@@ -60,7 +65,7 @@ public class GUIRevisor extends JFrame {
         setLayout(new BorderLayout(12, 12));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel rol = new JLabel("Rol: Revisor");
+        JLabel rol = new JLabel("Rol: Revisor — usuario: " + usuario);
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 
@@ -173,7 +178,7 @@ public class GUIRevisor extends JFrame {
 
     private void cargarComboPreguntas() {
         comboPreguntas.removeAllItems();
-        for (Question pregunta : service.listarPreguntas()) {
+        for (Question pregunta : fuente.paraRevisor(usuario)) {
             comboPreguntas.addItem(pregunta);
         }
     }

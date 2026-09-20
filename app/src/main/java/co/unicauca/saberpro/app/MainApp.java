@@ -5,6 +5,7 @@ import co.unicauca.saberpro.microkernel.presentation.GUIMicrokernel;
 import co.unicauca.saberpro.preguntas.access.QuestionImplRepository;
 import co.unicauca.saberpro.preguntas.domain.QuestionRepository;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
+import co.unicauca.saberpro.preguntas.domain.TodasLasPreguntasEnRevision;
 import co.unicauca.saberpro.preguntas.presentation.GUIObserver1;
 import co.unicauca.saberpro.preguntas.presentation.GUIObserver2;
 import co.unicauca.saberpro.preguntas.presentation.GUIQuestions;
@@ -14,6 +15,11 @@ import co.unicauca.saberpro.preguntas.simulacro.domain.SimulacroRepository;
 import co.unicauca.saberpro.preguntas.simulacro.domain.SimulacroService;
 import co.unicauca.saberpro.preguntas.simulacro.presentation.GUIDocente;
 import co.unicauca.saberpro.preguntas.simulacro.presentation.GUIEstudiante;
+import co.unicauca.saberpro.revision.access.AsignacionRevisionImplRepository;
+import co.unicauca.saberpro.revision.access.NotificadorCorreoSimulado;
+import co.unicauca.saberpro.revision.domain.AsignacionRevisionService;
+import co.unicauca.saberpro.revision.domain.DirectorioRevisoresDeUsuarios;
+import co.unicauca.saberpro.revision.presentation.GUIAsignacionRevisores;
 import co.unicauca.saberpro.usuarios.domain.Role;
 import co.unicauca.saberpro.usuarios.domain.UserStatus;
 import co.unicauca.saberpro.usuarios.domain.access.IUserRepository;
@@ -77,6 +83,11 @@ public class MainApp {
             MenuProviderRegistry menuProviderRegistry = MenuProviderRegistry.withDefaultProviders();
             sembrarUsuariosDemo(userService);
 
+            // --- Módulo de revisión (HU-04: el Administrador asigna revisores) ---
+            AsignacionRevisionService asignacionService = new AsignacionRevisionService(questionService,
+                    new DirectorioRevisoresDeUsuarios(userService), new AsignacionRevisionImplRepository(),
+                    new NotificadorCorreoSimulado());
+
             // --- El puente entre ambos: qué ventana abrir según el rol ---
             new LoginFrame(userService, user -> {
                 switch (user.getRole()) {
@@ -84,11 +95,13 @@ public class MainApp {
                         new GUIQuestions(questionService, user.getUsername()).setVisible(true);
                         new GUIMicrokernel(questionMicrokernel).setVisible(true);
                     }
-                    case REVISOR -> new GUIRevisor(questionService).setVisible(true);
+                    case REVISOR -> new GUIRevisor(questionService,
+                            new TodasLasPreguntasEnRevision(questionService), user.getUsername()).setVisible(true);
                     case DOCENTE -> new GUIDocente(simulacroService).setVisible(true);
                     case ESTUDIANTE -> new GUIEstudiante(user, simulacroService).setVisible(true);
                     case ADMINISTRADOR -> {
                         new DashboardFrame(user, menuProviderRegistry).setVisible(true);
+                        new GUIAsignacionRevisores(asignacionService).setVisible(true);
                         vistaEstadisticas.setVisible(true);
                         vistaGrafica.setVisible(true);
                     }
