@@ -21,6 +21,7 @@ import co.unicauca.saberpro.revision.domain.AsignacionRevisionService;
 import co.unicauca.saberpro.revision.domain.DirectorioRevisoresDeUsuarios;
 import co.unicauca.saberpro.revision.presentation.GUIAsignacionRevisores;
 import co.unicauca.saberpro.usuarios.domain.Role;
+import co.unicauca.saberpro.usuarios.domain.User;
 import co.unicauca.saberpro.usuarios.domain.UserStatus;
 import co.unicauca.saberpro.usuarios.domain.access.IUserRepository;
 import co.unicauca.saberpro.usuarios.domain.access.UserRepositoryFactory;
@@ -36,6 +37,10 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * Composition root de la aplicación fusionada Taller 2 (usuarios/login) +
@@ -88,27 +93,41 @@ public class MainApp {
                     new DirectorioRevisoresDeUsuarios(userService), new AsignacionRevisionImplRepository(),
                     new NotificadorCorreoSimulado());
 
-            // --- El puente entre ambos: qué ventana abrir según el rol ---
-            new LoginFrame(userService, user -> {
-                switch (user.getRole()) {
-                    case AUTOR_PREGUNTAS -> {
-                        new GUIQuestions(questionService, user.getUsername()).setVisible(true);
-                        new GUIMicrokernel(questionMicrokernel).setVisible(true);
-                    }
-                    case REVISOR -> new GUIRevisor(questionService,
-                            new TodasLasPreguntasEnRevision(questionService), user.getUsername()).setVisible(true);
-                    case DOCENTE -> new GUIDocente(simulacroService).setVisible(true);
-                    case ESTUDIANTE -> new GUIEstudiante(user, simulacroService).setVisible(true);
-                    case ADMINISTRADOR -> {
-                        new DashboardFrame(user, menuProviderRegistry).setVisible(true);
-                        new GUIAsignacionRevisores(asignacionService).setVisible(true);
-                        vistaEstadisticas.setVisible(true);
-                        vistaGrafica.setVisible(true);
-                    }
-                    default -> new DashboardFrame(user, menuProviderRegistry).setVisible(true);
-                }
-            }).setVisible(true);
+            // --- El puente entre ambos: qué ventanas abrir según el rol ---
+            // La primera ventana de la lista es la principal: al cerrarla se
+            // cierran las demás y vuelve el login, para poder cambiar de rol
+            // sin reiniciar (los datos del banco viven en memoria).
+            mostrarLogin(userService, user -> switch (user.getRole()) {
+                case AUTOR_PREGUNTAS -> List.of(new GUIQuestions(questionService, user.getUsername()),
+                        new GUIMicrokernel(questionMicrokernel));
+                case REVISOR -> List.of(new GUIRevisor(questionService,
+                        new TodasLasPreguntasEnRevision(questionService), user.getUsername()));
+                case DOCENTE -> List.of(new GUIDocente(simulacroService));
+                case ESTUDIANTE -> List.of(new GUIEstudiante(user, simulacroService));
+                case ADMINISTRADOR -> List.of(new DashboardFrame(user, menuProviderRegistry),
+                        new GUIAsignacionRevisores(asignacionService), vistaEstadisticas, vistaGrafica);
+                default -> List.of(new DashboardFrame(user, menuProviderRegistry));
+            });
         });
+    }
+
+    /**
+     * Muestra el login y, tras autenticarse, abre las ventanas del rol. Cuando
+     * se cierra la ventana principal (la primera de la lista) se cierran las
+     * demás y se vuelve a mostrar el login.
+     */
+    private static void mostrarLogin(UserService userService, Function<User, List<JFrame>> ventanasPorRol) {
+        new LoginFrame(userService, user -> {
+            List<JFrame> ventanas = ventanasPorRol.apply(user);
+            ventanas.get(0).addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    ventanas.forEach(JFrame::dispose);
+                    mostrarLogin(userService, ventanasPorRol);
+                }
+            });
+            ventanas.forEach(v -> v.setVisible(true));
+        }).setVisible(true);
     }
 
     /**
