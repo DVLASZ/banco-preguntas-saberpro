@@ -105,7 +105,7 @@ public class MainApp {
                 case DOCENTE -> List.of(new GUIDocente(simulacroService));
                 case ESTUDIANTE -> List.of(new GUIEstudiante(user, simulacroService));
                 case ADMINISTRADOR -> List.of(new DashboardFrame(user, menuProviderRegistry),
-                        new GUIAsignacionRevisores(asignacionService), vistaEstadisticas, vistaGrafica);
+                        new GUIAsignacionRevisores(asignacionService, user.getUsername()), vistaEstadisticas, vistaGrafica);
                 default -> List.of(new DashboardFrame(user, menuProviderRegistry));
             });
         });

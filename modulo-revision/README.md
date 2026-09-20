@@ -22,7 +22,7 @@ Criterios de aceptación:
    notifica (simulado).
 3. Si no se marcó ningún revisor, se muestra "Debe seleccionar al menos un
    revisor".
-4. El autor de la pregunta aparece deshabilitado en la lista de revisores
+4. El autor de la pregunta no se ofrece como revisor: no aparece en la lista de revisores
    disponibles.
 
 ## Estructura

@@ -11,7 +11,7 @@ import java.awt.*;
  *
  * <p>TODO(HU-04): reemplazar este marcador por la pantalla real: una tabla con las
  * preguntas pendientes de revisión (id, nombre y autor); al elegir una, la lista
- * de revisores disponibles con casillas (el autor deshabilitado); y un botón
+ * de revisores disponibles con casillas (el autor no se ofrece: no aparece en la lista); y un botón
  * "Asignar" que llama a {@code AsignacionRevisionService.asignarRevisores}, muestra
  * el error "Debe seleccionar al menos un revisor" si no se marcó ninguno y avisa que
  * se notificó por correo. Para el estilo (colores, márgenes, fuentes) mira
@@ -20,10 +20,13 @@ import java.awt.*;
 public class GUIAsignacionRevisores extends JFrame {
 
     private final AsignacionRevisionService service;
+    /** Usuario del Administrador que asigna (queda registrado en cada asignación). */
+    private final String administrador;
 
-    public GUIAsignacionRevisores(AsignacionRevisionService service) {
+    public GUIAsignacionRevisores(AsignacionRevisionService service, String administrador) {
         super("Banco de Preguntas Saber Pro - Asignación de Revisores");
         this.service = service;
+        this.administrador = administrador;
 
         getContentPane().setBackground(Color.WHITE);
         setLayout(new BorderLayout());
