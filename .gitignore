@@ -1,6 +1,7 @@
 target/
 *.class
 *.db
+modulo-api-rest/data/
 dependency-reduced-pom.xml
 .idea/
 *.iml

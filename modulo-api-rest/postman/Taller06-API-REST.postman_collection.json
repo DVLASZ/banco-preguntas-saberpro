@@ -1,0 +1,297 @@
+{
+  "info": {
+    "name": "Taller 06 - API REST Banco de Preguntas",
+    "description": "Microservicio Spring Boot + JPA. Ejecutar la coleccion en orden (1 a 6); las dos ultimas peticiones muestran los errores 404 y 400.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "questionId",
+      "value": "P-001"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. GET - Listar todas las preguntas",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Devuelve una lista', () => pm.expect(pm.response.json()).to.be.an('array'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/questions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. GET - Buscar pregunta por id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Es la pregunta P-001', () => pm.expect(pm.response.json().id).to.eql('P-001'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/questions/P-001",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions",
+            "P-001"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. POST - Crear pregunta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+              "pm.test('Trae cabecera Location', () => pm.response.to.have.header('Location'));",
+              "pm.collectionVariables.set('questionId', pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Patrón Strategy\",\n  \"enunciado\": \"¿Qué permite el patrón Strategy?\",\n  \"opcionA\": \"Intercambiar algoritmos en tiempo de ejecución\",\n  \"opcionB\": \"Crear objetos sin exponer su clase concreta\",\n  \"opcionC\": \"Recorrer una colección sin exponer su estructura\",\n  \"opcionD\": \"Notificar cambios a varios observadores\",\n  \"respuestaCorrecta\": \"A\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"dificultad\": \"INTERMEDIO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/questions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. PUT - Actualizar pregunta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Nombre actualizado', () => pm.expect(pm.response.json().nombre).to.include('editado'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Patrón Strategy (editado)\",\n  \"enunciado\": \"¿Qué permite el patrón Strategy?\",\n  \"opcionA\": \"Intercambiar algoritmos en tiempo de ejecución\",\n  \"opcionB\": \"Crear objetos sin exponer su clase concreta\",\n  \"opcionC\": \"Recorrer una colección sin exponer su estructura\",\n  \"opcionD\": \"Notificar cambios a varios observadores\",\n  \"respuestaCorrecta\": \"A\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"dificultad\": \"AVANZADO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/questions/{{questionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions",
+            "{{questionId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. DELETE - Archivar pregunta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 204 No Content', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/questions/{{questionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions",
+            "{{questionId}}"
+          ]
+        },
+        "description": "No borra fisicamente (RNF-16): la pregunta pasa al estado ARCHIVADA."
+      }
+    },
+    {
+      "name": "6. GET - Verificar que quedo ARCHIVADA",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 (la pregunta sigue existiendo)', () => pm.response.to.have.status(200));",
+              "pm.test('Estado ARCHIVADA', () => pm.expect(pm.response.json().estado).to.eql('ARCHIVADA'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/questions/{{questionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions",
+            "{{questionId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. GET - Id inexistente (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/questions/P-999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions",
+            "P-999"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. POST - Datos invalidos (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"\",\n  \"enunciado\": \"x\",\n  \"opcionA\": \"a\",\n  \"opcionB\": \"b\",\n  \"opcionC\": \"c\",\n  \"opcionD\": \"d\",\n  \"respuestaCorrecta\": \"Z\",\n  \"competencia\": \"INGLES\",\n  \"tema\": \"t\",\n  \"dificultad\": \"BASICO\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/questions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "questions"
+          ]
+        }
+      }
+    }
+  ]
+}

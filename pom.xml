@@ -29,6 +29,7 @@
         <module>modulo-preguntas</module>
         <module>modulo-simulacros</module>
         <module>modulo-microkernel</module>
+        <module>modulo-api-rest</module>
         <module>app</module>
     </modules>
 

@@ -33,7 +33,8 @@ banco-preguntas-saberpro/          (pom padre — packaging "pom")
 ├── modulo-preguntas/                Banco de preguntas: redacción y ciclo de vida RF-14 (depende de: nada)
 ├── modulo-simulacros/               Generación y presentación de simulacros HU-12 a HU-14 (depende de: modulo-preguntas, modulo-usuarios)
 ├── modulo-microkernel/              Generación de preguntas por plugins (Taller 5) (depende de: modulo-preguntas)
-└── app/                             Composition root: arma los módulos y arranca la app (depende de: los 4 anteriores)
+├── modulo-api-rest/                 Microservicio REST con Spring Boot + JPA (Taller 6) (depende de: modulo-preguntas)
+└── app/                             Composition root: arma los módulos y arranca la app de escritorio (depende de: usuarios, preguntas, simulacros y microkernel)
 ```
 
 Grafo de dependencias entre módulos (siempre en una sola dirección, sin
@@ -45,16 +46,20 @@ app  →  modulo-simulacros  →  modulo-preguntas
  │                            modulo-usuarios
  ├──────────────────────────────────↗
  └→  modulo-microkernel  →  modulo-preguntas
+
+modulo-api-rest  →  modulo-preguntas      (aparte: app no depende de él)
 ```
 
 `modulo-preguntas` y `modulo-usuarios` no dependen de ningún otro módulo
 del proyecto — son la base. `modulo-simulacros` depende de ambos (necesita
 preguntas publicadas y necesita saber qué usuario presenta el simulacro).
 `modulo-microkernel` solo depende de `modulo-preguntas` (genera preguntas
-reales del banco a partir de plugins). `app` es el único módulo que
-conoce a los cuatro: arma la inyección de dependencias manualmente y
-define `SesionRouter`, que decide qué ventana abrir según el rol
-autenticado.
+reales del banco a partir de plugins). `modulo-api-rest` también solo
+depende de `modulo-preguntas`: expone su servicio de dominio por HTTP y le
+conecta una base de datos con JPA sin que el dominio sepa de Spring ni de
+JPA. `app` es el único módulo que arma la aplicación de escritorio: hace la
+inyección de dependencias manualmente y define `SesionRouter`, que decide
+qué ventana abrir según el rol autenticado.
 
 Cada módulo, a su vez, aplica internamente arquitectura en capas
 (dominio / acceso a datos / presentación) y el micropatrón MVC — ver el
@@ -65,10 +70,20 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 107 pruebas de los 4 módulos con lógica de negocio
+mvn test      # ejecuta las 150 pruebas de los 5 módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
+
+Para levantar el **microservicio REST** (Taller 6) en `http://localhost:8080`:
+
+```bash
+cd modulo-api-rest
+java -jar target/banco-preguntas-api.jar
+```
+
+Los endpoints, el formato de errores y la colección de Postman están en el
+[README del módulo](modulo-api-rest/README.md).
 
 Al iniciar se muestra el login. Usuarios de prueba (contraseña
 `Saber2026!` para todos, se siembran solos la primera vez que se corre):
@@ -101,6 +116,10 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
   validado por un pipeline de Tuberías y Filtros (4 filtros) antes de
   crear la pregunta real y notificar a las vistas observadoras — ver
   `modulo-microkernel`.
+- API REST de preguntas (Taller 6): microservicio Spring Boot con CRUD
+  (GET/POST/PUT/DELETE) sobre la `Question` real, persistencia con Spring
+  Data JPA + H2 detrás del puerto `QuestionRepository`, y DELETE que archiva
+  en vez de borrar (RNF-16) — ver `modulo-api-rest`.
 
 **Pendiente** (ver el desglose completo de qué falta y en qué orden
 convendría abordarlo en el historial de la conversación/planeación del
