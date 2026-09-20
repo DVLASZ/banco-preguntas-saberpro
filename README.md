@@ -74,7 +74,7 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 243 pruebas de los módulos con lógica de negocio
+mvn test      # ejecuta las 284 pruebas de los módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
