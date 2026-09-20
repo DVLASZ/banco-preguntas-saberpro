@@ -74,7 +74,7 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 223 pruebas de los módulos con lógica de negocio
+mvn test      # ejecuta las 243 pruebas de los módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
@@ -112,6 +112,12 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 - Ciclo de vida RF-14 con transiciones válidas (RF-15): el Autor guarda un
   **borrador** (solo él puede modificarlo mientras lo sea, RF-06) y lo
   **envía a revisión** con confirmación; los estados se muestran con color.
+- Listado "Mis preguntas" del Autor (RF-07): tabla paginada (5, 10 o 20 por
+  página) con filtros por estado, competencia y texto (nombre, tema, subtema o
+  pregunta, sin importar mayúsculas ni tildes), el estado de cada pregunta con
+  su color, y apertura de la pregunta para verla o editarla. Sigue MVC: la vista
+  `PanelMisPreguntas`, el controlador `MisPreguntasController` y el modelo
+  `QuestionService.buscarDelAutor`.
 - Revisión por un Revisor: aprobar/rechazar preguntas En revisión.
 - Generación de simulacros por el Docente filtrando por competencia,
   tema y dificultad (HU-12), usando solo preguntas publicadas.
@@ -137,10 +143,9 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
   por correo (HU-04, en desarrollo en `modulo-revision`) e historial de
   revisiones con observaciones (HU-10/HU-11) — hoy el Revisor decide sin
   dejar un registro de sus observaciones más allá del estado.
-- Listado de "mis preguntas" con paginación y filtros por estado,
-  competencia o tema (HU-03) y búsqueda para todos los roles (HU-05) — hoy
-  el Autor elige de una lista y la búsqueda solo existe internamente
-  (`QuestionService.buscarPublicadas`) para armar simulacros.
+- Búsqueda de preguntas para todos los roles (HU-05) — hoy la búsqueda
+  solo existe internamente (`QuestionService.buscarPublicadas`) para armar
+  simulacros, y el listado con filtros es solo para el Autor.
 - Historial de simulacros de un estudiante (HU-15) y estadísticas
   individuales de desempeño (HU-16).
 - Reportes agregados de desempeño por grupo (HU-17).

@@ -39,9 +39,7 @@ public class GUIQuestions extends JFrame {
     private final QuestionService service;
     private final String usuario;
 
-    private final JComboBox<Question> comboPreguntas = new JComboBox<>();
-    private final JButton btnCargar = new JButton("Cargar pregunta");
-    private final JButton btnNueva = new JButton("Nueva pregunta");
+    private PanelMisPreguntas panelMisPreguntas;
     private final JButton btnGuardar = new JButton("Guardar borrador");
     private final JButton btnEnviar = new JButton("Enviar a revisión");
     private final JButton btnCancelar = new JButton("Cancelar");
@@ -79,12 +77,11 @@ public class GUIQuestions extends JFrame {
         this.service = service;
         this.usuario = usuario;
         construirInterfaz();
-        cargarComboPreguntas();
         limpiarFormulario();
         habilitarFormulario(false, "Seleccione una pregunta o cree una nueva.");
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(780, 860);
+        setSize(820, 940);
         setLocationRelativeTo(null);
     }
 
@@ -115,25 +112,13 @@ public class GUIQuestions extends JFrame {
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 
-        JPanel panelSeleccion = new JPanel(new BorderLayout(8, 8));
+        // HU-03: listado paginado y filtrable de las preguntas del autor.
+        panelMisPreguntas = new PanelMisPreguntas(service, usuario, this::abrirPregunta, this::iniciarPreguntaNueva);
+        JPanel panelSeleccion = new JPanel(new BorderLayout());
         panelSeleccion.setBackground(Color.WHITE);
-        panelSeleccion.setBorder(tituloSeccion("Mis preguntas"));
-        comboPreguntas.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
-                String texto = value instanceof Question q ? q + "   [" + q.getEstado() + "]" : "";
-                return super.getListCellRendererComponent(list, texto, index, isSelected, cellHasFocus);
-            }
-        });
-        panelSeleccion.add(comboPreguntas, BorderLayout.CENTER);
-        JPanel botonesSeleccion = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        botonesSeleccion.setOpaque(false);
-        botonesSeleccion.add(btnCargar);
-        botonesSeleccion.add(btnNueva);
-        panelSeleccion.add(botonesSeleccion, BorderLayout.EAST);
-        btnCargar.addActionListener(e -> cargarPreguntaSeleccionada());
-        btnNueva.addActionListener(e -> iniciarPreguntaNueva());
+        panelSeleccion.setBorder(BorderFactory.createCompoundBorder(tituloSeccion("Mis preguntas"),
+                new EmptyBorder(4, 6, 6, 6)));
+        panelSeleccion.add(panelMisPreguntas, BorderLayout.CENTER);
 
         JPanel panelNorte = new JPanel(new BorderLayout(4, 4));
         panelNorte.setOpaque(false);
@@ -256,24 +241,19 @@ public class GUIQuestions extends JFrame {
 
     // ---- selección y carga ----
 
-    private void cargarComboPreguntas() {
-        comboPreguntas.removeAllItems();
-        for (Question pregunta : service.listarPorAutor(usuario)) {
-            comboPreguntas.addItem(pregunta);
-        }
-    }
-
-    private void cargarPreguntaSeleccionada() {
-        Question seleccionada = (Question) comboPreguntas.getSelectedItem();
-        if (seleccionada == null || !confirmarDescarteDeCambios()) {
+    /** Abre una pregunta del listado en el formulario (si hay cambios sin guardar, pregunta antes). */
+    private void abrirPregunta(String id) {
+        if (!confirmarDescarteDeCambios()) {
+            panelMisPreguntas.seleccionar(idPreguntaEnEdicion);
             return;
         }
-        mostrarPregunta(service.obtenerPregunta(seleccionada.getId()));
+        mostrarPregunta(service.obtenerPregunta(id));
     }
 
     private void mostrarPregunta(Question pregunta) {
         limpiarResaltados();
         idPreguntaEnEdicion = pregunta.getId();
+        panelMisPreguntas.seleccionar(pregunta.getId());
         txtId.setText(pregunta.getId());
         cargarFormulario(ContenidoPregunta.de(pregunta));
         badgeEstadoActual.mostrar(pregunta.getEstado());
@@ -287,7 +267,7 @@ public class GUIQuestions extends JFrame {
             return;
         }
         limpiarResaltados();
-        comboPreguntas.setSelectedItem(null);
+        panelMisPreguntas.seleccionar(null);
         limpiarFormulario();
         habilitarFormulario(true, "Complete todos los campos y guarde el borrador.");
         txtNombre.requestFocusInWindow();
@@ -387,19 +367,8 @@ public class GUIQuestions extends JFrame {
     }
 
     private void recargarDespuesDeGuardar(String id) {
-        cargarComboPreguntas();
-        Question guardada = service.obtenerPregunta(id);
-        comboPreguntas.setSelectedItem(comboPreguntas.getItemCount() == 0 ? null : itemConId(id));
-        mostrarPregunta(guardada);
-    }
-
-    private Question itemConId(String id) {
-        for (int i = 0; i < comboPreguntas.getItemCount(); i++) {
-            if (comboPreguntas.getItemAt(i).getId().equals(id)) {
-                return comboPreguntas.getItemAt(i);
-            }
-        }
-        return null;
+        panelMisPreguntas.refrescar();
+        mostrarPregunta(service.obtenerPregunta(id));
     }
 
     /** Cancela la edición: si hay cambios sin guardar pide confirmación antes de descartarlos. */

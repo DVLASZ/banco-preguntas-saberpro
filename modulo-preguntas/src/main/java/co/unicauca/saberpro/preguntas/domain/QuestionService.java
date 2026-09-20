@@ -52,6 +52,35 @@ public class QuestionService implements Subject {
         return resultado;
     }
 
+    /**
+     * Las preguntas de un autor que cumplen el filtro, de a una página (HU-03,
+     * RF-07). Van en el orden del banco. Si se pide una página que no existe se
+     * devuelve la última; si aún no hay resultados, la primera vacía.
+     *
+     * @param pagina número de página, desde 1
+     * @param tamano preguntas por página, al menos 1
+     */
+    public Pagina<Question> buscarDelAutor(String autor, FiltroPreguntas filtro, int pagina, int tamano) {
+        if (tamano < 1) {
+            throw new IllegalArgumentException("El tamaño de página debe ser al menos 1");
+        }
+        if (pagina < 1) {
+            throw new IllegalArgumentException("La página debe ser al menos 1");
+        }
+        FiltroPreguntas criterios = filtro == null ? FiltroPreguntas.sinFiltros() : filtro;
+        List<Question> coincidentes = new ArrayList<>();
+        for (Question pregunta : listarPorAutor(autor)) {
+            if (criterios.coincide(pregunta)) {
+                coincidentes.add(pregunta);
+            }
+        }
+        int ultimaPagina = Math.max(1, (coincidentes.size() + tamano - 1) / tamano);
+        int actual = Math.min(pagina, ultimaPagina);
+        int desde = (actual - 1) * tamano;
+        int hasta = Math.min(desde + tamano, coincidentes.size());
+        return new Pagina<>(coincidentes.subList(desde, hasta), actual, tamano, coincidentes.size());
+    }
+
     public Question obtenerPregunta(String id) {
         Question pregunta = repository.obtenerPorId(id);
         if (pregunta == null) {
