@@ -30,7 +30,7 @@ de cada módulo no cambia).
 ```
 banco-preguntas-saberpro/          (pom padre — packaging "pom")
 ├── modulo-usuarios/                Autenticación, registro y roles (RF-01 a RF-03)
-├── modulo-preguntas/                Banco de preguntas: redacción y ciclo de vida RF-14 (depende de: nada)
+├── modulo-preguntas/                Banco de preguntas: redacción, listado y ciclo de vida RF-14 (depende de: nada)
 ├── modulo-simulacros/               Generación y presentación de simulacros HU-12 a HU-14 (depende de: modulo-preguntas, modulo-usuarios)
 ├── modulo-microkernel/              Generación de preguntas por plugins (Taller 5) (depende de: modulo-preguntas)
 ├── modulo-revision/                 Asignación de revisores a preguntas pendientes, HU-04 (depende de: modulo-preguntas, modulo-usuarios)
@@ -94,11 +94,40 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 
 | Usuario | Rol | Ventana que abre |
 |---|---|---|
-| `autor1` | Autor de preguntas | Redactar preguntas (borrador → enviar a revisión) |
+| `autor1` | Autor de preguntas | Redactar preguntas (borrador → enviar a revisión) y ver su listado con paginación y filtros |
 | `revisor1` | Revisor | Evaluar y decidir (Aprobar/Rechazar) |
 | `docente1` | Docente | Generar simulacros |
 | `estudiante1` | Estudiante | Presentar simulacros |
 | `admin1` | Administrador | Tablero, estadísticas/gráfica del banco y asignación de revisores (HU-04, en desarrollo) |
+
+Al cerrar la ventana principal de un rol vuelve el login, para cambiar de usuario sin
+reiniciar (las preguntas viven en memoria mientras la aplicación esté abierta).
+
+## Primer corte
+
+El primer corte implementa cuatro historias de usuario de alto valor:
+
+| Historia | Descripción | Estado |
+|---|---|---|
+| HU-01 | El Autor crea una pregunta de selección múltiple con validación estructural | Implementada |
+| HU-02 | El Autor cambia el estado de "Borrador" a "Pendiente de revisión" | Implementada |
+| HU-03 | El Autor lista sus preguntas con paginación y filtros | Implementada |
+| HU-04 | El Administrador asigna revisores a las preguntas pendientes | En desarrollo (`modulo-revision`) |
+
+Las HU-01 a HU-04 son las del backlog del equipo en Jira; los códigos RF y las
+historias HU03 (validación estructural) o HU-12 a HU-17 que aparecen más abajo son
+los del documento del proyecto de curso.
+
+## Flujo de trabajo y ramas
+
+- `main`: entregas estables. Hoy contiene el Taller 6.
+- `primer-corte`: integración de todo el primer corte. Se fusiona a `main` cuando el
+  primer corte está completo y con las pruebas en verde.
+- Ramas de trabajo (`hu04-asignacion-revisores`, `docs-arquitectura`, …): cada
+  integrante trabaja en la suya, con su propia identidad de Git, y la integra a
+  `primer-corte` con un Pull Request. Se fusionan con "Create a merge commit" o
+  "Rebase and merge" (no "Squash") para que cada commit conserve a su autor.
+- Antes de fusionar se ejecuta `mvn test`.
 
 ## Estado actual del proyecto
 
@@ -145,9 +174,9 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 - Persistencia real de preguntas y simulacros (hoy son en memoria; solo
   usuarios usa SQLite).
 - Asignación de uno o más revisores por pregunta con notificación simulada
-  por correo (HU-04, en desarrollo en `modulo-revision`) e historial de
-  revisiones con observaciones (HU-10/HU-11) — hoy el Revisor decide sin
-  dejar un registro de sus observaciones más allá del estado.
+  por correo (HU-04, en desarrollo en `modulo-revision`).
+- Historial de revisiones con observaciones (HU-10/HU-11) — hoy el Revisor
+  decide sin dejar un registro de sus observaciones más allá del estado.
 - Búsqueda de preguntas para todos los roles (HU-05) — hoy la búsqueda
   solo existe internamente (`QuestionService.buscarPublicadas`) para armar
   simulacros, y el listado con filtros es solo para el Autor.
