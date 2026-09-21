@@ -10,8 +10,9 @@ por pares, y generar/presentar simulacros a partir de preguntas ya
 publicadas.
 
 Este repositorio es la continuación, ya como proyecto único, de los
-talleres sueltos de la materia (login/roles del Taller 2, capas/MVC/
-Observer del Taller 4, modelo C4 del Taller 3) — ver la sección
+talleres sueltos de la materia (login/roles del Taller 2, modelo C4 del
+Taller 3, capas/MVC/Observer del Taller 4, microkernel del Taller 5 y API
+REST del Taller 6) — ver la sección
 [Historia y talleres relacionados](#historia-y-talleres-relacionados).
 
 ## Arquitectura: monolito modular
@@ -199,6 +200,15 @@ el repositorio [`ingenieria-software-2`](https://github.com/DVLASZ/ingenieria-so
   origen de `modulo-preguntas` y `modulo-simulacros`; se conserva intacto
   en ese repositorio como entregable del laboratorio, mientras este
   repositorio es donde el proyecto sigue avanzando.
+- **Taller 5** — arquitectura Microkernel combinada con Tuberías y Filtros:
+  generación de preguntas por plugins cargados por Reflexión y validados por
+  un pipeline de cuatro filtros; origen de `modulo-microkernel`. Desde este
+  taller el código se desarrolla directamente en este repositorio; en
+  `ingenieria-software-2` solo queda una carpeta con su README y el enlace.
+- **Taller 6** — API REST con Spring Boot y Spring Data JPA: microservicio con
+  el CRUD de preguntas sobre la `Question` real del proyecto, con validación,
+  manejo de errores y colección de Postman; origen de `modulo-api-rest`. Igual
+  que el Taller 5, su carpeta en `ingenieria-software-2` solo deja el enlace.
 
 ## Autores
 
