@@ -74,7 +74,7 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 284 pruebas de los módulos con lógica de negocio
+mvn test      # ejecuta las 310 pruebas de los módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
@@ -118,6 +118,11 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
   su color, y apertura de la pregunta para verla o editarla. Sigue MVC: la vista
   `PanelMisPreguntas`, el controlador `MisPreguntasController` y el modelo
   `QuestionService.buscarDelAutor`.
+- MVC explícito en las ventanas del Autor y del Revisor: las vistas (`GUIQuestions`,
+  `GUIRevisor`) solo pintan y preguntan al usuario a través de una interfaz
+  (`RedaccionPreguntaVista`, `RevisionVista`); las decisiones las toman los
+  controladores (`RedaccionPreguntaController`, `RevisionController`), que se
+  prueban sin ventana usando una vista falsa.
 - Revisión por un Revisor: aprobar/rechazar preguntas En revisión.
 - Generación de simulacros por el Docente filtrando por competencia,
   tema y dificultad (HU-12), usando solo preguntas publicadas.

@@ -9,22 +9,23 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.List;
 
 /**
- * Ventana del rol <b>Revisor</b>: evalúa una pregunta ya enviada a
- * revisión y solo puede Aprobarla o Rechazarla (RF-16) — a diferencia del
+ * Vista (MVC) del rol <b>Revisor</b>: muestra una pregunta ya enviada a
+ * revisión y solo permite Aprobarla o Rechazarla (RF-16) — a diferencia del
  * Autor ({@link GUIQuestions}), no edita el contenido de la pregunta ni
- * tiene un selector de estado libre. Cada acción dispara
- * {@link QuestionService#cambiarEstado} y, por lo tanto, notifica a las
- * vistas observadoras ({@link GUIObserver1}, {@link GUIObserver2}).
+ * tiene un selector de estado libre. Las decisiones las toma el
+ * {@link RevisionController}, que las registra en el modelo
+ * ({@link QuestionService#cambiarEstado}) y así se notifica a las vistas
+ * observadoras ({@link GUIObserver1}, {@link GUIObserver2}).
  */
-public class GUIRevisor extends JFrame {
+public class GUIRevisor extends JFrame implements RevisionVista {
 
     private static final Color GRIS_TEXTO = new Color(0x475569);
     private static final Color FONDO_CAMPO = new Color(0xF1F5F9);
 
-    private final QuestionService service;
-    private final FuenteDePreguntasParaRevisar fuente;
+    private final RevisionController controlador;
     private final String usuario;
 
     private final JComboBox<Question> comboPreguntas = new JComboBox<>();
@@ -44,16 +45,13 @@ public class GUIRevisor extends JFrame {
     private final JButton btnAprobar = new JButton("Aprobar");
     private final JButton btnRechazar = new JButton("Rechazar");
 
-    private Question preguntaCargada;
-
     public GUIRevisor(QuestionService service, FuenteDePreguntasParaRevisar fuente, String usuario) {
         super("Banco de Preguntas Saber Pro - Revisor");
-        this.service = service;
-        this.fuente = fuente;
         this.usuario = usuario;
+        this.controlador = new RevisionController(service, fuente, usuario, this);
         construirInterfaz();
-        cargarComboPreguntas();
         habilitarAcciones(false);
+        controlador.iniciar();
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(640, 780);
@@ -121,8 +119,8 @@ public class GUIRevisor extends JFrame {
 
         JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
         panelAcciones.setOpaque(false);
-        btnRechazar.addActionListener(e -> decidir(EstadoPregunta.RECHAZADA));
-        btnAprobar.addActionListener(e -> decidir(EstadoPregunta.APROBADA));
+        btnRechazar.addActionListener(e -> controlador.rechazar());
+        btnAprobar.addActionListener(e -> controlador.aprobar());
         btnAprobar.putClientProperty("JButton.buttonType", "default");
         panelAcciones.add(btnRechazar);
         panelAcciones.add(btnAprobar);
@@ -176,59 +174,48 @@ public class GUIRevisor extends JFrame {
         gbc.gridy++;
     }
 
-    private void cargarComboPreguntas() {
+    @Override
+    public void mostrarPreguntasPorRevisar(List<Question> preguntas) {
         comboPreguntas.removeAllItems();
-        for (Question pregunta : fuente.paraRevisor(usuario)) {
+        for (Question pregunta : preguntas) {
             comboPreguntas.addItem(pregunta);
         }
     }
 
     private void cargarPreguntaSeleccionada() {
         Question seleccionada = (Question) comboPreguntas.getSelectedItem();
-        if (seleccionada == null) {
-            return;
+        if (seleccionada != null) {
+            controlador.cargarPregunta(seleccionada.getId());
         }
-        preguntaCargada = service.obtenerPregunta(seleccionada.getId());
-
-        // Al tomar una pregunta pendiente para revisarla, pasa
-        // automáticamente a "En revisión" (RF-15): el solo hecho de que
-        // el Revisor la abra ya inicia su evaluación.
-        if (preguntaCargada.getEstado() == EstadoPregunta.PENDIENTE_REVISION) {
-            service.cambiarEstado(preguntaCargada.getId(), EstadoPregunta.EN_REVISION);
-            preguntaCargada = service.obtenerPregunta(preguntaCargada.getId());
-        }
-
-        txtId.setText(preguntaCargada.getId());
-        txtNombre.setText(preguntaCargada.getNombre());
-        txtContexto.setText(preguntaCargada.getContexto());
-        txtEnunciado.setText(preguntaCargada.getEnunciado());
-        txtOpcionA.setText(preguntaCargada.getOpciones().getOpcionA());
-        txtOpcionB.setText(preguntaCargada.getOpciones().getOpcionB());
-        txtOpcionC.setText(preguntaCargada.getOpciones().getOpcionC());
-        txtOpcionD.setText(preguntaCargada.getOpciones().getOpcionD());
-        txtRespuestaCorrecta.setText(String.valueOf(preguntaCargada.getRespuestaCorrecta()));
-        txtJustificacion.setText(preguntaCargada.getJustificacion());
-        badgeEstadoActual.mostrar(preguntaCargada.getEstado());
-        // Solo una pregunta en revisión se puede aprobar o rechazar (RF-15).
-        habilitarAcciones(preguntaCargada.getEstado() == EstadoPregunta.EN_REVISION);
     }
 
-    private void decidir(EstadoPregunta decision) {
-        if (preguntaCargada == null) {
-            return;
-        }
-        try {
-            service.cambiarEstado(preguntaCargada.getId(), decision);
-        } catch (RuntimeException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(),
-                    "No se pudo registrar la revisión", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+    @Override
+    public void mostrarPregunta(Question pregunta, boolean puedeDecidir) {
+        txtId.setText(pregunta.getId());
+        txtNombre.setText(pregunta.getNombre());
+        txtContexto.setText(pregunta.getContexto());
+        txtEnunciado.setText(pregunta.getEnunciado());
+        txtOpcionA.setText(pregunta.getOpciones().getOpcionA());
+        txtOpcionB.setText(pregunta.getOpciones().getOpcionB());
+        txtOpcionC.setText(pregunta.getOpciones().getOpcionC());
+        txtOpcionD.setText(pregunta.getOpciones().getOpcionD());
+        txtRespuestaCorrecta.setText(String.valueOf(pregunta.getRespuestaCorrecta()));
+        txtJustificacion.setText(pregunta.getJustificacion());
+        badgeEstadoActual.mostrar(pregunta.getEstado());
+        habilitarAcciones(puedeDecidir);
+    }
+
+    @Override
+    public void mostrarDecision(String idPregunta, EstadoPregunta decision) {
         badgeEstadoActual.mostrar(decision);
         habilitarAcciones(false);
-        JOptionPane.showMessageDialog(this,
-                "Pregunta " + preguntaCargada.getId() + " marcada como: " + decision,
+        JOptionPane.showMessageDialog(this, "Pregunta " + idPregunta + " marcada como: " + decision,
                 "Revisión registrada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void mostrarError(String titulo, String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, titulo, JOptionPane.ERROR_MESSAGE);
     }
 
     private void habilitarAcciones(boolean habilitado) {
