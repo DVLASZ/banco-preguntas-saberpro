@@ -5,8 +5,7 @@ Administrador elige al menos un revisor por pregunta, la pregunta pasa a
 **En revisión** y el sistema avisa a cada revisor por correo (simulado, ya que
 el proyecto permite simular las integraciones externas).
 
-> Estado: en desarrollo. Las clases ya tienen su contrato definido y las
-> pruebas de cada regla están descritas; falta implementarlas.
+> Estado: implementado.
 
 ## Historia de usuario
 
@@ -45,6 +44,30 @@ de modo que el correo simulado se puede cambiar por uno real sin tocar la lógic
 ```bash
 mvn test -pl modulo-revision -am
 ```
+
+## Cómo probarlo
+
+```bash
+mvn -q package -DskipTests
+java -jar app/target/banco-preguntas-saberpro.jar
+```
+
+Usuarios (contraseña `Saber2026!` para todos): `autor1`, `revisor1`, `admin1`.
+Las preguntas viven en memoria: se pierden al cerrar la app. Para cambiar de
+usuario no reinicies: cierra la ventana principal del rol y vuelve el login.
+
+1. `autor1` → en "Mis preguntas" abre **P-001** (Borrador) → **Enviar a
+   revisión** → confirma. Queda "Pendiente de revisión".
+2. `admin1` → ventana "Asignación de Revisores": aparecen **P-001 y P-003**
+   con su autor `autor1` (criterio 1).
+3. Elige una pregunta y pulsa **Asignar** sin marcar a nadie → sale
+   "Debe seleccionar al menos un revisor" (criterio 3).
+4. Elige P-001, marca a `revisor1` y pulsa **Asignar** → mensaje de éxito, el
+   "correo" sale en la consola y P-001 ya no aparece como pendiente
+   (criterio 2).
+5. `revisor1` → ve solo P-001 y puede aprobarla o rechazarla.
+6. El criterio 4 (el autor no se ofrece como revisor) lo cubre la prueba
+   `revisoresDisponibles_noIncluyeAlAutorDeLaPregunta`.
 
 ## Autores
 

@@ -18,6 +18,18 @@ public class AsignacionRevision {
     private final LocalDateTime fecha;
 
     public AsignacionRevision(String idPregunta, String usuarioRevisor, String asignadoPor, LocalDateTime fecha) {
+        if (idPregunta == null || idPregunta.isBlank()) {
+            throw new IllegalArgumentException("El id de la pregunta es obligatorio");
+        }
+        if (usuarioRevisor == null || usuarioRevisor.isBlank()) {
+            throw new IllegalArgumentException("El revisor es obligatorio");
+        }
+        if (asignadoPor == null || asignadoPor.isBlank()) {
+            throw new IllegalArgumentException("Quien asigna es obligatorio");
+        }
+        if (fecha == null) {
+            throw new IllegalArgumentException("La fecha de la asignación es obligatoria");
+        }
         this.idPregunta = idPregunta;
         this.usuarioRevisor = usuarioRevisor;
         this.asignadoPor = asignadoPor;

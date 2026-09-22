@@ -36,14 +36,6 @@ public class RevisionController {
     public void cargarPregunta(String id) {
         preguntaCargada = modelo.obtenerPregunta(id);
 
-        // Al tomar una pregunta pendiente para revisarla, pasa
-        // automáticamente a "En revisión" (RF-15): el solo hecho de que
-        // el Revisor la abra ya inicia su evaluación.
-        if (preguntaCargada.getEstado() == EstadoPregunta.PENDIENTE_REVISION) {
-            modelo.cambiarEstado(preguntaCargada.getId(), EstadoPregunta.EN_REVISION);
-            preguntaCargada = modelo.obtenerPregunta(preguntaCargada.getId());
-        }
-
         // Solo una pregunta en revisión se puede aprobar o rechazar (RF-15).
         vista.mostrarPregunta(preguntaCargada, preguntaCargada.getEstado() == EstadoPregunta.EN_REVISION);
     }

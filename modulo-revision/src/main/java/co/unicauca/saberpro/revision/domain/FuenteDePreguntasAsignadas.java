@@ -22,6 +22,7 @@ public class FuenteDePreguntasAsignadas implements FuenteDePreguntasParaRevisar 
 
     @Override
     public List<Question> paraRevisor(String usuarioRevisor) {
-        throw new UnsupportedOperationException("HU-04: implementar FuenteDePreguntasAsignadas");
+        return servicio.preguntasAsignadas(usuarioRevisor);
     }
 }
+
