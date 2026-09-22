@@ -5,7 +5,6 @@ import co.unicauca.saberpro.microkernel.presentation.GUIMicrokernel;
 import co.unicauca.saberpro.preguntas.access.QuestionImplRepository;
 import co.unicauca.saberpro.preguntas.domain.QuestionRepository;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
-import co.unicauca.saberpro.preguntas.domain.TodasLasPreguntasEnRevision;
 import co.unicauca.saberpro.preguntas.presentation.GUIObserver1;
 import co.unicauca.saberpro.preguntas.presentation.GUIObserver2;
 import co.unicauca.saberpro.preguntas.presentation.GUIQuestions;
@@ -19,6 +18,7 @@ import co.unicauca.saberpro.revision.access.AsignacionRevisionImplRepository;
 import co.unicauca.saberpro.revision.access.NotificadorCorreoSimulado;
 import co.unicauca.saberpro.revision.domain.AsignacionRevisionService;
 import co.unicauca.saberpro.revision.domain.DirectorioRevisoresDeUsuarios;
+import co.unicauca.saberpro.revision.domain.FuenteDePreguntasAsignadas;
 import co.unicauca.saberpro.revision.presentation.GUIAsignacionRevisores;
 import co.unicauca.saberpro.usuarios.domain.Role;
 import co.unicauca.saberpro.usuarios.domain.User;
@@ -101,7 +101,7 @@ public class MainApp {
                 case AUTOR_PREGUNTAS -> List.of(new GUIQuestions(questionService, user.getUsername()),
                         new GUIMicrokernel(questionMicrokernel));
                 case REVISOR -> List.of(new GUIRevisor(questionService,
-                        new TodasLasPreguntasEnRevision(questionService), user.getUsername()));
+                        new FuenteDePreguntasAsignadas(asignacionService), user.getUsername()));
                 case DOCENTE -> List.of(new GUIDocente(simulacroService));
                 case ESTUDIANTE -> List.of(new GUIEstudiante(user, simulacroService));
                 case ADMINISTRADOR -> List.of(new DashboardFrame(user, menuProviderRegistry),

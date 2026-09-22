@@ -73,12 +73,12 @@ class RevisionControllerTest {
     }
 
     @Test
-    void cargarUnaPreguntaPendiente_laPasaAEnRevisionYDejaDecidir() {
+    void cargarUnaPreguntaPendiente_noLaCambiaDeEstadoYNoDejaDecidir() {
         controlador.cargarPregunta("P-003");
 
-        assertEquals(EstadoPregunta.EN_REVISION, modelo.obtenerPregunta("P-003").getEstado());
-        assertEquals(EstadoPregunta.EN_REVISION, vista.mostrada.getEstado());
-        assertTrue(vista.puedeDecidir);
+        assertEquals(EstadoPregunta.PENDIENTE_REVISION, modelo.obtenerPregunta("P-003").getEstado());
+        assertEquals(EstadoPregunta.PENDIENTE_REVISION, vista.mostrada.getEstado());
+        assertFalse(vista.puedeDecidir);
     }
 
     @Test
