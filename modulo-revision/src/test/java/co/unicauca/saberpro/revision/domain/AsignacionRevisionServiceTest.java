@@ -24,11 +24,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * Pruebas de {@link AsignacionRevisionService}: una por regla de la HU-04.
- *
- * <p>TODO(HU-04): quitar {@code @Disabled} y escribir cada prueba (Given / When /
- * Then) con Mockito para {@code QuestionService}, {@code DirectorioRevisores},
- * {@code AsignacionRevisionRepository} y {@code NotificadorAsignacion}. Mira
- * {@code QuestionServiceTest} en modulo-preguntas como ejemplo de estilo.
  */
 
 @ExtendWith(MockitoExtension.class)

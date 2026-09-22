@@ -10,9 +10,6 @@ import java.util.List;
  * Implementación en memoria de {@link AsignacionRevisionRepository}, igual que
  * {@code QuestionImplRepository} en modulo-preguntas (una estructura simple; si
  * queda tiempo se puede pasar a SQLite siguiendo el patrón de modulo-usuarios).
- *
- * <p>TODO(HU-04): guardar las asignaciones en una lista y filtrarlas por
- * pregunta o por revisor.
  */
 public class AsignacionRevisionImplRepository implements AsignacionRevisionRepository {
 

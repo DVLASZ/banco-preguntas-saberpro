@@ -34,7 +34,7 @@ banco-preguntas-saberpro/          (pom padre — packaging "pom")
 ├── modulo-preguntas/                Banco de preguntas: redacción, listado y ciclo de vida RF-14 (depende de: nada)
 ├── modulo-simulacros/               Generación y presentación de simulacros HU-12 a HU-14 (depende de: modulo-preguntas, modulo-usuarios)
 ├── modulo-microkernel/              Generación de preguntas por plugins (Taller 5) (depende de: modulo-preguntas)
-├── modulo-revision/                 Asignación de revisores a preguntas pendientes, HU-04 (depende de: modulo-preguntas, modulo-usuarios)
+├── modulo-revision/                 Asignación de revisores a preguntas pendientes, HU-04 (implementado) (depende de: modulo-preguntas, modulo-usuarios)
 ├── modulo-api-rest/                 Microservicio REST con Spring Boot + JPA (Taller 6) (depende de: modulo-preguntas)
 └── app/                             Composition root: arma los módulos y arranca la app de escritorio (depende de: usuarios, preguntas, simulacros, microkernel y revisión)
 ```
@@ -75,7 +75,7 @@ README de cada módulo para el detalle de sus capas.
 Requiere Java 17+ y Maven.
 
 ```bash
-mvn test      # ejecuta las 310 pruebas de los módulos con lógica de negocio
+mvn test      # ejecuta las 330 pruebas de los módulos con lógica de negocio
 mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las dependencias)
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
@@ -99,7 +99,7 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 | `revisor1` | Revisor | Evaluar y decidir (Aprobar/Rechazar) |
 | `docente1` | Docente | Generar simulacros |
 | `estudiante1` | Estudiante | Presentar simulacros |
-| `admin1` | Administrador | Tablero, estadísticas/gráfica del banco y asignación de revisores (HU-04, en desarrollo) |
+| `admin1` | Administrador | Tablero, estadísticas/gráfica del banco y asignación de revisores (HU-04) |
 
 Al cerrar la ventana principal de un rol vuelve el login, para cambiar de usuario sin
 reiniciar (las preguntas viven en memoria mientras la aplicación esté abierta).
@@ -113,7 +113,7 @@ El primer corte implementa cuatro historias de usuario de alto valor:
 | HU-01 | El Autor crea una pregunta de selección múltiple con validación estructural | Implementada |
 | HU-02 | El Autor cambia el estado de "Borrador" a "Pendiente de revisión" | Implementada |
 | HU-03 | El Autor lista sus preguntas con paginación y filtros | Implementada |
-| HU-04 | El Administrador asigna revisores a las preguntas pendientes | En desarrollo (`modulo-revision`) |
+| HU-04 | El Administrador asigna revisores a las preguntas pendientes | Implementada |
 
 Las HU-01 a HU-04 son las del backlog del equipo en Jira; los códigos RF y las
 historias HU03 (validación estructural) o HU-12 a HU-17 que aparecen más abajo son
@@ -153,7 +153,12 @@ los del documento del proyecto de curso.
   (`RedaccionPreguntaVista`, `RevisionVista`); las decisiones las toman los
   controladores (`RedaccionPreguntaController`, `RevisionController`), que se
   prueban sin ventana usando una vista falsa.
-- Revisión por un Revisor: aprobar/rechazar preguntas En revisión.
+- Asignación de revisores por el Administrador (HU-04): al menos un revisor por
+  pregunta pendiente, la pregunta pasa a "En revisión" y cada revisor se notifica
+  por correo (simulado); el autor de la pregunta no se ofrece como su propio
+  revisor — ver `modulo-revision`.
+- Revisión por un Revisor: aprobar/rechazar solo las preguntas que se le
+  asignaron.
 - Generación de simulacros por el Docente filtrando por competencia,
   tema y dificultad (HU-12), usando solo preguntas publicadas.
 - Presentación de un simulacro por el Estudiante con cronómetro y
@@ -174,8 +179,6 @@ los del documento del proyecto de curso.
 **Pendiente:**
 - Persistencia real de preguntas y simulacros (hoy son en memoria; solo
   usuarios usa SQLite).
-- Asignación de uno o más revisores por pregunta con notificación simulada
-  por correo (HU-04, en desarrollo en `modulo-revision`).
 - Historial de revisiones con observaciones (HU-10/HU-11) — hoy el Revisor
   decide sin dejar un registro de sus observaciones más allá del estado.
 - Búsqueda de preguntas para todos los roles (HU-05) — hoy la búsqueda

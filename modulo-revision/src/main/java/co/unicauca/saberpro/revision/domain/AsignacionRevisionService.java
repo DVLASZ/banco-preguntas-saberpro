@@ -14,8 +14,7 @@ import java.util.Set;
  * Servicio de la HU-04: el Administrador asigna uno o más revisores a las
  * preguntas en estado Pendiente de revisión.
  *
- * <p>TODO(HU-04): implementar cada método siguiendo el contrato de su Javadoc.
- * Los cambios de estado de la pregunta se hacen con
+ * <p>Los cambios de estado de la pregunta se hacen con
  * {@link QuestionService#cambiarEstado}, que ya valida las transiciones (RF-15).
  */
 public class AsignacionRevisionService {

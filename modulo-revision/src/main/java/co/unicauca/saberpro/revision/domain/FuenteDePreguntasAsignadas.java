@@ -9,8 +9,6 @@ import java.util.List;
  * Fuente de preguntas del Revisor una vez existe la asignación (HU-04): solo
  * las que el Administrador le asignó. Reemplaza a
  * {@code TodasLasPreguntasEnRevision} en {@code MainApp} cuando esté lista.
- *
- * <p>TODO(HU-04): devolver {@code servicio.preguntasAsignadas(usuarioRevisor)}.
  */
 public class FuenteDePreguntasAsignadas implements FuenteDePreguntasParaRevisar {
 

@@ -5,10 +5,6 @@ import java.time.LocalDateTime;
 /**
  * Asignación de un revisor a una pregunta (HU-04, RF-16): quién la revisa,
  * quién la asignó y cuándo.
- *
- * <p>TODO(HU-04): en el constructor, validar que ningún campo sea nulo o vacío
- * y lanzar {@link IllegalArgumentException} con un mensaje claro (sigue el
- * estilo de {@code Question} en modulo-preguntas).
  */
 public class AsignacionRevision {
 

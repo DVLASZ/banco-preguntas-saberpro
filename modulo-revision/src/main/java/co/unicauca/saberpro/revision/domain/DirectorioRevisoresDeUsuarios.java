@@ -9,10 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 /**
  * Adaptador que obtiene los revisores del módulo de usuarios.
- *
- * <p>TODO(HU-04): con {@code userService.listUsers()} devolver, como
- * {@link Revisor}, los usuarios cuyo rol sea {@code Role.REVISOR} y cuyo estado
- * sea {@code UserStatus.ACTIVO} (usa {@code getUsername()} y {@code getFullName()}).
  */
 public class DirectorioRevisoresDeUsuarios implements DirectorioRevisores {
 
