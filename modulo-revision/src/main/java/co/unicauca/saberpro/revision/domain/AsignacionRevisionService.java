@@ -1,9 +1,14 @@
 package co.unicauca.saberpro.revision.domain;
 
+import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Question;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Servicio de la HU-04: el Administrador asigna uno o más revisores a las
@@ -34,7 +39,13 @@ public class AsignacionRevisionService {
      * ({@link Question#getAutor()}).
      */
     public List<Question> preguntasPendientes() {
-        throw new UnsupportedOperationException("HU-04: implementar preguntasPendientes");
+        List<Question> resultado = new ArrayList<>();
+        for (Question pregunta : questionService.listarPreguntas()) {
+            if (pregunta.getEstado() == EstadoPregunta.PENDIENTE_REVISION) {
+                resultado.add(pregunta);
+            }
+        }
+        return resultado;
     }
 
     /**
@@ -44,7 +55,14 @@ public class AsignacionRevisionService {
      * si la pantalla lo quiere mostrar deshabilitado).
      */
     public List<Revisor> revisoresDisponibles(String idPregunta) {
-        throw new UnsupportedOperationException("HU-04: implementar revisoresDisponibles");
+        Question pregunta = questionService.obtenerPregunta(idPregunta);
+        List<Revisor> disponibles = new ArrayList<>();
+        for (Revisor revisor : directorio.revisoresActivos()) {
+            if (!revisor.usuario().equals(pregunta.getAutor())) {
+                disponibles.add(revisor);
+            }
+        }
+        return disponibles;
     }
 
     /**
@@ -58,11 +76,56 @@ public class AsignacionRevisionService {
      * y notifica a cada revisor con el {@link NotificadorAsignacion}.
      */
     public void asignarRevisores(String idPregunta, List<String> usuariosRevisores, String administrador) {
-        throw new UnsupportedOperationException("HU-04: implementar asignarRevisores");
+        if (usuariosRevisores == null || usuariosRevisores.isEmpty()) {
+            throw new IllegalArgumentException("Debe seleccionar al menos un revisor");
+        }
+        Question pregunta = questionService.obtenerPregunta(idPregunta);
+        if (pregunta.getEstado() != EstadoPregunta.PENDIENTE_REVISION) {
+            throw new IllegalStateException("La pregunta " + idPregunta + " no está pendiente de revisión");
+        }
+        for (String usuario : usuariosRevisores) {
+            if (usuario.equals(pregunta.getAutor())) {
+                throw new IllegalArgumentException("El autor de la pregunta no puede ser su revisor");
+            }
+        }
+        List<Revisor> activos = directorio.revisoresActivos();
+        for (String usuario : usuariosRevisores) {
+            boolean esRevisorActivo = false;
+            for (Revisor revisor : activos) {
+                if (revisor.usuario().equals(usuario)) {
+                    esRevisorActivo = true;
+                    break;
+                }
+            }
+            if (!esRevisorActivo) {
+                throw new IllegalArgumentException("El usuario " + usuario + " no es un revisor activo");
+            }
+        }
+
+        for (String usuario : usuariosRevisores) {
+            repository.guardar(new AsignacionRevision(idPregunta, usuario, administrador, LocalDateTime.now()));
+        }
+        questionService.cambiarEstado(idPregunta, EstadoPregunta.EN_REVISION);
+        for (String usuario : usuariosRevisores) {
+            for (Revisor revisor : activos) {
+                if (revisor.usuario().equals(usuario)) {
+                    notificador.notificar(revisor, pregunta);
+                    break;
+                }
+            }
+        }
     }
 
     /** Preguntas que tiene asignadas un revisor y que siguen En revisión (para su ventana de revisión). */
     public List<Question> preguntasAsignadas(String usuarioRevisor) {
-        throw new UnsupportedOperationException("HU-04: implementar preguntasAsignadas");
+        Set<String> idsVistos = new LinkedHashSet<>();
+        List<Question> resultado = new ArrayList<>();
+        for (AsignacionRevision asignacion : repository.obtenerPorRevisor(usuarioRevisor)) {
+            Question pregunta = questionService.obtenerPregunta(asignacion.getIdPregunta());
+            if (pregunta.getEstado() == EstadoPregunta.EN_REVISION && idsVistos.add(pregunta.getId())) {
+                resultado.add(pregunta);
+            }
+        }
+        return resultado;
     }
 }

@@ -3,6 +3,7 @@ package co.unicauca.saberpro.revision.access;
 import co.unicauca.saberpro.revision.domain.AsignacionRevision;
 import co.unicauca.saberpro.revision.domain.AsignacionRevisionRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,18 +16,32 @@ import java.util.List;
  */
 public class AsignacionRevisionImplRepository implements AsignacionRevisionRepository {
 
+    private final List<AsignacionRevision> asignaciones = new ArrayList<>();
+
     @Override
     public void guardar(AsignacionRevision asignacion) {
-        throw new UnsupportedOperationException("HU-04: implementar guardar");
+        asignaciones.add(asignacion);
     }
 
     @Override
     public List<AsignacionRevision> obtenerPorPregunta(String idPregunta) {
-        throw new UnsupportedOperationException("HU-04: implementar obtenerPorPregunta");
+        List<AsignacionRevision> resultado = new ArrayList<>();
+        for (AsignacionRevision asignacion : asignaciones) {
+            if (asignacion.getIdPregunta().equals(idPregunta)) {
+                resultado.add(asignacion);
+            }
+        }
+        return resultado;
     }
 
     @Override
     public List<AsignacionRevision> obtenerPorRevisor(String usuarioRevisor) {
-        throw new UnsupportedOperationException("HU-04: implementar obtenerPorRevisor");
+        List<AsignacionRevision> resultado = new ArrayList<>();
+        for (AsignacionRevision asignacion : asignaciones) {
+            if (asignacion.getUsuarioRevisor().equals(usuarioRevisor)) {
+                resultado.add(asignacion);
+            }
+        }
+        return resultado;
     }
 }
