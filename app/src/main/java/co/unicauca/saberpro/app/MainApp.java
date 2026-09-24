@@ -40,6 +40,7 @@ import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -71,8 +72,10 @@ public class MainApp {
             // todo el banco de preguntas (HU-17): eso es competencia del
             // Administrador, no de todos los roles — por eso se crean y se
             // suscriben como observadoras desde ya (para que no se pierdan
-            // notificaciones), pero solo se muestran más abajo si el rol
-            // autenticado es ADMINISTRADOR, en vez de abrirse siempre.
+            // notificaciones mientras están cerradas), pero no se muestran
+            // automaticamente al iniciar sesion: el Administrador las abre
+            // el mismo, con doble clic en "Ver reportes y estadisticas"
+            // desde su tablero (ver accionesAdministrador mas abajo).
             GUIObserver1 vistaEstadisticas = new GUIObserver1(questionService);
             GUIObserver2 vistaGrafica = new GUIObserver2(questionService);
             questionService.agregarObservador(vistaEstadisticas);
@@ -93,6 +96,17 @@ public class MainApp {
                     new DirectorioRevisoresDeUsuarios(userService), new AsignacionRevisionImplRepository(),
                     new NotificadorCorreoSimulado());
 
+            // Que hace cada opcion del tablero del Administrador (RF-17): solo
+            // "Ver reportes y estadisticas" tiene vista propia por ahora; las
+            // demas opciones lo avisan al seleccionarlas (ver DashboardFrame).
+            Map<String, Runnable> accionesAdministrador = Map.of(
+                    "Ver reportes y estadisticas", () -> {
+                        vistaEstadisticas.setVisible(true);
+                        vistaEstadisticas.toFront();
+                        vistaGrafica.setVisible(true);
+                        vistaGrafica.toFront();
+                    });
+
             // --- El puente entre ambos: qué ventanas abrir según el rol ---
             // La primera ventana de la lista es la principal: al cerrarla se
             // cierran las demás y vuelve el login, para poder cambiar de rol
@@ -104,9 +118,9 @@ public class MainApp {
                         new FuenteDePreguntasAsignadas(asignacionService), user.getUsername()));
                 case DOCENTE -> List.of(new GUIDocente(simulacroService));
                 case ESTUDIANTE -> List.of(new GUIEstudiante(user, simulacroService));
-                case ADMINISTRADOR -> List.of(new DashboardFrame(user, menuProviderRegistry),
-                        new GUIAsignacionRevisores(asignacionService, user.getUsername()), vistaEstadisticas, vistaGrafica);
-                default -> List.of(new DashboardFrame(user, menuProviderRegistry));
+                case ADMINISTRADOR -> List.of(new DashboardFrame(user, menuProviderRegistry, accionesAdministrador),
+                        new GUIAsignacionRevisores(asignacionService, user.getUsername()));
+                default -> List.of(new DashboardFrame(user, menuProviderRegistry, Map.of()));
             });
         });
     }
