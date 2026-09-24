@@ -171,6 +171,12 @@ el repositorio [`ingenieria-software-2`](https://github.com/DVLASZ/ingenieria-so
   en ese repositorio como entregable del laboratorio, mientras este
   repositorio es donde el proyecto sigue avanzando.
 
+## Documentación
+
+La documentación de arquitectura (historias de usuario, prototipos, Sprint 1,
+modificabilidad, C4 y UML, patrones de diseño y pruebas) está en la carpeta
+[`docs/`](docs/README.md).
+
 ## Autores
 
 - Edward Dávila — edwarddavila@unicauca.edu.co
