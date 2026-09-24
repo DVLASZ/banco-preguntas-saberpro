@@ -96,17 +96,6 @@ public class MainApp {
                     new DirectorioRevisoresDeUsuarios(userService), new AsignacionRevisionImplRepository(),
                     new NotificadorCorreoSimulado());
 
-            // Que hace cada opcion del tablero del Administrador (RF-17): solo
-            // "Ver reportes y estadisticas" tiene vista propia por ahora; las
-            // demas opciones lo avisan al seleccionarlas (ver DashboardFrame).
-            Map<String, Runnable> accionesAdministrador = Map.of(
-                    "Ver reportes y estadisticas", () -> {
-                        vistaEstadisticas.setVisible(true);
-                        vistaEstadisticas.toFront();
-                        vistaGrafica.setVisible(true);
-                        vistaGrafica.toFront();
-                    });
-
             // --- El puente entre ambos: qué ventanas abrir según el rol ---
             // La primera ventana de la lista es la principal: al cerrarla se
             // cierran las demás y vuelve el login, para poder cambiar de rol
@@ -118,8 +107,27 @@ public class MainApp {
                         new FuenteDePreguntasAsignadas(asignacionService), user.getUsername()));
                 case DOCENTE -> List.of(new GUIDocente(simulacroService));
                 case ESTUDIANTE -> List.of(new GUIEstudiante(user, simulacroService));
-                case ADMINISTRADOR -> List.of(new DashboardFrame(user, menuProviderRegistry, accionesAdministrador),
-                        new GUIAsignacionRevisores(asignacionService, user.getUsername()));
+                case ADMINISTRADOR -> {
+                    // Que hace cada opcion del tablero (RF-17): "Asignar revisores"
+                    // (HU-04) y "Ver reportes y estadisticas" tienen vista propia,
+                    // pero ninguna se abre sola — solo al pedirla el Administrador
+                    // (ver DashboardFrame); las demas opciones avisan que aun no
+                    // tienen vista propia.
+                    GUIAsignacionRevisores vistaAsignacion =
+                            new GUIAsignacionRevisores(asignacionService, user.getUsername());
+                    Map<String, Runnable> accionesAdministrador = Map.of(
+                            "Asignar revisores", () -> {
+                                vistaAsignacion.setVisible(true);
+                                vistaAsignacion.toFront();
+                            },
+                            "Ver reportes y estadisticas", () -> {
+                                vistaEstadisticas.setVisible(true);
+                                vistaEstadisticas.toFront();
+                                vistaGrafica.setVisible(true);
+                                vistaGrafica.toFront();
+                            });
+                    yield List.of(new DashboardFrame(user, menuProviderRegistry, accionesAdministrador));
+                }
                 default -> List.of(new DashboardFrame(user, menuProviderRegistry, Map.of()));
             });
         });
