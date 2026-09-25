@@ -121,9 +121,8 @@ los del documento del proyecto de curso.
 
 ## Flujo de trabajo y ramas
 
-- `main`: entregas estables. Hoy contiene el Taller 6.
-- `primer-corte`: integración de todo el primer corte. Se fusiona a `main` cuando el
-  primer corte está completo y con las pruebas en verde.
+- `main`: entregas estables. Contiene el primer corte del proyecto de curso.
+- `primer-corte`: integración de todo el primer corte, ya fusionada a `main`.
 - Ramas de trabajo (`hu04-asignacion-revisores`, `docs-arquitectura`, …): cada
   integrante trabaja en la suya, con su propia identidad de Git, y la integra a
   `primer-corte` con un Pull Request. Se fusionan con "Create a merge commit" o
