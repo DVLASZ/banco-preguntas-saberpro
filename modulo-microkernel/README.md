@@ -63,9 +63,9 @@ generar la pregunta a través del microkernel.
 
 ## Pruebas
 
-34 pruebas (JUnit 5 + Mockito): los 4 filtros, el pipeline, los 3
-plugins y el núcleo (incluida la carga real de los plugins por
-Reflexión).
+39 pruebas (JUnit 5 + Mockito): los 4 filtros, el pipeline, la solicitud de
+generación, la clase base de los plugins (Template Method), los 3 plugins y
+el núcleo (incluida la carga real de los plugins por Reflexión).
 
 ```bash
 mvn test -pl modulo-microkernel -am

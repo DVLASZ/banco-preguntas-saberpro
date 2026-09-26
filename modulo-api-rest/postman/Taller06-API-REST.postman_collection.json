@@ -99,7 +99,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Patrón Strategy\",\n  \"enunciado\": \"¿Qué permite el patrón Strategy?\",\n  \"opcionA\": \"Intercambiar algoritmos en tiempo de ejecución\",\n  \"opcionB\": \"Crear objetos sin exponer su clase concreta\",\n  \"opcionC\": \"Recorrer una colección sin exponer su estructura\",\n  \"opcionD\": \"Notificar cambios a varios observadores\",\n  \"respuestaCorrecta\": \"A\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"dificultad\": \"INTERMEDIO\"\n}",
+          "raw": "{\n  \"nombre\": \"Patrón Strategy\",\n  \"contexto\": \"Un sistema de envíos debe calcular el costo de forma distinta según el país y se quiere agregar nuevas formas de cálculo sin modificar el código existente.\",\n  \"enunciado\": \"¿Qué permite el patrón Strategy?\",\n  \"opcionA\": \"Intercambiar algoritmos en tiempo de ejecución\",\n  \"opcionB\": \"Crear objetos sin exponer su clase concreta\",\n  \"opcionC\": \"Recorrer una colección sin exponer su estructura\",\n  \"opcionD\": \"Notificar cambios a varios observadores\",\n  \"respuestaCorrecta\": \"A\",\n  \"justificacion\": \"Strategy encapsula algoritmos intercambiables y permite elegirlos en tiempo de ejecución.\",\n  \"bibliografia\": \"Gamma, E., Helm, R., Johnson, R. y Vlissides, J. (1994). Design Patterns. Addison-Wesley.\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"subtema\": \"Strategy\",\n  \"dificultad\": \"INTERMEDIO\",\n  \"autor\": \"autor1\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -142,7 +142,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Patrón Strategy (editado)\",\n  \"enunciado\": \"¿Qué permite el patrón Strategy?\",\n  \"opcionA\": \"Intercambiar algoritmos en tiempo de ejecución\",\n  \"opcionB\": \"Crear objetos sin exponer su clase concreta\",\n  \"opcionC\": \"Recorrer una colección sin exponer su estructura\",\n  \"opcionD\": \"Notificar cambios a varios observadores\",\n  \"respuestaCorrecta\": \"A\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"dificultad\": \"AVANZADO\"\n}",
+          "raw": "{\n  \"nombre\": \"Patrón Strategy (editado)\",\n  \"contexto\": \"Un sistema de envíos debe calcular el costo de forma distinta según el país y se quiere agregar nuevas formas de cálculo sin modificar el código existente.\",\n  \"enunciado\": \"¿Qué permite el patrón Strategy?\",\n  \"opcionA\": \"Intercambiar algoritmos en tiempo de ejecución\",\n  \"opcionB\": \"Crear objetos sin exponer su clase concreta\",\n  \"opcionC\": \"Recorrer una colección sin exponer su estructura\",\n  \"opcionD\": \"Notificar cambios a varios observadores\",\n  \"respuestaCorrecta\": \"A\",\n  \"justificacion\": \"Strategy encapsula algoritmos intercambiables y permite elegirlos en tiempo de ejecución.\",\n  \"bibliografia\": \"Gamma, E., Helm, R., Johnson, R. y Vlissides, J. (1994). Design Patterns. Addison-Wesley.\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"subtema\": \"Strategy\",\n  \"dificultad\": \"AVANZADO\",\n  \"autor\": \"autor1\"\n}",
           "options": {
             "raw": {
               "language": "json"

@@ -14,6 +14,7 @@ public class AdministradorMenuProvider implements IMenuProvider {
     @Override
     public List<String> getMenuOptions() {
         return List.of(
+                "Asignar revisores",
                 "Gestionar usuarios",
                 "Ver banco de preguntas",
                 "Ver reportes y estadisticas",

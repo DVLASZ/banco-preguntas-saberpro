@@ -78,4 +78,58 @@ class QuestionTest {
 
         assertThrows(IllegalArgumentException.class, () -> pregunta.setEstado(null));
     }
+
+    @Test
+    void constructorBasico_dejaVacioElContenidoExtendidoYElAutor() {
+        Question pregunta = preguntaValida('A', EstadoPregunta.BORRADOR);
+
+        assertEquals("", pregunta.getContexto());
+        assertEquals("", pregunta.getJustificacion());
+        assertEquals("", pregunta.getBibliografia());
+        assertEquals("", pregunta.getSubtema());
+        assertEquals("", pregunta.getAutor());
+    }
+
+    @Test
+    void builder_construyeLaPreguntaConTodosSusCampos() {
+        Question pregunta = Question.builder().id("P-050").nombre("Nombre").contexto("Contexto")
+                .enunciado("¿Pregunta?").opciones(opciones).respuestaCorrecta('c')
+                .justificacion("Porque sí").bibliografia("Libro").estado(EstadoPregunta.PENDIENTE_REVISION)
+                .competencia(Competencia.INGLES).tema("Tema").subtema("Subtema")
+                .dificultad(Dificultad.AVANZADO).autor("autor1").build();
+
+        assertEquals("P-050", pregunta.getId());
+        assertEquals("Contexto", pregunta.getContexto());
+        assertEquals("¿Pregunta?", pregunta.getEnunciado());
+        assertEquals('C', pregunta.getRespuestaCorrecta());
+        assertEquals("Porque sí", pregunta.getJustificacion());
+        assertEquals("Libro", pregunta.getBibliografia());
+        assertEquals("Subtema", pregunta.getSubtema());
+        assertEquals("autor1", pregunta.getAutor());
+        assertEquals(EstadoPregunta.PENDIENTE_REVISION, pregunta.getEstado());
+    }
+
+    @Test
+    void builder_aplicaLasMismasInvariantesQueElConstructor() {
+        Question.Builder sinEnunciado = Question.builder().id("P-050").nombre("n").opciones(opciones)
+                .respuestaCorrecta('A').estado(EstadoPregunta.BORRADOR).competencia(Competencia.INGLES)
+                .tema("t").dificultad(Dificultad.BASICO);
+
+        assertThrows(IllegalArgumentException.class, sinEnunciado::build);
+    }
+
+    @Test
+    void builder_tratacomoVaciosLosTextosOpcionalesNulos() {
+        Question pregunta = Question.builder().id("P-050").nombre("n").enunciado("¿e?").opciones(opciones)
+                .respuestaCorrecta('A').estado(EstadoPregunta.BORRADOR).competencia(Competencia.INGLES)
+                .tema("t").dificultad(Dificultad.BASICO).contexto(null).autor(null).build();
+
+        assertEquals("", pregunta.getContexto());
+        assertEquals("", pregunta.getAutor());
+    }
+
+    @Test
+    void toString_muestraIdYNombre() {
+        assertEquals("P-001 - n", preguntaValida('A', EstadoPregunta.BORRADOR).toString());
+    }
 }

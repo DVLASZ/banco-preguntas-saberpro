@@ -3,6 +3,7 @@ package co.unicauca.saberpro.api.service;
 import co.unicauca.saberpro.api.dto.QuestionRequest;
 import co.unicauca.saberpro.api.dto.QuestionResponse;
 import co.unicauca.saberpro.preguntas.domain.Competencia;
+import co.unicauca.saberpro.preguntas.domain.ContenidoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Dificultad;
 import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Question;
@@ -36,14 +37,16 @@ class QuestionApiServiceImplTest {
     private QuestionApiServiceImpl service;
 
     private static Question pregunta(String id) {
-        return new Question(id, "Nombre " + id, "Enunciado " + id,
-                new QuestionDistractors("A1", "B1", "C1", "D1"),
-                'B', EstadoPregunta.PENDIENTE_REVISION, Competencia.INGLES, "Tema", Dificultad.BASICO);
+        return Question.builder().id(id).nombre("Nombre " + id).contexto("Contexto " + id)
+                .enunciado("¿Enunciado " + id + "?").opciones(new QuestionDistractors("A1", "B1", "C1", "D1"))
+                .respuestaCorrecta('B').justificacion("Porque sí").bibliografia("Libro")
+                .estado(EstadoPregunta.BORRADOR).competencia(Competencia.INGLES).tema("Tema").subtema("Subtema")
+                .dificultad(Dificultad.BASICO).autor("autor1").build();
     }
 
-    private static QuestionRequest solicitudConEspacios() {
-        return new QuestionRequest("  Nombre  ", " Enunciado ", " A1 ", " B1 ", " C1 ", " D1 ",
-                " b ", Competencia.INGLES, "  Tema ", Dificultad.BASICO);
+    private static QuestionRequest solicitud() {
+        return new QuestionRequest("Nombre", "Contexto", "¿Enunciado?", "Aa1", "Bb2", "Cc3", "Dd4", "b",
+                "Justificación", "Libro", Competencia.INGLES, "Tema", "Subtema", Dificultad.BASICO, "autor1");
     }
 
     @Test
@@ -64,7 +67,9 @@ class QuestionApiServiceImplTest {
         QuestionResponse respuesta = service.findById("P-001");
 
         assertEquals("Nombre P-001", respuesta.nombre());
+        assertEquals("Contexto P-001", respuesta.contexto());
         assertEquals("B", respuesta.respuestaCorrecta());
+        assertEquals("autor1", respuesta.autor());
     }
 
     @Test
@@ -75,17 +80,16 @@ class QuestionApiServiceImplTest {
     }
 
     @Test
-    void saveLimpiaEspaciosYDelegaLaCreacionAlDominio() {
-        when(questionService.crearPregunta(any(), any(), any(), eq('b'), any(), any(), any()))
-                .thenReturn(pregunta("P-013"));
+    void saveCreaUnBorradorATravesDelDominioConElAutorDeLaSolicitud() {
+        when(questionService.crearBorrador(any(ContenidoPregunta.class), eq("autor1"))).thenReturn(pregunta("P-013"));
 
-        QuestionResponse respuesta = service.save(solicitudConEspacios());
+        QuestionResponse respuesta = service.save(solicitud());
 
-        ArgumentCaptor<QuestionDistractors> opciones = ArgumentCaptor.forClass(QuestionDistractors.class);
-        verify(questionService).crearPregunta(eq("Nombre"), eq("Enunciado"), opciones.capture(), eq('b'),
-                eq(Competencia.INGLES), eq("Tema"), eq(Dificultad.BASICO));
-        assertEquals("A1", opciones.getValue().getOpcionA());
-        assertEquals("D1", opciones.getValue().getOpcionD());
+        ArgumentCaptor<ContenidoPregunta> contenido = ArgumentCaptor.forClass(ContenidoPregunta.class);
+        verify(questionService).crearBorrador(contenido.capture(), eq("autor1"));
+        assertEquals("Contexto", contenido.getValue().contexto());
+        assertEquals("Dd4", contenido.getValue().opcionD());
+        assertEquals("Subtema", contenido.getValue().subtema());
         assertEquals("P-013", respuesta.id());
     }
 
@@ -93,20 +97,18 @@ class QuestionApiServiceImplTest {
     void updateDelegaLaActualizacionYDevuelveLaPreguntaGuardada() {
         when(questionService.obtenerPregunta("P-001")).thenReturn(pregunta("P-001"));
 
-        QuestionResponse respuesta = service.update("P-001", solicitudConEspacios());
+        QuestionResponse respuesta = service.update("P-001", solicitud());
 
-        verify(questionService).actualizarContenido(eq("P-001"), eq("Nombre"), eq("Enunciado"),
-                any(QuestionDistractors.class), eq('b'), eq(Competencia.INGLES), eq("Tema"),
-                eq(Dificultad.BASICO));
+        verify(questionService).actualizarContenido(eq("P-001"), any(ContenidoPregunta.class), eq("autor1"));
         assertEquals("P-001", respuesta.id());
     }
 
     @Test
     void updatePropagaLaExcepcionCuandoLaPreguntaNoExiste() {
         doThrow(new NoSuchElementException("No existe")).when(questionService)
-                .actualizarContenido(eq("P-404"), any(), any(), any(), eq('b'), any(), any(), any());
+                .actualizarContenido(eq("P-404"), any(ContenidoPregunta.class), eq("autor1"));
 
-        assertThrows(NoSuchElementException.class, () -> service.update("P-404", solicitudConEspacios()));
+        assertThrows(NoSuchElementException.class, () -> service.update("P-404", solicitud()));
     }
 
     @Test

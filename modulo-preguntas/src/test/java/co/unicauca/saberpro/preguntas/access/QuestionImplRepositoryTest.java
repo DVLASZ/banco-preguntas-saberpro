@@ -1,7 +1,9 @@
 package co.unicauca.saberpro.preguntas.access;
 
 import co.unicauca.saberpro.preguntas.domain.Competencia;
+import co.unicauca.saberpro.preguntas.domain.ContenidoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Dificultad;
+import co.unicauca.saberpro.preguntas.domain.validation.QuestionValidator;
 import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
 import co.unicauca.saberpro.preguntas.domain.Question;
 import co.unicauca.saberpro.preguntas.domain.QuestionRepository;
@@ -81,6 +83,23 @@ class QuestionImplRepositoryTest {
                 EstadoPregunta.BORRADOR, Competencia.LECTURA_CRITICA, "tema", Dificultad.BASICO);
 
         assertThrows(IllegalArgumentException.class, () -> repository.crear(duplicada));
+    }
+
+    @Test
+    void losDatosDeEjemploCumplenLaValidacionEstructural() {
+        QuestionValidator validador = QuestionValidator.porDefecto();
+
+        for (Question pregunta : repository.obtenerTodas()) {
+            assertTrue(validador.validar(ContenidoPregunta.de(pregunta)).isEmpty(),
+                    pregunta.getId() + " debe cumplir la validación: " + validador.validar(ContenidoPregunta.de(pregunta)));
+        }
+    }
+
+    @Test
+    void losDatosDeEjemploTienenAutorYRepartenLosSieteEstados() {
+        assertTrue(repository.obtenerTodas().stream().allMatch(p -> !p.getAutor().isBlank()));
+        assertEquals(EstadoPregunta.values().length,
+                repository.obtenerTodas().stream().map(Question::getEstado).distinct().count());
     }
 
     private Question pregunta() {

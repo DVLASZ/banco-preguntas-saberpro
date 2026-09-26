@@ -1,5 +1,8 @@
 package co.unicauca.saberpro.api.exception;
 
+import co.unicauca.saberpro.preguntas.domain.AccesoDenegadoException;
+import co.unicauca.saberpro.preguntas.domain.OperacionNoPermitidaException;
+import co.unicauca.saberpro.preguntas.domain.validation.QuestionValidationException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiError> handleNotFound(NoSuchElementException ex) {
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(QuestionValidationException.class)
+    public ResponseEntity<ApiError> handleStructuralValidation(QuestionValidationException ex) {
+        List<String> detalles = ex.getViolaciones().stream()
+                .map(violacion -> violacion.campo() + ": " + violacion.mensaje())
+                .toList();
+        return build(HttpStatus.BAD_REQUEST, "La pregunta no cumple la validación estructural", detalles);
+    }
+
+    @ExceptionHandler(OperacionNoPermitidaException.class)
+    public ResponseEntity<ApiError> handleNotAllowed(OperacionNoPermitidaException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), List.of());
+    }
+
+    @ExceptionHandler(AccesoDenegadoException.class)
+    public ResponseEntity<ApiError> handleForbidden(AccesoDenegadoException ex) {
+        return build(HttpStatus.FORBIDDEN, ex.getMessage(), List.of());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

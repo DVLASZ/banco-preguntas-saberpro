@@ -14,7 +14,14 @@ import co.unicauca.saberpro.preguntas.simulacro.domain.SimulacroRepository;
 import co.unicauca.saberpro.preguntas.simulacro.domain.SimulacroService;
 import co.unicauca.saberpro.preguntas.simulacro.presentation.GUIDocente;
 import co.unicauca.saberpro.preguntas.simulacro.presentation.GUIEstudiante;
+import co.unicauca.saberpro.revision.access.AsignacionRevisionImplRepository;
+import co.unicauca.saberpro.revision.access.NotificadorCorreoSimulado;
+import co.unicauca.saberpro.revision.domain.AsignacionRevisionService;
+import co.unicauca.saberpro.revision.domain.DirectorioRevisoresDeUsuarios;
+import co.unicauca.saberpro.revision.domain.FuenteDePreguntasAsignadas;
+import co.unicauca.saberpro.revision.presentation.GUIAsignacionRevisores;
 import co.unicauca.saberpro.usuarios.domain.Role;
+import co.unicauca.saberpro.usuarios.domain.User;
 import co.unicauca.saberpro.usuarios.domain.UserStatus;
 import co.unicauca.saberpro.usuarios.domain.access.IUserRepository;
 import co.unicauca.saberpro.usuarios.domain.access.UserRepositoryFactory;
@@ -30,6 +37,11 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Composition root de la aplicación fusionada Taller 2 (usuarios/login) +
@@ -60,8 +72,10 @@ public class MainApp {
             // todo el banco de preguntas (HU-17): eso es competencia del
             // Administrador, no de todos los roles — por eso se crean y se
             // suscriben como observadoras desde ya (para que no se pierdan
-            // notificaciones), pero solo se muestran más abajo si el rol
-            // autenticado es ADMINISTRADOR, en vez de abrirse siempre.
+            // notificaciones mientras están cerradas), pero no se muestran
+            // automaticamente al iniciar sesion: el Administrador las abre
+            // el mismo, con doble clic en "Ver reportes y estadisticas"
+            // desde su tablero (ver accionesAdministrador mas abajo).
             GUIObserver1 vistaEstadisticas = new GUIObserver1(questionService);
             GUIObserver2 vistaGrafica = new GUIObserver2(questionService);
             questionService.agregarObservador(vistaEstadisticas);
@@ -77,25 +91,65 @@ public class MainApp {
             MenuProviderRegistry menuProviderRegistry = MenuProviderRegistry.withDefaultProviders();
             sembrarUsuariosDemo(userService);
 
-            // --- El puente entre ambos: qué ventana abrir según el rol ---
-            new LoginFrame(userService, user -> {
-                switch (user.getRole()) {
-                    case AUTOR_PREGUNTAS -> {
-                        new GUIQuestions(questionService).setVisible(true);
-                        new GUIMicrokernel(questionMicrokernel).setVisible(true);
-                    }
-                    case REVISOR -> new GUIRevisor(questionService).setVisible(true);
-                    case DOCENTE -> new GUIDocente(simulacroService).setVisible(true);
-                    case ESTUDIANTE -> new GUIEstudiante(user, simulacroService).setVisible(true);
-                    case ADMINISTRADOR -> {
-                        new DashboardFrame(user, menuProviderRegistry).setVisible(true);
-                        vistaEstadisticas.setVisible(true);
-                        vistaGrafica.setVisible(true);
-                    }
-                    default -> new DashboardFrame(user, menuProviderRegistry).setVisible(true);
+            // --- Módulo de revisión (HU-04: el Administrador asigna revisores) ---
+            AsignacionRevisionService asignacionService = new AsignacionRevisionService(questionService,
+                    new DirectorioRevisoresDeUsuarios(userService), new AsignacionRevisionImplRepository(),
+                    new NotificadorCorreoSimulado());
+
+            // --- El puente entre ambos: qué ventanas abrir según el rol ---
+            // La primera ventana de la lista es la principal: al cerrarla se
+            // cierran las demás y vuelve el login, para poder cambiar de rol
+            // sin reiniciar (los datos del banco viven en memoria).
+            mostrarLogin(userService, user -> switch (user.getRole()) {
+                case AUTOR_PREGUNTAS -> List.of(new GUIQuestions(questionService, user.getUsername()),
+                        new GUIMicrokernel(questionMicrokernel));
+                case REVISOR -> List.of(new GUIRevisor(questionService,
+                        new FuenteDePreguntasAsignadas(asignacionService), user.getUsername()));
+                case DOCENTE -> List.of(new GUIDocente(simulacroService));
+                case ESTUDIANTE -> List.of(new GUIEstudiante(user, simulacroService));
+                case ADMINISTRADOR -> {
+                    // Que hace cada opcion del tablero (RF-17): "Asignar revisores"
+                    // (HU-04) y "Ver reportes y estadisticas" tienen vista propia,
+                    // pero ninguna se abre sola — solo al pedirla el Administrador
+                    // (ver DashboardFrame); las demas opciones avisan que aun no
+                    // tienen vista propia.
+                    GUIAsignacionRevisores vistaAsignacion =
+                            new GUIAsignacionRevisores(asignacionService, user.getUsername());
+                    Map<String, Runnable> accionesAdministrador = Map.of(
+                            "Asignar revisores", () -> {
+                                vistaAsignacion.setVisible(true);
+                                vistaAsignacion.toFront();
+                            },
+                            "Ver reportes y estadisticas", () -> {
+                                vistaEstadisticas.setVisible(true);
+                                vistaEstadisticas.toFront();
+                                vistaGrafica.setVisible(true);
+                                vistaGrafica.toFront();
+                            });
+                    yield List.of(new DashboardFrame(user, menuProviderRegistry, accionesAdministrador));
                 }
-            }).setVisible(true);
+                default -> List.of(new DashboardFrame(user, menuProviderRegistry, Map.of()));
+            });
         });
+    }
+
+    /**
+     * Muestra el login y, tras autenticarse, abre las ventanas del rol. Cuando
+     * se cierra la ventana principal (la primera de la lista) se cierran las
+     * demás y se vuelve a mostrar el login.
+     */
+    private static void mostrarLogin(UserService userService, Function<User, List<JFrame>> ventanasPorRol) {
+        new LoginFrame(userService, user -> {
+            List<JFrame> ventanas = ventanasPorRol.apply(user);
+            ventanas.get(0).addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    ventanas.forEach(JFrame::dispose);
+                    mostrarLogin(userService, ventanasPorRol);
+                }
+            });
+            ventanas.forEach(v -> v.setVisible(true));
+        }).setVisible(true);
     }
 
     /**

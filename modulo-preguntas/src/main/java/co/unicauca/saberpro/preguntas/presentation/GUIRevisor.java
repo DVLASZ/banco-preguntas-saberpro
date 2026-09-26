@@ -1,6 +1,7 @@
 package co.unicauca.saberpro.preguntas.presentation;
 
 import co.unicauca.saberpro.preguntas.domain.EstadoPregunta;
+import co.unicauca.saberpro.preguntas.domain.FuenteDePreguntasParaRevisar;
 import co.unicauca.saberpro.preguntas.domain.Question;
 import co.unicauca.saberpro.preguntas.domain.QuestionService;
 
@@ -8,28 +9,33 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.List;
 
 /**
- * Ventana del rol <b>Revisor</b>: evalúa una pregunta ya enviada a
- * revisión y solo puede Aprobarla o Rechazarla (RF-16) — a diferencia del
+ * Vista (MVC) del rol <b>Revisor</b>: muestra una pregunta ya enviada a
+ * revisión y solo permite Aprobarla o Rechazarla (RF-16) — a diferencia del
  * Autor ({@link GUIQuestions}), no edita el contenido de la pregunta ni
- * tiene un selector de estado libre. Cada acción dispara
- * {@link QuestionService#cambiarEstado} y, por lo tanto, notifica a las
- * vistas observadoras ({@link GUIObserver1}, {@link GUIObserver2}).
+ * tiene un selector de estado libre. Las decisiones las toma el
+ * {@link RevisionController}, que las registra en el modelo
+ * ({@link QuestionService#cambiarEstado}) y así se notifica a las vistas
+ * observadoras ({@link GUIObserver1}, {@link GUIObserver2}).
  */
-public class GUIRevisor extends JFrame {
+public class GUIRevisor extends JFrame implements RevisionVista {
 
     private static final Color GRIS_TEXTO = new Color(0x475569);
     private static final Color FONDO_CAMPO = new Color(0xF1F5F9);
 
-    private final QuestionService service;
+    private final RevisionController controlador;
+    private final String usuario;
 
     private final JComboBox<Question> comboPreguntas = new JComboBox<>();
     private final JButton btnCargar = new JButton("Cargar pregunta");
 
     private final JTextField txtId = new JTextField();
     private final JTextField txtNombre = new JTextField();
-    private final JTextArea txtEnunciado = new JTextArea(3, 30);
+    private final JTextArea txtContexto = new JTextArea(3, 30);
+    private final JTextArea txtEnunciado = new JTextArea(2, 30);
+    private final JTextArea txtJustificacion = new JTextArea(3, 30);
     private final JTextField txtOpcionA = new JTextField();
     private final JTextField txtOpcionB = new JTextField();
     private final JTextField txtOpcionC = new JTextField();
@@ -39,17 +45,16 @@ public class GUIRevisor extends JFrame {
     private final JButton btnAprobar = new JButton("Aprobar");
     private final JButton btnRechazar = new JButton("Rechazar");
 
-    private Question preguntaCargada;
-
-    public GUIRevisor(QuestionService service) {
+    public GUIRevisor(QuestionService service, FuenteDePreguntasParaRevisar fuente, String usuario) {
         super("Banco de Preguntas Saber Pro - Revisor");
-        this.service = service;
+        this.usuario = usuario;
+        this.controlador = new RevisionController(service, fuente, usuario, this);
         construirInterfaz();
-        cargarComboPreguntas();
         habilitarAcciones(false);
+        controlador.iniciar();
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(560, 600);
+        setSize(640, 780);
         setLocationRelativeTo(null);
     }
 
@@ -58,7 +63,7 @@ public class GUIRevisor extends JFrame {
         setLayout(new BorderLayout(12, 12));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel rol = new JLabel("Rol: Revisor");
+        JLabel rol = new JLabel("Rol: Revisor — usuario: " + usuario);
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 
@@ -86,30 +91,15 @@ public class GUIRevisor extends JFrame {
 
         agregarCampo(panelFormulario, gbc, "Id:", txtId);
         agregarCampo(panelFormulario, gbc, "Nombre:", txtNombre);
-
-        gbc.gridx = 0;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        panelFormulario.add(etiqueta("Pregunta:"), gbc);
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        txtEnunciado.setLineWrap(true);
-        txtEnunciado.setWrapStyleWord(true);
-        txtEnunciado.setEditable(false);
-        txtEnunciado.setBackground(FONDO_CAMPO);
-        txtEnunciado.setFont(txtEnunciado.getFont().deriveFont(13f));
-        txtEnunciado.setBorder(new EmptyBorder(6, 8, 6, 8));
-        JScrollPane scrollEnunciado = new JScrollPane(txtEnunciado);
-        scrollEnunciado.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
-        panelFormulario.add(scrollEnunciado, gbc);
-        gbc.gridy++;
+        agregarAreaSoloLectura(panelFormulario, gbc, "Contexto:", txtContexto);
+        agregarAreaSoloLectura(panelFormulario, gbc, "Pregunta:", txtEnunciado);
 
         agregarCampo(panelFormulario, gbc, "A.", txtOpcionA);
         agregarCampo(panelFormulario, gbc, "B.", txtOpcionB);
         agregarCampo(panelFormulario, gbc, "C.", txtOpcionC);
         agregarCampo(panelFormulario, gbc, "D.", txtOpcionD);
         agregarCampo(panelFormulario, gbc, "Respuesta correcta:", txtRespuestaCorrecta);
+        agregarAreaSoloLectura(panelFormulario, gbc, "Justificación:", txtJustificacion);
 
         gbc.gridx = 0;
         gbc.weightx = 0;
@@ -129,8 +119,8 @@ public class GUIRevisor extends JFrame {
 
         JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
         panelAcciones.setOpaque(false);
-        btnRechazar.addActionListener(e -> decidir(EstadoPregunta.RECHAZADA));
-        btnAprobar.addActionListener(e -> decidir(EstadoPregunta.APROBADA));
+        btnRechazar.addActionListener(e -> controlador.rechazar());
+        btnAprobar.addActionListener(e -> controlador.aprobar());
         btnAprobar.putClientProperty("JButton.buttonType", "default");
         panelAcciones.add(btnRechazar);
         panelAcciones.add(btnAprobar);
@@ -154,6 +144,26 @@ public class GUIRevisor extends JFrame {
         return label;
     }
 
+    private void agregarAreaSoloLectura(JPanel panel, GridBagConstraints gbc, String etiqueta, JTextArea area) {
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setEditable(false);
+        area.setBackground(FONDO_CAMPO);
+        area.setFont(area.getFont().deriveFont(13f));
+        area.setBorder(new EmptyBorder(6, 8, 6, 8));
+        JScrollPane scroll = new JScrollPane(area);
+        scroll.setBorder(BorderFactory.createLineBorder(new Color(0xE2E8F0)));
+        gbc.gridx = 0;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        panel.add(etiqueta(etiqueta), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panel.add(scroll, gbc);
+        gbc.gridy++;
+    }
+
     private void agregarCampo(JPanel panel, GridBagConstraints gbc, String etiqueta, JComponent campo) {
         gbc.gridx = 0;
         gbc.weightx = 0;
@@ -164,49 +174,48 @@ public class GUIRevisor extends JFrame {
         gbc.gridy++;
     }
 
-    private void cargarComboPreguntas() {
+    @Override
+    public void mostrarPreguntasPorRevisar(List<Question> preguntas) {
         comboPreguntas.removeAllItems();
-        for (Question pregunta : service.listarPreguntas()) {
+        for (Question pregunta : preguntas) {
             comboPreguntas.addItem(pregunta);
         }
     }
 
     private void cargarPreguntaSeleccionada() {
         Question seleccionada = (Question) comboPreguntas.getSelectedItem();
-        if (seleccionada == null) {
-            return;
+        if (seleccionada != null) {
+            controlador.cargarPregunta(seleccionada.getId());
         }
-        preguntaCargada = service.obtenerPregunta(seleccionada.getId());
-
-        // Al tomar una pregunta pendiente para revisarla, pasa
-        // automáticamente a "En revisión" (RF-15): el solo hecho de que
-        // el Revisor la abra ya inicia su evaluación.
-        if (preguntaCargada.getEstado() == EstadoPregunta.PENDIENTE_REVISION) {
-            service.cambiarEstado(preguntaCargada.getId(), EstadoPregunta.EN_REVISION);
-            preguntaCargada = service.obtenerPregunta(preguntaCargada.getId());
-        }
-
-        txtId.setText(preguntaCargada.getId());
-        txtNombre.setText(preguntaCargada.getNombre());
-        txtEnunciado.setText(preguntaCargada.getEnunciado());
-        txtOpcionA.setText(preguntaCargada.getOpciones().getOpcionA());
-        txtOpcionB.setText(preguntaCargada.getOpciones().getOpcionB());
-        txtOpcionC.setText(preguntaCargada.getOpciones().getOpcionC());
-        txtOpcionD.setText(preguntaCargada.getOpciones().getOpcionD());
-        txtRespuestaCorrecta.setText(String.valueOf(preguntaCargada.getRespuestaCorrecta()));
-        badgeEstadoActual.mostrar(preguntaCargada.getEstado());
-        habilitarAcciones(true);
     }
 
-    private void decidir(EstadoPregunta decision) {
-        if (preguntaCargada == null) {
-            return;
-        }
-        service.cambiarEstado(preguntaCargada.getId(), decision);
+    @Override
+    public void mostrarPregunta(Question pregunta, boolean puedeDecidir) {
+        txtId.setText(pregunta.getId());
+        txtNombre.setText(pregunta.getNombre());
+        txtContexto.setText(pregunta.getContexto());
+        txtEnunciado.setText(pregunta.getEnunciado());
+        txtOpcionA.setText(pregunta.getOpciones().getOpcionA());
+        txtOpcionB.setText(pregunta.getOpciones().getOpcionB());
+        txtOpcionC.setText(pregunta.getOpciones().getOpcionC());
+        txtOpcionD.setText(pregunta.getOpciones().getOpcionD());
+        txtRespuestaCorrecta.setText(String.valueOf(pregunta.getRespuestaCorrecta()));
+        txtJustificacion.setText(pregunta.getJustificacion());
+        badgeEstadoActual.mostrar(pregunta.getEstado());
+        habilitarAcciones(puedeDecidir);
+    }
+
+    @Override
+    public void mostrarDecision(String idPregunta, EstadoPregunta decision) {
         badgeEstadoActual.mostrar(decision);
-        JOptionPane.showMessageDialog(this,
-                "Pregunta " + preguntaCargada.getId() + " marcada como: " + decision,
+        habilitarAcciones(false);
+        JOptionPane.showMessageDialog(this, "Pregunta " + idPregunta + " marcada como: " + decision,
                 "Revisión registrada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void mostrarError(String titulo, String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, titulo, JOptionPane.ERROR_MESSAGE);
     }
 
     private void habilitarAcciones(boolean habilitado) {
