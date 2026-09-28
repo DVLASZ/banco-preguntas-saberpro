@@ -215,8 +215,13 @@ el repositorio [`ingenieria-software-2`](https://github.com/DVLASZ/ingenieria-so
 ## Documentación
 
 La documentación de arquitectura (historias de usuario, prototipos, Sprint 1,
-modificabilidad, C4 y UML, patrones de diseño y pruebas) está en la carpeta
-[`docs/`](docs/README.md).
+modificabilidad, C4 y UML, patrones de diseño y pruebas) está dividida por
+tema en la carpeta [`docs/`](docs/README.md). El documento de entrega del
+primer corte, consolidado en un solo archivo, está disponible tanto en
+Markdown para lectura directa —
+[`docs/Documento-Arquitectura-PrimerCorte.md`](docs/Documento-Arquitectura-PrimerCorte.md)
+— como en el Word original entregado —
+[`docs/Documento-Arquitectura-PrimerCorte.docx`](docs/Documento-Arquitectura-PrimerCorte.docx).
 
 ## Autores
 

@@ -160,14 +160,18 @@ errores y comentarios.
 las pares se resta la respuesta de 5. Se suman los diez valores y se multiplican por
 2,5: el resultado va de 0 a 100 (68 se considera el promedio; por encima de 80, muy bueno).
 
-**Resultados** (se completan al aplicar el test)
+**Resultados**
 
 | Participante | T1 | T2 | T3 | T4 | T5 | Puntaje SUS | Observaciones |
 |---|---|---|---|---|---|---|---|
-| P1 | | | | | | | |
-| P2 | | | | | | | |
-| P3 | | | | | | | |
-| **Promedio / % de éxito** | | | | | | | |
+| P1 | Sí (52s) | Sí (15s) | Sí (20s) | No (50s) | Sí (40s) | 77,5 | 1 error en T1 (dejó la bibliografía vacía; corrigió solo al ver el aviso). En T4 pensó que la app se había bloqueado al no poder editar los campos y necesitó una pista para entender que la pregunta quedaba protegida por estar enviada. Sugirió un aviso visual de "Solo lectura" en vez de solo deshabilitar los campos. |
+| P2 | Sí (30s) | Sí (10s) | Sí (10s) | Sí (15s) | Sí (20s) | 97,5 | Completó las 5 tareas sin dudar ni pedir ayuda. Reconoció de inmediato el estado de solo lectura por el comportamiento de los campos. Sugirió agregar atajos de teclado (p. ej. Ctrl+S) para agilizar el diligenciamiento del formulario. |
+| P3 | Sí (80s) | Sí (25s) | Sí (35s) | Sí (30s) | No (70s) | 62,5 | En T1 dudó varias veces por la cantidad de campos del formulario. En T3 no usó el filtro por estado: bajó manualmente por la tabla hasta encontrar los borradores. En T5 no encontró el botón de cerrar sesión y necesitó una pista para cambiar de usuario. Sugirió dividir el formulario de creación en pasos y hacer más visible el botón de cerrar sesión. |
+| **Promedio / % de éxito** | 100% | 100% | 100% | 67% | 67% | 79,2 | T3 se completó siempre, pero 1 de 3 no usó el filtro previsto. T4 y T5 tuvieron 1 caso cada uno que necesitó una pista del evaluador (visibilidad del estado de solo lectura y ubicación del botón de cerrar sesión). |
+
+- P1 = Sebastián Ruiz Segura (7° Ing. Sistemas)
+- P2 = Jhoiner Alberto Puentes Figueroa (8° Ing. Sistemas)
+- P3 = José David Ospina (8° Ing. Electrónica)
 
 **Cómo se usan los resultados.** Los problemas que aparezcan en dos o más
 participantes se agregan a la tabla de problemas de la evaluación heurística con su severidad y se priorizan

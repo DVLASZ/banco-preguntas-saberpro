@@ -16,3 +16,13 @@ del Cauca, periodo 2026.2.
 
 Los diagramas de secuencia, clases y estados están escritos en
 [Mermaid](https://mermaid.js.org/), que GitHub muestra directamente en la página.
+
+## Documento de entrega consolidado
+
+Los siete documentos de arriba, más el video de sustentación, se reúnen en un
+solo documento para la entrega formal del primer corte:
+[`Documento-Arquitectura-PrimerCorte.md`](Documento-Arquitectura-PrimerCorte.md)
+(lectura directa en GitHub) o
+[`Documento-Arquitectura-PrimerCorte.docx`](Documento-Arquitectura-PrimerCorte.docx)
+(el Word original entregado, con formato, tabla de contenido y listas de
+figuras/tablas).
