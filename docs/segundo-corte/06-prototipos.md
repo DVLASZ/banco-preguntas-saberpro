@@ -6,7 +6,7 @@ notificaciones. Las pantallas de HU-01 a HU-03 del primer corte se rediseñarán
 elija; su estructura (formulario, listado con filtros y paginación, estados con color) se conserva.
 
 Los prototipos están en Figma, en la página **Corte 2 - Prototipos web (HU-04 y HU-05)** del archivo
-[Taller 4 - Mockup Banco de Preguntas](https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Taller-4---Mockup-Banco-de-Preguntas?node-id=157-2),
+[Banco de Preguntas Saber Pro - Prototipos](https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Banco-de-Preguntas-Saber-Pro---Prototipos?node-id=157-2),
 el mismo que conserva los prototipos del primer corte en su propia página.
 
 También se guarda la fuente HTML en [`prototipos/wireframes.html`](prototipos/wireframes.html); cada pantalla

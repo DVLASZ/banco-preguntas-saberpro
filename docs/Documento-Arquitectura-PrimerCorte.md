@@ -351,7 +351,7 @@ Una historia se considera terminada cuando: sus criterios de aceptación se cump
 
 ## 2.1 Prototipos de la interfaz de usuario
 
-Los prototipos están en Figma, en el archivo Taller 4 - Mockup Banco de Preguntas.
+Los prototipos están en Figma, en el archivo Banco de Preguntas Saber Pro - Prototipos.
 
 <a id="tabla-4"></a>
 Tabla 4 Prototipos base en Figma (Taller 4).
@@ -789,4 +789,4 @@ Usuarios de prueba (contraseña Saber2026!): autor1 (Autor), revisor1 (Revisor),
 <a id="tabla-26"></a>
 Tabla 26 Enlaces del proyecto (video, repositorio, Jira, Figma, C4).
 
-<table><tbody><tr><td><p><strong>Recurso</strong></p></td><td><p><strong>URL</strong></p></td></tr><tr><td><p>Video de sustentación (YouTube)</p></td><td><p><a href="https://youtu.be/xWMwpDzWfwI">https://youtu.be/xWMwpDzWfwI</a></p></td></tr><tr><td><p>Repositorio Git del proyecto</p></td><td><p><a href="https://github.com/DVLASZ/banco-preguntas-saberpro">https://github.com/DVLASZ/banco-preguntas-saberpro</a></p></td></tr><tr><td><p>Tablero de tareas (Jira, Sprint 1)</p></td><td><p><a href="https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1">https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1</a></p></td></tr><tr><td><p>Prototipos (Figma)</p></td><td><p><a href="https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Taller-4---Mockup-Banco-de-Preguntas">https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Taller-4---Mockup-Banco-de-Preguntas</a></p><p>(página "Primer corte - Prototipos HU-01 a HU-04")</p></td></tr><tr><td><p>Diagramas C4 (diagrams.net)</p></td><td><p><a href="https://app.diagrams.net/#G1P06v2Eww57q3xeCN8tEg0mBflO3VU5YR">https://app.diagrams.net/#G1P06v2Eww57q3xeCN8tEg0mBflO3VU5YR</a></p></td></tr></tbody></table>
+<table><tbody><tr><td><p><strong>Recurso</strong></p></td><td><p><strong>URL</strong></p></td></tr><tr><td><p>Video de sustentación (YouTube)</p></td><td><p><a href="https://youtu.be/xWMwpDzWfwI">https://youtu.be/xWMwpDzWfwI</a></p></td></tr><tr><td><p>Repositorio Git del proyecto</p></td><td><p><a href="https://github.com/DVLASZ/banco-preguntas-saberpro">https://github.com/DVLASZ/banco-preguntas-saberpro</a></p></td></tr><tr><td><p>Tablero de tareas (Jira, Sprint 1)</p></td><td><p><a href="https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1">https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1</a></p></td></tr><tr><td><p>Prototipos (Figma)</p></td><td><p><a href="https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Banco-de-Preguntas-Saber-Pro---Prototipos">https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Banco-de-Preguntas-Saber-Pro---Prototipos</a></p><p>(página "Primer corte - Prototipos HU-01 a HU-04")</p></td></tr><tr><td><p>Diagramas C4 (diagrams.net)</p></td><td><p><a href="https://app.diagrams.net/#G1P06v2Eww57q3xeCN8tEg0mBflO3VU5YR">https://app.diagrams.net/#G1P06v2Eww57q3xeCN8tEg0mBflO3VU5YR</a></p></td></tr></tbody></table>

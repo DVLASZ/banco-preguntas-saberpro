@@ -3,15 +3,15 @@
 ## 1. Prototipos de la interfaz de usuario
 
 Los prototipos están en Figma, en el archivo
-[Taller 4 - Mockup Banco de Preguntas](https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Taller-4---Mockup-Banco-de-Preguntas).
+[Banco de Preguntas Saber Pro - Prototipos](https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Banco-de-Preguntas-Saber-Pro---Prototipos).
 
 | Prototipo (marco de Figma) | Página del archivo | Historia de usuario |
 |---|---|---|
-| Autor de Preguntas - Formulario | Page 1 | Base de HU-01 y HU-02 |
-| Buscar Preguntas - Filtros | Page 1 | Base de HU-03 |
-| Revisor - Revisar Pregunta | Page 1 | Flujo posterior a HU-04 |
-| Login - Inicio de Sesion, Registro - Registro de Usuario, Tablero generico | Page 1 | Acceso al sistema |
-| Vista de Estadisticas, Vista Grafica | Page 1 | Reporte del Administrador (Observer) |
+| Autor de Preguntas - Formulario | Taller 4 - Prototipos base (mockups iniciales) | Base de HU-01 y HU-02 |
+| Buscar Preguntas - Filtros | Taller 4 - Prototipos base (mockups iniciales) | Base de HU-03 |
+| Revisor - Revisar Pregunta | Taller 4 - Prototipos base (mockups iniciales) | Flujo posterior a HU-04 |
+| Login - Inicio de Sesion, Registro - Registro de Usuario, Tablero generico | Taller 4 - Prototipos base (mockups iniciales) | Acceso al sistema |
+| Vista de Estadisticas, Vista Grafica | Taller 4 - Prototipos base (mockups iniciales) | Reporte del Administrador (Observer) |
 
 Los prototipos detallados de las cuatro historias de la iteración, ya alineados con
 la interfaz implementada, están en la página **"Primer corte - Prototipos HU-01 a
