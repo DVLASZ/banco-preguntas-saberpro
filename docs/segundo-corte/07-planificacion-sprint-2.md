@@ -1,6 +1,7 @@
 # 07 · Planificación del Sprint 2
 
-Tablero en Jira: proyecto **SCRUM**, sprint **SCRUM Sprint 2**. Responsables sin asignar todavía.
+Tablero en Jira: proyecto **SCRUM**, sprint **SCRUM Sprint 2**, del **13 al 30 de octubre de 2026**.
+Responsables sin asignar todavía.
 
 ## Épicas
 
