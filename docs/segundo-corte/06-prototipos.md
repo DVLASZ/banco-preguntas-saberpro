@@ -5,8 +5,12 @@ wireframes de pantallas web. Cubren lo nuevo de la iteración: el ajuste de HU-0
 notificaciones. Las pantallas de HU-01 a HU-03 del primer corte se rediseñarán en la tecnología web que se
 elija; su estructura (formulario, listado con filtros y paginación, estados con color) se conserva.
 
-Fuente editable: [`prototipos/wireframes.html`](prototipos/wireframes.html). Cada pantalla se abre con su
-ancla, por ejemplo `wireframes.html#s4`.
+Los prototipos están en Figma, en la página **Corte 2 - Prototipos web (HU-04 y HU-05)** del archivo
+[Taller 4 - Mockup Banco de Preguntas](https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Taller-4---Mockup-Banco-de-Preguntas?node-id=157-2),
+el mismo que conserva los prototipos del primer corte en su propia página.
+
+También se guarda la fuente HTML en [`prototipos/wireframes.html`](prototipos/wireframes.html); cada pantalla
+se abre con su ancla, por ejemplo `wireframes.html#s4`.
 
 | Pantalla | Historia | Imagen |
 |---|---|---|
