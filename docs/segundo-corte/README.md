@@ -14,12 +14,17 @@ Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 
 | [03 · Arquitectura (C4 y UML)](03-arquitectura-c4-uml.md) | Modelo C4, secuencias, estados, modelo de datos por servicio y despliegue |
 | [04 · Escalabilidad](04-escalabilidad.md) | Escenario de calidad y plan de prueba de carga |
 | [05 · Patrones de diseño](05-patrones.md) | Los 6 patrones GoF y dónde se aplican |
-| [06 · Prototipos](06-prototipos.md) | Prototipos de la interfaz web para HU-04 y HU-05 |
+| [06 · Prototipos](06-prototipos.md) | Prototipos web de alta fidelidad de las pantallas de la iteración |
 | [07 · Planificación del Sprint 2](07-planificacion-sprint-2.md) | Historias y tareas del sprint en Jira |
 | [Anexo · Consultas a los docentes](anexos/consultas-a-docentes.md) | Preguntas de alcance técnico y respuestas del profesor Mage |
 | [Anexo · Plan de arranque](anexos/plan-de-arranque.md) | Estructura del repositorio, puertos, eventos, endpoints y orden de construcción |
+| [Anexo · Notificaciones y correos](anexos/notificaciones-y-correos.md) | Quién recibe qué y plantillas de correo |
+| [Anexo · Datos semilla](anexos/datos-semilla.md) | Usuarios y preguntas precargados para desarrollo y demostración |
+| [Anexo · Plan de pruebas](anexos/plan-de-pruebas.md) | Qué se prueba en cada servicio |
+| [Contratos de la API y de los eventos](contratos/) | OpenAPI de los servicios y esquema JSON de los eventos |
 
-Los diagramas están escritos en [Mermaid](https://mermaid.js.org/), que GitHub muestra directamente.
+Los diagramas están escritos en [Mermaid](https://mermaid.js.org/), que GitHub muestra directamente, y además
+exportados como imagen en [`img/diagramas`](img/diagramas/).
 
 ## Decisiones tomadas
 

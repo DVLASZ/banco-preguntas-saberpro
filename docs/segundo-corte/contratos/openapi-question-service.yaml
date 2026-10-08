@@ -1,0 +1,189 @@
+openapi: 3.0.3
+info:
+  title: question-service
+  version: 0.1.0
+  description: |
+    Preguntas, validación estructural y ciclo de vida (HU-01, HU-02 y HU-03).
+    Contrato de diseño: la implementación debe generar este mismo contrato con springdoc.
+servers:
+  - url: http://localhost:8080/api
+    description: A través del API Gateway
+tags:
+  - name: Preguntas
+security:
+  - bearerAuth: []
+paths:
+  /questions:
+    post:
+      tags: [Preguntas]
+      summary: Crear una pregunta en estado Borrador (HU-01). Rol AUTHOR.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionRequest' }
+      responses:
+        '201':
+          description: Pregunta creada en estado Borrador
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+    get:
+      tags: [Preguntas]
+      summary: Listar preguntas con filtros y paginación (HU-03). Un AUTHOR solo ve las suyas.
+      parameters:
+        - { name: estado, in: query, schema: { $ref: '#/components/schemas/EstadoPregunta' } }
+        - { name: competencia, in: query, schema: { $ref: '#/components/schemas/Competencia' } }
+        - { name: tema, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 10 } }
+      responses:
+        '200':
+          description: Página de preguntas
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionPage' }
+  /questions/pending-review:
+    get:
+      tags: [Preguntas]
+      summary: Preguntas en estado Pendiente de revisión (HU-04). Rol ADMIN.
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 10 } }
+      responses:
+        '200':
+          description: Página de preguntas pendientes
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionPage' }
+  /questions/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Preguntas]
+      summary: Consultar una pregunta con su historial de estados
+      responses:
+        '200':
+          description: Pregunta
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Preguntas]
+      summary: Modificar una pregunta (solo en estado Borrador). Rol AUTHOR.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionRequest' }
+      responses:
+        '200':
+          description: Pregunta modificada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/StateConflict' }
+  /questions/{id}/submit:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Preguntas]
+      summary: Enviar a revisión, de Borrador a Pendiente de revisión (HU-02). Rol AUTHOR.
+      description: Publica el evento question.submitted.
+      responses:
+        '200':
+          description: Pregunta en estado Pendiente de revisión
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/StateConflict' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    Competencia:
+      type: string
+      enum: [LECTURA_CRITICA, RAZONAMIENTO_CUANTITATIVO, COMPETENCIAS_CIUDADANAS, COMUNICACION_ESCRITA, INGLES]
+    Dificultad:
+      type: string
+      enum: [BASICO, INTERMEDIO, AVANZADO]
+    EstadoPregunta:
+      type: string
+      enum: [BORRADOR, PENDIENTE_REVISION, EN_REVISION, APROBADA, RECHAZADA, PUBLICADA, ARCHIVADA]
+    QuestionRequest:
+      type: object
+      required: [nombre, contexto, enunciado, opcionA, opcionB, opcionC, opcionD, respuestaCorrecta, justificacion, bibliografia, competencia, tema, subtema, dificultad]
+      properties:
+        nombre: { type: string, maxLength: 200 }
+        contexto: { type: string, maxLength: 4000 }
+        enunciado: { type: string, maxLength: 2000, description: Pregunta directa }
+        opcionA: { type: string, maxLength: 500 }
+        opcionB: { type: string, maxLength: 500 }
+        opcionC: { type: string, maxLength: 500 }
+        opcionD: { type: string, maxLength: 500 }
+        respuestaCorrecta: { type: string, pattern: '^[A-Da-d]$' }
+        justificacion: { type: string, maxLength: 4000 }
+        bibliografia: { type: string, maxLength: 1000 }
+        competencia: { $ref: '#/components/schemas/Competencia' }
+        tema: { type: string, maxLength: 200 }
+        subtema: { type: string, maxLength: 200 }
+        dificultad: { $ref: '#/components/schemas/Dificultad' }
+    QuestionResponse:
+      allOf:
+        - $ref: '#/components/schemas/QuestionRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            autorId: { type: string, format: uuid }
+            estado: { $ref: '#/components/schemas/EstadoPregunta' }
+            creadaEn: { type: string, format: date-time }
+            actualizadaEn: { type: string, format: date-time }
+            historialEstados:
+              type: array
+              items: { $ref: '#/components/schemas/CambioEstado' }
+    CambioEstado:
+      type: object
+      properties:
+        desde: { $ref: '#/components/schemas/EstadoPregunta' }
+        hacia: { $ref: '#/components/schemas/EstadoPregunta' }
+        cambiadoPor: { type: string, format: uuid }
+        fecha: { type: string, format: date-time }
+    QuestionPage:
+      type: object
+      properties:
+        contenido:
+          type: array
+          items: { $ref: '#/components/schemas/QuestionResponse' }
+        pagina: { type: integer }
+        tamano: { type: integer }
+        totalElementos: { type: integer, format: int64 }
+        totalPaginas: { type: integer }
+    ApiError:
+      type: object
+      properties:
+        codigo: { type: string }
+        mensaje: { type: string }
+        detalles:
+          type: array
+          items: { type: string }
+  responses:
+    ValidationError:
+      description: Datos inválidos o validación estructural incumplida
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    NotFound:
+      description: La pregunta no existe
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    StateConflict:
+      description: La transición de estado no es válida desde el estado actual
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }

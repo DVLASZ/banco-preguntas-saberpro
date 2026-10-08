@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: review-service
+  version: 0.1.0
+  description: |
+    Revisión por pares: asignación de revisores (HU-04) y evaluación (HU-05).
+    Contrato de diseño. Reglas: de 1 a 3 revisores, el autor nunca es revisor,
+    aprobación por unanimidad.
+servers:
+  - url: http://localhost:8080/api
+    description: A través del API Gateway
+tags:
+  - name: Revisiones
+security:
+  - bearerAuth: []
+paths:
+  /reviews/{questionId}/assignments:
+    parameters:
+      - { name: questionId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Revisiones]
+      summary: Asignar de 1 a 3 revisores a una pregunta pendiente (HU-04). Rol ADMIN.
+      description: Publica review.reviewers-assigned; la pregunta pasa a En revisión.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssignmentRequest' }
+      responses:
+        '201':
+          description: Revisores asignados
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewCase' }
+        '400':
+          description: Menos de 1 o más de 3 revisores, repetidos, o el autor entre ellos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404': { description: La pregunta no está pendiente de asignación }
+        '409': { description: La pregunta ya tiene revisores asignados }
+  /reviews/assigned:
+    get:
+      tags: [Revisiones]
+      summary: Preguntas asignadas al revisor autenticado (HU-05). Rol REVIEWER.
+      parameters:
+        - name: estado
+          in: query
+          schema: { type: string, enum: [PENDIENTE, EVALUADA], default: PENDIENTE }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 10 } }
+      responses:
+        '200':
+          description: Asignaciones del revisor
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AssignedItem' }
+  /reviews/{questionId}:
+    parameters:
+      - { name: questionId, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Revisiones]
+      summary: Estado de la revisión, evaluaciones y observaciones. Roles REVIEWER asignado, AUTHOR de la pregunta y ADMIN.
+      responses:
+        '200':
+          description: Caso de revisión con todas las observaciones
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewCase' }
+        '403': { description: El usuario no participa en esta revisión }
+        '404': { description: No existe revisión para la pregunta }
+  /reviews/{questionId}/evaluations:
+    parameters:
+      - { name: questionId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Revisiones]
+      summary: Registrar la evaluación del revisor autenticado (HU-05). Rol REVIEWER.
+      description: |
+        Publica review.evaluation-submitted. Cuando la decisión final queda determinada
+        publica review.completed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EvaluationRequest' }
+      responses:
+        '201':
+          description: Evaluación registrada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewCase' }
+        '400':
+          description: Rechazo sin observación
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '403': { description: El revisor no está asignado a la pregunta }
+        '409': { description: El revisor ya evaluó esta pregunta, o la revisión ya está cerrada }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    AssignmentRequest:
+      type: object
+      required: [reviewerIds]
+      properties:
+        reviewerIds:
+          type: array
+          minItems: 1
+          maxItems: 3
+          uniqueItems: true
+          items: { type: string, format: uuid }
+    EvaluationRequest:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [APROBAR, RECHAZAR] }
+        observacion:
+          type: string
+          maxLength: 4000
+          description: Obligatoria cuando la decisión es RECHAZAR
+    ReviewCase:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        questionId: { type: string, format: uuid }
+        authorId: { type: string, format: uuid }
+        estado: { type: string, enum: [PENDIENTE_ASIGNACION, EN_REVISION, CERRADA] }
+        resultado: { type: string, enum: [APROBADA, RECHAZADA], nullable: true }
+        asignaciones:
+          type: array
+          items: { $ref: '#/components/schemas/Assignment' }
+        creadoEn: { type: string, format: date-time }
+        cerradoEn: { type: string, format: date-time, nullable: true }
+    Assignment:
+      type: object
+      properties:
+        reviewerId: { type: string, format: uuid }
+        asignadoPor: { type: string, format: uuid }
+        asignadoEn: { type: string, format: date-time }
+        evaluacion: { $ref: '#/components/schemas/Evaluation' }
+    Evaluation:
+      type: object
+      nullable: true
+      properties:
+        decision: { type: string, enum: [APROBAR, RECHAZAR] }
+        observaciones:
+          type: array
+          items: { type: string }
+        enviadaEn: { type: string, format: date-time }
+    AssignedItem:
+      type: object
+      properties:
+        questionId: { type: string, format: uuid }
+        nombre: { type: string }
+        competencia: { type: string }
+        autor: { type: string }
+        asignadaEn: { type: string, format: date-time }
+        miEvaluacion: { type: string, enum: [PENDIENTE, APROBADA, RECHAZADA] }
+    ApiError:
+      type: object
+      properties:
+        codigo: { type: string }
+        mensaje: { type: string }
+        detalles:
+          type: array
+          items: { type: string }

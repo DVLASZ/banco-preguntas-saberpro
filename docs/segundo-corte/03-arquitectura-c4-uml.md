@@ -1,5 +1,7 @@
 # 03 · Arquitectura (C4 y UML)
 
+> Cada diagrama de este documento también está como imagen (SVG y PNG) en [`img/diagramas`](img/diagramas/), lista para el documento formal en Word o PDF.
+
 ## Estilo arquitectónico
 
 Microservicios orientados a eventos con un API Gateway como único punto de entrada, una base de datos
@@ -249,39 +251,40 @@ erDiagram
 
 ### question_db
 
+El modelo conserva las cuatro opciones y la letra de la respuesta correcta, igual que el dominio del primer corte
+(`ContenidoPregunta`), para reutilizarlo sin cambios.
+
 ```mermaid
 erDiagram
-  QUESTION ||--|{ QUESTION_OPTION : tiene
   QUESTION ||--o{ QUESTION_STATE_HISTORY : registra
   QUESTION {
     uuid id PK
     uuid author_id
-    string context
-    string direct_question
-    string justification
-    string bibliography
-    string competency
-    string topic
-    string subtopic
-    string difficulty
-    string state
-    timestamp created_at
-    timestamp updated_at
-  }
-  QUESTION_OPTION {
-    uuid id PK
-    uuid question_id FK
-    int position
-    string text
-    boolean is_correct
+    string nombre
+    string contexto
+    string enunciado
+    string opcion_a
+    string opcion_b
+    string opcion_c
+    string opcion_d
+    string respuesta_correcta
+    string justificacion
+    string bibliografia
+    string competencia
+    string tema
+    string subtema
+    string dificultad
+    string estado
+    timestamp creada_en
+    timestamp actualizada_en
   }
   QUESTION_STATE_HISTORY {
     uuid id PK
     uuid question_id FK
-    string from_state
-    string to_state
-    uuid changed_by
-    timestamp changed_at
+    string desde
+    string hacia
+    uuid cambiado_por
+    timestamp fecha
   }
 ```
 
