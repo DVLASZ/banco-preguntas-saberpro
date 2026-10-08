@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Wireframes del segundo corte</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Segoe UI, Arial, sans-serif; background: #eceff3; color: #222; }
+  .screen { display: none; width: 1280px; height: 720px; background: #fff; position: relative; overflow: hidden; }
+  .screen.on { display: block; }
+  header { height: 56px; background: #2b3a55; color: #fff; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+  header .brand { font-weight: 600; font-size: 18px; }
+  header nav { display: flex; gap: 22px; font-size: 14px; opacity: .95; }
+  header nav .act { border-bottom: 2px solid #fff; padding-bottom: 4px; }
+  .user { font-size: 13px; display: flex; gap: 16px; align-items: center; }
+  .bell { position: relative; }
+  .bell b { position: absolute; top: -8px; right: -10px; background: #d64545; color: #fff; border-radius: 10px; font-size: 11px; padding: 1px 6px; }
+  main { padding: 28px 40px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .sub { color: #666; font-size: 14px; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; background: #f1f3f6; padding: 10px 12px; border-bottom: 2px solid #d5dae1; }
+  td { padding: 10px 12px; border-bottom: 1px solid #e4e7ec; }
+  .btn { display: inline-block; padding: 7px 16px; border: 1px solid #2b3a55; border-radius: 4px; font-size: 13px; background: #fff; color: #2b3a55; }
+  .btn.pri { background: #2b3a55; color: #fff; }
+  .btn.ok { background: #2e7d4f; border-color: #2e7d4f; color: #fff; }
+  .btn.no { background: #b3392f; border-color: #b3392f; color: #fff; }
+  .btn.dis { opacity: .4; }
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; color: #fff; display: inline-block; }
+  .b-pend { background: #d49a1e; } .b-rev { background: #2f6fb3; } .b-apr { background: #2e7d4f; } .b-rec { background: #b3392f; } .b-bor { background: #777; }
+  .row { display: flex; gap: 24px; }
+  .col { flex: 1; }
+  .card { border: 1px solid #d5dae1; border-radius: 6px; padding: 16px; background: #fafbfc; }
+  .card h3 { margin: 0 0 10px; font-size: 15px; }
+  .field { margin-bottom: 14px; font-size: 14px; }
+  .field label { display: block; color: #555; font-size: 12px; margin-bottom: 4px; }
+  .box { border: 1px solid #c4cad3; border-radius: 4px; padding: 8px 10px; background: #fff; min-height: 36px; }
+  .area { min-height: 110px; color: #888; }
+  .chk { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px dashed #dde1e7; font-size: 14px; }
+  .sq { width: 16px; height: 16px; border: 1.5px solid #2b3a55; border-radius: 3px; display: inline-block; text-align: center; line-height: 13px; font-size: 13px; }
+  .rd { width: 16px; height: 16px; border: 1.5px solid #2b3a55; border-radius: 50%; display: inline-block; text-align: center; line-height: 12px; }
+  .warn { background: #fdecea; border: 1px solid #e8a39d; color: #8a2a21; padding: 8px 12px; border-radius: 4px; font-size: 13px; margin-top: 10px; }
+  .note { font-size: 12px; color: #777; }
+  .obs { border-left: 4px solid #2f6fb3; background: #f3f7fc; padding: 8px 12px; margin-bottom: 10px; font-size: 13px; }
+  .obs.rej { border-color: #b3392f; background: #fcf3f2; }
+  .obs b { display: block; font-size: 12px; margin-bottom: 3px; }
+  .login { width: 380px; margin: 120px auto 0; }
+  .tag { position: absolute; right: 16px; bottom: 12px; font-size: 11px; color: #999; }
+  .item { padding: 10px 12px; border-bottom: 1px solid #e4e7ec; font-size: 14px; }
+  .item.unread { background: #eef4fb; }
+  .item small { display: block; color: #777; margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<!-- S1: Login -->
+<section class="screen" id="s1">
+  <header><div class="brand">Banco de Preguntas Saber Pro</div></header>
+  <div class="login card">
+    <h1>Iniciar sesión</h1>
+    <div class="sub">Ingresa con tu usuario institucional</div>
+    <div class="field"><label>Usuario</label><div class="box">autor1@unicauca.edu.co</div></div>
+    <div class="field"><label>Contraseña</label><div class="box">••••••••</div></div>
+    <div class="btn pri" style="width:100%;text-align:center">Ingresar</div>
+    <div class="warn" style="margin-top:14px">Usuario o contraseña incorrectos</div>
+  </div>
+  <div class="tag">Wireframe · Inicio de sesión</div>
+</section>
+
+<!-- S2: HU-04 Asignar revisores -->
+<section class="screen" id="s2">
+  <header>
+    <div class="brand">Banco de Preguntas Saber Pro</div>
+    <nav><span>Preguntas</span><span class="act">Asignar revisores</span></nav>
+    <div class="user"><span class="bell">🔔<b>2</b></span><span>Administrador · María Pérez</span></div>
+  </header>
+  <main>
+    <h1>Asignación de revisores</h1>
+    <div class="sub">Preguntas en estado “Pendiente de revisión”. Selecciona entre 1 y 3 revisores.</div>
+    <div class="row">
+      <div class="col" style="flex:1.25">
+        <table>
+          <tr><th>ID</th><th>Pregunta</th><th>Competencia</th><th>Autor</th></tr>
+          <tr style="background:#eef4fb"><td>Q-102</td><td>Complejidad de algoritmos de ordenamiento</td><td>Razonamiento cuantitativo</td><td>L. Sánchez</td></tr>
+          <tr><td>Q-107</td><td>Normalización de bases de datos</td><td>Diseño de software</td><td>K. Castaño</td></tr>
+          <tr><td>Q-111</td><td>Patrón Observer en interfaces gráficas</td><td>Diseño de software</td><td>E. Dávila</td></tr>
+          <tr><td>Q-115</td><td>Protocolos de capa de transporte</td><td>Redes</td><td>L. Sánchez</td></tr>
+        </table>
+        <div class="note" style="margin-top:10px">Página 1 de 2 · 4 de 7 resultados</div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h3>Revisores para Q-102 <span class="note">(autor excluido)</span></h3>
+          <div class="chk"><span class="sq">✓</span>Carlos Gómez</div>
+          <div class="chk"><span class="sq">✓</span>Ana Torres</div>
+          <div class="chk"><span class="sq">✓</span>Julián Ruiz</div>
+          <div class="chk"><span class="sq"></span>Marta Ríos</div>
+          <div class="note" style="margin-top:8px">Seleccionados: 3 de 3</div>
+          <div class="warn">No se puede seleccionar más de 3 revisores.</div>
+          <div style="margin-top:14px;display:flex;gap:10px"><span class="btn pri">Asignar y notificar</span><span class="btn">Cancelar</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="tag">Wireframe · HU-04 Asignar revisores</div>
+</section>
+
+<!-- S3: HU-05 Bandeja del revisor -->
+<section class="screen" id="s3">
+  <header>
+    <div class="brand">Banco de Preguntas Saber Pro</div>
+    <nav><span class="act">Mis revisiones</span></nav>
+    <div class="user"><span class="bell">🔔<b>1</b></span><span>Revisor · Carlos Gómez</span></div>
+  </header>
+  <main>
+    <h1>Preguntas asignadas</h1>
+    <div class="sub">Preguntas que el administrador te asignó para evaluar.</div>
+    <div style="display:flex;gap:12px;margin-bottom:16px">
+      <div class="box" style="width:200px">Estado: Pendientes ▾</div>
+      <div class="box" style="width:240px">Competencia: Todas ▾</div>
+    </div>
+    <table>
+      <tr><th>ID</th><th>Pregunta</th><th>Competencia</th><th>Autor</th><th>Asignada</th><th>Mi evaluación</th><th></th></tr>
+      <tr><td>Q-102</td><td>Complejidad de algoritmos de ordenamiento</td><td>Razonamiento cuantitativo</td><td>L. Sánchez</td><td>06/10/2026</td><td><span class="badge b-pend">Pendiente</span></td><td><span class="btn pri">Evaluar</span></td></tr>
+      <tr><td>Q-098</td><td>Principio de responsabilidad única</td><td>Diseño de software</td><td>K. Castaño</td><td>03/10/2026</td><td><span class="badge b-pend">Pendiente</span></td><td><span class="btn pri">Evaluar</span></td></tr>
+      <tr><td>Q-091</td><td>Consultas SQL con subconsultas</td><td>Diseño de software</td><td>E. Dávila</td><td>30/09/2026</td><td><span class="badge b-apr">Aprobada por mí</span></td><td><span class="btn">Ver</span></td></tr>
+    </table>
+    <div class="note" style="margin-top:12px">Sin preguntas pendientes se muestra: “No tienes preguntas por evaluar”.</div>
+  </main>
+  <div class="tag">Wireframe · HU-05 Bandeja del revisor</div>
+</section>
+
+<!-- S4: HU-05 Evaluación -->
+<section class="screen" id="s4">
+  <header>
+    <div class="brand">Banco de Preguntas Saber Pro</div>
+    <nav><span class="act">Mis revisiones</span></nav>
+    <div class="user"><span class="bell">🔔</span><span>Revisor · Carlos Gómez</span></div>
+  </header>
+  <main style="padding-top:20px">
+    <h1>Evaluar pregunta Q-102 <span class="badge b-rev" style="vertical-align:middle">En revisión</span></h1>
+    <div class="sub">Autor: L. Sánchez · Competencia: Razonamiento cuantitativo · Dificultad: Media</div>
+    <div class="row">
+      <div class="col" style="flex:1.2">
+        <div class="card">
+          <h3>Contenido de la pregunta</h3>
+          <div class="field"><label>Contexto</label><div class="box">Un equipo necesita ordenar un millón de registros en memoria…</div></div>
+          <div class="field"><label>Pregunta</label><div class="box">¿Cuál algoritmo tiene mejor complejidad promedio?</div></div>
+          <div class="field"><label>Opciones</label>
+            <div class="box">A. Burbuja</div><div class="box" style="margin-top:4px">B. Inserción</div><div class="box" style="margin-top:4px">C. Quicksort ✓</div><div class="box" style="margin-top:4px">D. Selección</div>
+          </div>
+          <div class="field"><label>Justificación</label><div class="box">Quicksort promedia O(n log n)…</div></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" style="margin-bottom:14px">
+          <h3>Mi evaluación</h3>
+          <div class="field"><label>Decisión</label>
+            <div class="chk" style="border:0"><span class="rd">●</span>Aprobar</div>
+            <div class="chk" style="border:0"><span class="rd"></span>Rechazar</div>
+          </div>
+          <div class="field"><label>Observaciones (obligatorias si rechazas)</label><div class="box area">Escribe tus observaciones para el autor…</div></div>
+          <div style="display:flex;gap:10px"><span class="btn ok">Enviar evaluación</span><span class="btn">Volver</span></div>
+        </div>
+        <div class="card">
+          <h3>Observaciones de otros revisores</h3>
+          <div class="obs rej"><b>Ana Torres · Rechazó</b>El distractor B es demasiado evidente.</div>
+          <div class="obs"><b>Julián Ruiz · Aún no evalúa</b>—</div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="tag">Wireframe · HU-05 Evaluar pregunta</div>
+</section>
+
+<!-- S5: Autor ve observaciones -->
+<section class="screen" id="s5">
+  <header>
+    <div class="brand">Banco de Preguntas Saber Pro</div>
+    <nav><span class="act">Mis preguntas</span></nav>
+    <div class="user"><span class="bell">🔔<b>1</b></span><span>Autor · Laura Sánchez</span></div>
+  </header>
+  <main>
+    <h1>Pregunta Q-102 <span class="badge b-rec" style="vertical-align:middle">Rechazada</span></h1>
+    <div class="sub">Resultado de la revisión: al menos un revisor rechazó la pregunta.</div>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <h3>Observaciones de los revisores</h3>
+          <div class="obs rej"><b>Ana Torres · Rechazó · 07/10/2026</b>El distractor B es demasiado evidente; propón una opción más plausible.</div>
+          <div class="obs"><b>Carlos Gómez · Aprobó · 07/10/2026</b>Sin observaciones.</div>
+          <div class="obs"><b>Julián Ruiz · Aprobó · 08/10/2026</b>Revisar la bibliografía.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h3>Historial de estados</h3>
+          <table>
+            <tr><th>Fecha</th><th>Estado</th></tr>
+            <tr><td>05/10/2026</td><td><span class="badge b-bor">Borrador</span></td></tr>
+            <tr><td>06/10/2026</td><td><span class="badge b-pend">Pendiente de revisión</span></td></tr>
+            <tr><td>06/10/2026</td><td><span class="badge b-rev">En revisión</span></td></tr>
+            <tr><td>08/10/2026</td><td><span class="badge b-rec">Rechazada</span></td></tr>
+          </table>
+          <div style="margin-top:14px"><span class="btn pri">Volver a Borrador para corregir</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="tag">Wireframe · HU-05 Autor lee las observaciones</div>
+</section>
+
+<!-- S6: Notificaciones -->
+<section class="screen" id="s6">
+  <header>
+    <div class="brand">Banco de Preguntas Saber Pro</div>
+    <nav><span>Mis preguntas</span><span class="act">Notificaciones</span></nav>
+    <div class="user"><span class="bell">🔔<b>2</b></span><span>Autor · Laura Sánchez</span></div>
+  </header>
+  <main>
+    <h1>Notificaciones</h1>
+    <div class="sub">Avisos del proceso de revisión. También se envían por correo.</div>
+    <div class="card" style="padding:0">
+      <div class="item unread"><b>Pregunta Q-102 rechazada</b><small>Revisa las observaciones de los revisores · hace 2 horas</small></div>
+      <div class="item unread"><b>Evaluación recibida en Q-102</b><small>Ana Torres rechazó la pregunta · hace 1 día</small></div>
+      <div class="item"><b>Revisores asignados a Q-102</b><small>Tu pregunta pasó a “En revisión” · hace 2 días</small></div>
+      <div class="item"><b>Pregunta Q-098 aprobada</b><small>Todos los revisores aprobaron · hace 5 días</small></div>
+    </div>
+    <div style="margin-top:14px"><span class="btn">Marcar todas como leídas</span></div>
+  </main>
+  <div class="tag">Wireframe · Notificaciones</div>
+</section>
+
+<script>
+  var id = (location.hash || '#s1').slice(1);
+  var el = document.getElementById(id) || document.getElementById('s1');
+  el.classList.add('on');
+</script>
+</body>
+</html>
