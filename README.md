@@ -76,8 +76,6 @@ Más detalles en el [README del monolito](monolito/README.md).
 | [`docs/corte-2`](docs/corte-2/README.md) | Microservicios: contextos y eventos, arquitectura, patrones, prototipos y contratos de la API |
 | [`docs/corte-3`](docs/corte-3/README.md) | Alcance del tercer corte |
 
-Para colaborar, ver [CONTRIBUTING.md](CONTRIBUTING.md).
-
 ## Estado
 
 | Corte | Estado |
