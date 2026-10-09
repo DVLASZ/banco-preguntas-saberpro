@@ -1,0 +1,2 @@
+co.unicauca.bancopreguntas.platform.config.PlatformWebAutoConfiguration
+co.unicauca.bancopreguntas.platform.config.PlatformEventsAutoConfiguration

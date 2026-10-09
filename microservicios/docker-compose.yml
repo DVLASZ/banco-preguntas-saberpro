@@ -1,0 +1,86 @@
+# Infraestructura y servicio de preguntas del Banco de Preguntas Saber Pro (primera parte).
+#
+# Una instancia de PostgreSQL por microservicio (cada servicio posee sus datos) y un broker RabbitMQ para los
+# eventos. Los valores por defecto sirven para desarrollo local; para cambiarlos copia .env.example a .env y
+# edítalo (el archivo .env no se versiona).
+#
+#   docker compose up -d --build     # PostgreSQL, RabbitMQ y question-service
+#   docker compose up -d postgres-question rabbitmq   # solo la infraestructura (el servicio desde el IDE)
+#
+# En esta parte no hay autenticación con tokens: la identidad llega en las cabeceras X-User-Id y X-User-Roles
+# (modo "headers"). Los servicios que faltan, el gateway y Keycloak se agregan en las siguientes partes.
+name: bancopreguntas
+
+x-postgres: &postgres
+  image: postgres:16-alpine
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+    interval: 5s
+    timeout: 3s
+    retries: 10
+
+services:
+
+  postgres-question:
+    <<: *postgres
+    container_name: bp-postgres-question
+    environment:
+      POSTGRES_DB: question_db
+      POSTGRES_USER: ${QUESTION_DB_USER:-question}
+      POSTGRES_PASSWORD: ${QUESTION_DB_PASSWORD:-question}
+    ports:
+      - "5434:5432"
+    volumes:
+      - question-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: bp-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"   # panel de administración
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  question-service:
+    build:
+      context: .
+      dockerfile: question-service/Dockerfile
+    image: bancopreguntas/question-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-question:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8082:8082"
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      BANCOPREGUNTAS_SECURITY_MODE: ${SECURITY_MODE:-headers}
+      EUREKA_CLIENT_ENABLED: "false"   # todavía no hay servidor de descubrimiento
+      QUESTION_DB_URL: jdbc:postgresql://postgres-question:5432/question_db
+      QUESTION_DB_USER: ${QUESTION_DB_USER:-question}
+      QUESTION_DB_PASSWORD: ${QUESTION_DB_PASSWORD:-question}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+volumes:
+  question-data:
+  rabbitmq-data:
