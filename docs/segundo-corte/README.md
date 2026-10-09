@@ -21,6 +21,7 @@ Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 
 | [Anexo · Notificaciones y correos](anexos/notificaciones-y-correos.md) | Quién recibe qué y plantillas de correo |
 | [Anexo · Datos semilla](anexos/datos-semilla.md) | Usuarios y preguntas precargados para desarrollo y demostración |
 | [Anexo · Plan de pruebas](anexos/plan-de-pruebas.md) | Qué se prueba en cada servicio |
+| [Anexo · Reutilización del monolito](anexos/reutilizacion-del-monolito.md) | Cómo se aprovecha el monolito del corte 1 al migrar a microservicios |
 | [Contratos de la API y de los eventos](contratos/) | OpenAPI de los servicios y esquema JSON de los eventos |
 
 Los diagramas están escritos en [Mermaid](https://mermaid.js.org/), que GitHub muestra directamente, y además
