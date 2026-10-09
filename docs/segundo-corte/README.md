@@ -32,20 +32,22 @@ exportados como imagen en [`img/diagramas`](img/diagramas/).
 | Tema | Decisión |
 |---|---|
 | Estilo | Microservicios con API Gateway y comunicación por eventos (RabbitMQ) |
-| Lenguaje y marco | Java 21 con Spring Boot (obligatorio según el docente) |
+| Lenguaje y marco | Java 21 con Spring Boot (obligatorio según Mage) |
 | Datos | Una instancia de PostgreSQL por microservicio |
-| Frontend | Aplicación web separada en Angular o React, que solo habla con el gateway |
-| Seguridad (corte 2) | Autenticación mínima, usuarios precargados y autorización centralizada en el gateway; Keycloak llega en el corte 3 |
+| Frontend | Aplicación web separada en Angular, que solo habla con el gateway. Libardo aceptó también Swing o JavaFX, pero el foco es el backend |
+| Seguridad | Usuarios precargados y autorización validada en el gateway y en cada servicio; Keycloak con pantalla de login en el frontend se completa en el corte 3 |
 | Revisión | De 1 a 3 revisores, asigna el administrador, aprobación por unanimidad |
-| Notificaciones | Correo real por SMTP al administrador, los revisores y el autor |
+| Notificaciones | Correo simulado por eventos (publicador y suscriptor) más bandeja en el sistema, para el administrador, los revisores y el autor. Libardo rectificó la indicación de correo real |
+| Historial | Un microservicio lleva el historial de revisiones con fecha y responsable; la auditoría de accesos no es requisito |
+| Publicación | La pregunta aprobada la publica el administrador |
+| Hexagonal y DDD | En un solo servicio, en el corte 3 |
 | Monolito | Se conserva en la rama `corte-1`; el trabajo nuevo va en `corte-2` |
 
-## Pendiente de confirmar
+## Pendiente
 
-| Tema | Por qué importa |
+| Tema | Estado |
 |---|---|
-| Quién publica y archiva una pregunta | Completa la máquina de estados |
-| Si el primer rechazo cierra la revisión o se espera a todos | Regla de `review-service` |
-| Angular o React | Elección del equipo |
-| Cómo se demuestra la escalabilidad (réplicas, herramienta) | Plan de la prueba de carga |
-| Si el correo real es obligatorio o puede simularse | Esfuerzo de `notification-service` |
+| Estado Archivada: quién la archiva y cuándo | Sin respuesta de los docentes; fuera del alcance por ahora |
+| Escalabilidad y tolerancia a fallos | Fuera de alcance según Libardo; se miden como valor agregado |
+
+El detalle de lo que respondió cada docente, y qué decidimos cuando difieren, está en [consultas a los docentes](anexos/consultas-a-docentes.md).

@@ -2,14 +2,16 @@
 
 Complementa a `Corte2-Diseno-Microservicios.md`. Todo está basado en las respuestas del Docente 1. **No se escribe código ni se toca el repo hasta confirmar con Libardo.**
 
-## 0. Puerta de salida: qué debe confirmar Libardo
+## 0. Puerta de salida: lo que se confirmó con Libardo
+
+> Libardo ya respondió; las respuestas y decisiones están en [consultas a los docentes](consultas-a-docentes.md). La tabla se conserva como registro de lo que se preguntó.
 
 | # | Punto | Impacto si cambia |
 |---|---|---|
 | 1 | Quién publica y archiva; transiciones sin retorno | Tabla de estados de `question-service` |
 | 2 | Primer rechazo cierra la revisión, o se espera a todos | Lógica de `review-service` |
 | 3 | Unanimidad y 1 a 3 revisores (contrastar con Docente 1) | `review-service` |
-| 4 | Correo real obligatorio, o basta simulado | Esfuerzo de `notification-service` |
+| 4 | ~~Correo real obligatorio, o basta simulado~~ **Resuelto:** simulado (Libardo) | `notification-service` |
 | 5 | Angular o React; frontend en el Compose | Fase del frontend |
 | 6 | Login mínimo con token firmado | `user-service` y gateway |
 | 7 | Escalabilidad: qué evidencia | Fase de la prueba de carga |

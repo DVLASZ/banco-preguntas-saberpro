@@ -1,7 +1,9 @@
 # Notificaciones y plantillas de correo
 
-Cada evento relevante genera una notificación en la bandeja del sistema y un correo por SMTP
-(`notification-service`, puerto `EmailSender` con adaptador SMTP). Se notifica solo a los involucrados:
+Cada evento relevante genera una notificación en la bandeja del sistema y un correo
+(`notification-service`, puerto `EmailSender`). **El correo es simulado**, como indicó el profesor Libardo: el
+servicio reacciona al evento y registra el envío en lugar de salir a un servidor de correo, para no bloquear
+cuentas en las pruebas. Si algún día se pide correo real, solo cambia el adaptador del puerto `EmailSender`. Se notifica solo a los involucrados:
 administrador, revisores y autor.
 
 ## Quién recibe qué
