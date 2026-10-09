@@ -19,8 +19,8 @@
     <description>Microservicios del Banco de Preguntas Saber Pro</description>
 
     <modules>
-        <module>bp-platform</module>
-        <module>question-service</module>
+        <module>plataforma/bp-platform</module>
+        <module>servicios/question-service</module>
     </modules>
 
     <properties>

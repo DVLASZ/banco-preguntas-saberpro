@@ -1,0 +1,167 @@
+{
+  "info": {
+    "name": "question-service",
+    "description": "Colección de pruebas del servicio de preguntas. Por defecto llama directamente al servicio (puerto 8082) con la identidad en las cabeceras X-User-Id y X-User-Roles. Cambia las variables baseUrl, userId y roles según lo que pruebes: autor (AUTHOR) o administrador (ADMIN).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8082" },
+    { "key": "userId", "value": "autor1" },
+    { "key": "roles", "value": "AUTHOR" },
+    { "key": "questionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Crear pregunta (autor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Creada', () => pm.response.to.have.status(201));",
+              "const cuerpo = pm.response.json();",
+              "pm.collectionVariables.set('questionId', cuerpo.id);",
+              "pm.test('queda en BORRADOR', () => pm.expect(cuerpo.estado).to.eql('BORRADOR'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-User-Id", "value": "{{userId}}" },
+          { "key": "X-User-Roles", "value": "{{roles}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Patrón Observer\",\n  \"contexto\": \"Una aplicación debe actualizar varias ventanas cuando cambian los datos.\",\n  \"enunciado\": \"¿Qué patrón notifica a varios objetos cuando cambia el estado de otro?\",\n  \"opcionA\": \"Factory\",\n  \"opcionB\": \"Observer\",\n  \"opcionC\": \"Singleton\",\n  \"opcionD\": \"Adapter\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"Observer define una dependencia uno a muchos.\",\n  \"bibliografia\": \"Gamma et al. (1994).\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"subtema\": \"Observer\",\n  \"dificultad\": \"INTERMEDIO\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/questions", "host": ["{{baseUrl}}"], "path": ["api", "questions"] }
+      }
+    },
+    {
+      "name": "Listar mis preguntas (autor)",
+      "event": [
+        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-User-Id", "value": "{{userId}}" },
+          { "key": "X-User-Roles", "value": "{{roles}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/questions?page=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "questions"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "10" },
+            { "key": "estado", "value": "BORRADOR", "disabled": true },
+            { "key": "competencia", "value": "LECTURA_CRITICA", "disabled": true },
+            { "key": "texto", "value": "observer", "disabled": true }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ver una pregunta",
+      "event": [
+        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-User-Id", "value": "{{userId}}" },
+          { "key": "X-User-Roles", "value": "{{roles}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}"] }
+      }
+    },
+    {
+      "name": "Modificar una pregunta en borrador (autor)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "X-User-Id", "value": "{{userId}}" },
+          { "key": "X-User-Roles", "value": "{{roles}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Patrón Observer (corregida)\",\n  \"contexto\": \"Una aplicación debe actualizar varias ventanas cuando cambian los datos.\",\n  \"enunciado\": \"¿Qué patrón notifica a varios objetos cuando cambia el estado de otro?\",\n  \"opcionA\": \"Factory\",\n  \"opcionB\": \"Observer\",\n  \"opcionC\": \"Singleton\",\n  \"opcionD\": \"Adapter\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"Observer define una dependencia uno a muchos entre objetos.\",\n  \"bibliografia\": \"Gamma et al. (1994).\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"subtema\": \"Observer\",\n  \"dificultad\": \"INTERMEDIO\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}"] }
+      }
+    },
+    {
+      "name": "Enviar a revisión (autor)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('pasa a PENDIENTE_REVISION', () => pm.expect(pm.response.json().estado).to.eql('PENDIENTE_REVISION'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-User-Id", "value": "{{userId}}" },
+          { "key": "X-User-Roles", "value": "{{roles}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}/submit", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}", "submit"] }
+      }
+    },
+    {
+      "name": "Reabrir una pregunta rechazada (autor)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-User-Id", "value": "{{userId}}" },
+          { "key": "X-User-Roles", "value": "{{roles}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}/reopen", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}", "reopen"] }
+      }
+    },
+    {
+      "name": "Listar todas las preguntas (administrador)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-User-Id", "value": "admin" },
+          { "key": "X-User-Roles", "value": "ADMIN" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/questions/all?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "questions", "all"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+      }
+    },
+    {
+      "name": "Listar pendientes de revisión (administrador)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-User-Id", "value": "admin" },
+          { "key": "X-User-Roles", "value": "ADMIN" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/questions/pending-review?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "questions", "pending-review"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
+      }
+    },
+    {
+      "name": "Publicar una pregunta aprobada (administrador)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-User-Id", "value": "admin" },
+          { "key": "X-User-Roles", "value": "ADMIN" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}/publish", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}", "publish"] }
+      }
+    }
+  ]
+}

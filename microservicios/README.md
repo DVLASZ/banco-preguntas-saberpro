@@ -1,22 +1,28 @@
 # Microservicios del Banco de Preguntas Saber Pro
 
 Segunda iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
-corte se conserva en la rama `corte-1` y en los módulos de la raíz. El diseño está en
-[`docs/segundo-corte`](../docs/segundo-corte/README.md) y la forma de reutilizar el monolito en
-[`reutilizacion-del-monolito.md`](../docs/segundo-corte/anexos/reutilizacion-del-monolito.md).
+corte se conserva en la carpeta [`monolito/`](../monolito/README.md) y en la rama `corte-1`. El diseño está en
+[`docs/corte-2`](../docs/corte-2/README.md) y la forma de reutilizar el monolito en
+[`reutilizacion-del-monolito.md`](../docs/general/reutilizacion-del-monolito.md).
 
 > Proyecto Maven independiente del monolito: para abrirlo en el IDE, añade `microservicios/pom.xml` como proyecto
 > Maven.
 
-## Estado
+## Organización de la carpeta
 
-| Módulo | Función | Puerto |
-|---|---|---|
-| [bp-platform](bp-platform/) | Biblioteca común: sobre de eventos, publicación (Outbox), manejo de errores, identidad del usuario, OpenAPI | — |
-| [question-service](question-service/) | HU-01 a HU-03: preguntas, validación estructural y ciclo de vida, con eventos | 8082 |
+```
+microservicios/
+├── pom.xml                  Pom padre: compila todos los módulos
+├── docker-compose.yml       PostgreSQL, RabbitMQ y question-service con un solo comando
+├── .env.example             Variables de entorno de desarrollo
+├── plataforma/
+│   └── bp-platform/         Biblioteca común: sobre de eventos, Outbox, errores, identidad del usuario, OpenAPI
+└── servicios/
+    └── question-service/    HU-01 a HU-03: preguntas, validación estructural y ciclo de vida, con eventos (puerto 8082)
+```
 
 Los demás servicios (revisión, notificaciones, historial, usuarios), el gateway y Keycloak se agregan en las
-siguientes partes.
+siguientes partes, en `servicios/` e `infraestructura/`.
 
 ## Requisitos
 

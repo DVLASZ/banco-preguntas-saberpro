@@ -55,7 +55,7 @@ services:
   question-service:
     build:
       context: .
-      dockerfile: question-service/Dockerfile
+      dockerfile: servicios/question-service/Dockerfile
     image: bancopreguntas/question-service:0.1.0
     restart: unless-stopped
     depends_on:
