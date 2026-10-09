@@ -8,28 +8,28 @@
         <groupId>co.unicauca.saberpro</groupId>
         <artifactId>banco-preguntas-saberpro</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>modulo-revision</artifactId>
+    <artifactId>modulo-usuarios</artifactId>
     <packaging>jar</packaging>
 
-    <name>Modulo de Revision (HU-04)</name>
+    <name>Modulo de Usuarios</name>
     <description>
-        Asignacion de revisores a las preguntas pendientes de revision (HU-04,
-        RF-16): el Administrador elige al menos un revisor por pregunta, la
-        pregunta pasa a En revision y el sistema notifica a los revisores por
-        correo (simulado). Depende de modulo-preguntas (preguntas y estados) y
-        de modulo-usuarios (para conocer a los revisores).
+        Autenticacion, registro y roles (RF-01 a RF-03). No depende de
+        ningun otro modulo del proyecto: es la base sobre la que se
+        construyen los demas (preguntas, simulacros solo lo consultan a
+        traves de la entidad User y del rol autenticado).
     </description>
 
     <dependencies>
         <dependency>
-            <groupId>co.unicauca.saberpro</groupId>
-            <artifactId>modulo-preguntas</artifactId>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>co.unicauca.saberpro</groupId>
-            <artifactId>modulo-usuarios</artifactId>
+            <groupId>de.mkammerer</groupId>
+            <artifactId>argon2-jvm</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

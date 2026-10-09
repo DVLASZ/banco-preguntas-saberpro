@@ -25,12 +25,12 @@
     </description>
 
     <modules>
-        <module>modulo-usuarios</module>
-        <module>modulo-preguntas</module>
-        <module>modulo-simulacros</module>
-        <module>modulo-microkernel</module>
-        <module>modulo-revision</module>
-        <module>modulo-api-rest</module>
+        <module>modulos/modulo-usuarios</module>
+        <module>modulos/modulo-preguntas</module>
+        <module>modulos/modulo-simulacros</module>
+        <module>modulos/modulo-microkernel</module>
+        <module>modulos/modulo-revision</module>
+        <module>modulos/modulo-api-rest</module>
         <module>app</module>
     </modules>
 

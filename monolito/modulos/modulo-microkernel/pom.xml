@@ -8,21 +8,28 @@
         <groupId>co.unicauca.saberpro</groupId>
         <artifactId>banco-preguntas-saberpro</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>modulo-preguntas</artifactId>
+    <artifactId>modulo-microkernel</artifactId>
     <packaging>jar</packaging>
 
-    <name>Modulo de Preguntas</name>
+    <name>Modulo Microkernel (Taller 5)</name>
     <description>
-        Gestion del banco de preguntas: redaccion, ciclo de vida RF-14 y
-        revision por pares (RF-15/RF-16). Aplica capas + MVC + Observer.
-        No depende de ningun otro modulo del proyecto — es intencional:
-        el modulo de simulacros depende de este, y no al reves, para no
-        crear un ciclo entre modulos.
+        Arquitectura Microkernel (Plug-in) para tipos de pregunta
+        extensibles, combinada con el patron Tuberias y Filtros para
+        validar el contenido antes de generarlas. Los plugins se cargan
+        dinamicamente por Reflexion desde plugins.properties. Depende de
+        modulo-preguntas porque las preguntas que generan los plugins son
+        preguntas reales del banco (Question, Competencia, Dificultad),
+        no una entidad de juguete aparte.
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>co.unicauca.saberpro</groupId>
+            <artifactId>modulo-preguntas</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>

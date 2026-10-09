@@ -14,9 +14,9 @@ La planificación se lleva en Jira, en el tablero **SCRUM Sprint 1**:
 
 | Historia | Descripción | Puntos | Responsable |
 |---|---|---|---|
-| HU-01 (SCRUM-7) | Crear pregunta de selección múltiple | 5 | Edward Dávila |
-| HU-02 (SCRUM-8) | Cambiar el estado de "Borrador" a "Pendiente de revisión" | 3 | Edward Dávila |
-| HU-03 (SCRUM-9) | Listar preguntas creadas | 5 | Edward Dávila |
+| HU-01 (SCRUM-7) | Crear pregunta de selección múltiple | 5 | Edward Esteban Dávila Salazar |
+| HU-02 (SCRUM-8) | Cambiar el estado de "Borrador" a "Pendiente de revisión" | 3 | Edward Esteban Dávila Salazar |
+| HU-03 (SCRUM-9) | Listar preguntas creadas | 5 | Edward Esteban Dávila Salazar |
 | HU-04 (SCRUM-24) | Asignar revisor a preguntas pendientes de revisión | 5 | Kevin Yesid Castaño Herrera |
 | HU-T6 (SCRUM-30) | Exponer el CRUD de preguntas como microservicio REST (Taller 6) | 5 | Laura Isabel Sánchez Fernández |
 

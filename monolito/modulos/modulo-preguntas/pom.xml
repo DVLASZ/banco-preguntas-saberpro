@@ -8,29 +8,22 @@
         <groupId>co.unicauca.saberpro</groupId>
         <artifactId>banco-preguntas-saberpro</artifactId>
         <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>modulo-simulacros</artifactId>
+    <artifactId>modulo-preguntas</artifactId>
     <packaging>jar</packaging>
 
-    <name>Modulo de Simulacros</name>
+    <name>Modulo de Preguntas</name>
     <description>
-        Generacion de simulacros por el Docente y presentacion/calificacion
-        por el Estudiante (HU-12 a HU-14). Depende de modulo-preguntas
-        (reutiliza QuestionService.buscarPublicadas y la entidad Question)
-        y de modulo-usuarios (la ventana del Estudiante necesita saber que
-        usuario esta presentando el simulacro).
+        Gestion del banco de preguntas: redaccion, ciclo de vida RF-14 y
+        revision por pares (RF-15/RF-16). Aplica capas + MVC + Observer.
+        No depende de ningun otro modulo del proyecto — es intencional:
+        el modulo de simulacros depende de este, y no al reves, para no
+        crear un ciclo entre modulos.
     </description>
 
     <dependencies>
-        <dependency>
-            <groupId>co.unicauca.saberpro</groupId>
-            <artifactId>modulo-preguntas</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>co.unicauca.saberpro</groupId>
-            <artifactId>modulo-usuarios</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
