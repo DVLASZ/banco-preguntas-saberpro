@@ -22,4 +22,15 @@ selección parte de los patrones ya presentes en el primer corte y agrega uno es
 
 ## Patrones de arquitectura de microservicios
 
-API Gateway, base de datos por servicio, arquitectura orientada a eventos y consumidor idempotente.
+| Patrón | Dónde |
+|---|---|
+| API Gateway | `api-gateway` (Spring Cloud Gateway): entrada única, autorización, CORS |
+| Service Registry y Discovery | Eureka; las réplicas se registran solas |
+| Base de datos por servicio | Cinco instancias de PostgreSQL |
+| Arquitectura orientada a eventos | RabbitMQ, exchange *topic* `bancopreguntas.events` |
+| Consumidor idempotente | Tabla `processed_event` en cada consumidor |
+| **Transactional Outbox** | question, review y user: el evento se guarda con el cambio y un relevo lo publica |
+| Circuit Breaker, Retry y Bulkhead | Gateway (Resilience4J) |
+| Dead Letter Queue | `bancopreguntas.dead-letter`, por política de RabbitMQ |
+| Seguridad con JWT | Keycloak, validado en gateway y servicios |
+| Balanceo de carga | `edge` (nginx) delante de las réplicas del gateway |

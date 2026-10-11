@@ -12,7 +12,7 @@ flowchart TB
     QS["Gestión de Preguntas, Validación<br/>y Ciclo de Vida<br/>question-service"]
     RS["Revisión por Pares<br/>review-service"]
     NS["Notificaciones<br/>notification-service"]
-    AS["Administración y Trazabilidad<br/>audit-service (opcional)"]
+    AS["Administración y Trazabilidad<br/>history-service"]
   end
   subgraph Futuros
     SIM["Simulacros de Evaluación"]
@@ -29,13 +29,13 @@ flowchart TB
 
 | Contexto del docente | Servicio | Alcance |
 |---|---|---|
-| Gestión de Usuarios | `user-service` | Usuarios precargados, roles (administrador, autor, revisor) y login |
+| Gestión de Usuarios | `user-service` | Sincroniza los usuarios y roles de Keycloak y publica los eventos de acceso |
 | Gestión de Preguntas | `question-service` | HU-01 a HU-03 |
 | Validación de Preguntas | `question-service` | Módulo interno (reglas de validación estructural) |
 | Ciclo de Vida de Preguntas | `question-service` | Módulo interno (máquina de estados) |
 | Revisión por Pares | `review-service` | HU-04 y HU-05 |
 | (transversal) | `notification-service` | Correo y bandeja de notificaciones |
-| Administración y Trazabilidad | `audit-service` | Opcional: guarda todos los eventos |
+| Administración y Trazabilidad | `history-service` | Historial por pregunta y auditoría de accesos (consume todos los eventos) |
 | Simulacros de Evaluación | — | Corte 3 |
 | Seguimiento Académico | — | Corte 3 |
 
@@ -60,11 +60,14 @@ un sobre común y un cuerpo pequeño con identificadores, no copias de las entid
 
 | Evento | Lo publica | Lo consumen | Efecto |
 |---|---|---|---|
-| `question.submitted` | question-service | review-service, audit-service | Crea el caso de revisión pendiente de asignar |
-| `review.reviewers-assigned` | review-service | question-service, notification-service, audit-service | La pregunta pasa a "En revisión"; se avisa a cada revisor |
-| `review.evaluation-submitted` | review-service | notification-service, audit-service | Se avisa al administrador y al autor de la nueva evaluación |
-| `review.completed` | review-service | question-service, notification-service, audit-service | La pregunta pasa a Aprobada o Rechazada; se avisa a todos |
-| `question.state-changed` | question-service | audit-service | Traza del ciclo de vida |
+| `question.submitted` | question-service | review-service, history-service | Crea el caso de revisión pendiente de asignar |
+| `review.reviewers-assigned` | review-service | question-service, notification-service, history-service | La pregunta pasa a "En revisión"; se avisa a cada revisor |
+| `review.evaluation-submitted` | review-service | notification-service, history-service | Se avisa al administrador y al autor de la nueva evaluación |
+| `review.completed` | review-service | question-service, notification-service, history-service | La pregunta pasa a Aprobada o Rechazada; se avisa a todos |
+| `question.state-changed` | question-service | history-service | Traza del ciclo de vida |
+| `question.reopened` | question-service | review-service, history-service | El autor corrige una pregunta rechazada u observada y abre una nueva ronda de revisión |
+| `question.published` | question-service | history-service, notification-service | El administrador publica una pregunta aprobada |
+| `auth.login-succeeded` / `auth.login-failed` | user-service | history-service | Auditoría de inicios de sesión, tomados de los eventos de Keycloak |
 
 Cuerpo (`data`) de cada evento:
 
@@ -101,3 +104,15 @@ sequenceDiagram
   MQ->>QS: pasa a Aprobada o Rechazada
   MQ->>NS: correo al autor y al administrador
 ```
+
+## Cambios respecto al diseño inicial (implementación)
+
+- El servicio opcional de auditoría se implementó como **`history-service`**: guarda el historial de cada pregunta
+  y la auditoría de accesos, y alimenta la pantalla de historial y de auditoría del administrador.
+- Se añadieron los eventos `question.reopened`, `question.published` y `auth.*` (tabla de arriba). Los eventos de
+  revisión llevan además el número de **ronda** y, cuando corresponde, las banderas `automatic` (reasignación
+  automática de revisores) y `late` (observación recibida cuando la ronda ya se había cerrado).
+- Los eventos de `question-service`, `review-service` y `user-service` se publican con el **patrón Outbox** (se
+  guardan en la misma transacción que el cambio y un relevo los envía), de modo que no se pierden si RabbitMQ está
+  caído.
+- Un mensaje que falla tras 4 reintentos va a la cola de mensajes muertos `bancopreguntas.dead-letter`.

@@ -4,8 +4,9 @@ Documentación de la **segunda iteración** del Sistema de Banco de Preguntas Sa
 del monolito del primer corte a una solución distribuida con **microservicios orientados a eventos**.
 Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 2026.2.
 
-> Estado: documentación de diseño de la iteración, publicada en la rama `corte-2`. La implementación se publica por
-> partes; ver el [README de microservicios](../../microservicios/README.md) para lo disponible hoy.
+> Estado: implementación de la iteración en la rama `corte-2`, que se publica por partes (servicios, gateway,
+> Keycloak, frontend, pruebas de carga y Outbox). Quedan para el corte 3 la arquitectura hexagonal/DDD, HU-06 y
+> el pitch.
 
 | Documento | Contenido |
 |---|---|

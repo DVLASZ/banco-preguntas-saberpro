@@ -1,7 +1,7 @@
 # 07 · Planificación del Sprint 2
 
 Tablero en Jira: proyecto **SCRUM**, sprint **SCRUM Sprint 2**, del **13 al 30 de octubre de 2026**.
-Responsables sin asignar todavía.
+Estado al cierre de la implementación: todas las historias y tareas técnicas del sprint están construidas y verificadas; la arquitectura hexagonal/DDD queda para el corte 3.
 
 ## Épicas
 
@@ -28,8 +28,7 @@ Responsables sin asignar todavía.
 | SCRUM-49 | HU-T14 Frontend web separado | Por definir |
 | SCRUM-50 | HU-T15 Modelado y prototipos | SCRUM-69 a 71 |
 
-Las subtareas de `review-service`, `notification-service`, HU-05 y HU-04b se crearán cuando se confirmen
-con los docentes las reglas de revisión y de correo.
+Las reglas de revisión (1 a 3 revisores, unanimidad, rondas por versión, reasignación automática) y de correo se confirmaron con el docente el 5 de octubre y están implementadas.
 
 ## Captura del tablero
 

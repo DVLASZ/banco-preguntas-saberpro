@@ -27,21 +27,30 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  FE["Frontend web<br/>Angular o React"]
+  FE["Frontend web<br/>Angular"]
+  EDGE["edge<br/>nginx (balanceador)"]
+  KC["Keycloak<br/>identidad (JWT)"]
+  EU["discovery-server<br/>Eureka"]
   GW["api-gateway<br/>Spring Cloud Gateway<br/>valida token y rol"]
   US["user-service<br/>Spring Boot"]
   QS["question-service<br/>Spring Boot"]
   RS["review-service<br/>Spring Boot"]
   NS["notification-service<br/>Spring Boot"]
-  AS["audit-service<br/>Spring Boot (opcional)"]
+  AS["history-service<br/>Spring Boot"]
   MQ{{"RabbitMQ<br/>exchange bancopreguntas.events"}}
   SMTP["Servidor SMTP"]
   DU[("user_db<br/>PostgreSQL")]
   DQ[("question_db<br/>PostgreSQL")]
   DR[("review_db<br/>PostgreSQL")]
   DN[("notification_db<br/>PostgreSQL")]
-  DA[("audit_db<br/>PostgreSQL")]
-  FE -- "REST/JSON" --> GW
+  DA[("history_db<br/>PostgreSQL")]
+  FE -- "REST/JSON" --> EDGE
+  FE -. "login PKCE" .-> KC
+  EDGE --> GW
+  GW -. "registro" .-> EU
+  GW -. "claves públicas" .-> KC
+  US -. "eventos de acceso" .-> KC
+  GW --> AS
   GW --> US
   GW --> QS
   GW --> RS
@@ -60,12 +69,15 @@ flowchart TB
 
 | Contenedor | Responsabilidad | Puerto |
 |---|---|---|
-| api-gateway | Entrada única, enrutamiento, validación del token y autorización por rol | 8080 |
-| user-service | Usuarios precargados, roles, login y lista de revisores | 8081 |
-| question-service | Preguntas, validación estructural y ciclo de vida | 8082 |
-| review-service | Asignación de revisores, evaluaciones y observaciones | 8083 |
-| notification-service | Consume eventos, envía correo y guarda la bandeja | 8084 |
-| audit-service | Registra todos los eventos (opcional) | 8085 |
+| edge | Balanceador nginx delante de las réplicas del gateway | 8080 |
+| api-gateway | Enrutamiento por Eureka, validación del token, autorización por rol, circuit breaker y reintentos | interno |
+| discovery-server | Registro de servicios (Eureka) | 8761 |
+| keycloak | Proveedor de identidad: inicio de sesión, roles y token JWT | 8180 |
+| user-service | Sincroniza usuarios y roles de Keycloak; consulta sus eventos de acceso | 8081 (depuración) |
+| question-service | Preguntas, validación estructural y ciclo de vida | 8082 (depuración) |
+| review-service | Asignación de revisores, rondas de evaluación y observaciones | 8083 (depuración) |
+| notification-service | Consume eventos, envía correo y guarda la bandeja | 8084 (depuración) |
+| history-service | Historial por pregunta y auditoría de accesos | 8085 (depuración) |
 | RabbitMQ | Broker de eventos | 5672, panel 15672 |
 
 ## C4 · Nivel 3: componentes
@@ -325,7 +337,7 @@ erDiagram
   }
 ```
 
-### notification_db y audit_db
+### notification_db y history_db
 
 ```mermaid
 erDiagram
@@ -345,7 +357,7 @@ erDiagram
     uuid event_id PK
     timestamp processed_at
   }
-  AUDIT_EVENT {
+  HISTORY_ENTRY {
     uuid id PK
     uuid event_id
     string type
@@ -355,33 +367,8 @@ erDiagram
   }
 ```
 
-`review_db` y `notification_db` también guardan `PROCESSED_EVENT` para la idempotencia de sus consumidores.
+Todos los consumidores guardan `PROCESSED_EVENT` (idempotencia). `question_db`, `review_db` y `user_db` guardan además `OUTBOX_EVENT` (patrón Outbox: `seq`, `event_id`, `routing_key`, `payload`, `created_at`, `sent_at`).
 
 ## Despliegue
 
-```mermaid
-flowchart TB
-  subgraph docker["Docker Compose"]
-    GW["api-gateway :8080"]
-    US["user-service :8081"]
-    QS["question-service :8082 (réplicas)"]
-    RS["review-service :8083"]
-    NS["notification-service :8084"]
-    MQ["RabbitMQ :5672"]
-    MP["Mailpit :1025 (pruebas)"]
-    D1[("PostgreSQL user_db")]
-    D2[("PostgreSQL question_db")]
-    D3[("PostgreSQL review_db")]
-    D4[("PostgreSQL notification_db")]
-  end
-  FE["Frontend web :4200"] --> GW
-  GW --> US
-  GW --> QS
-  GW --> RS
-  GW --> NS
-  US --- D1
-  QS --- D2
-  RS --- D3
-  NS --- D4
-  NS --> MP
-```
+El despliegue completo (con `edge`, Eureka, Keycloak y las réplicas) se levanta con `docker compose up -d --build` desde `microservicios/`; los servicios de negocio no publican puertos al exterior (solo `docker-compose.debug.yml`).
