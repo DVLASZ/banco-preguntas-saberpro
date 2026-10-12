@@ -22,6 +22,7 @@
         <module>plataforma/bp-platform</module>
         <module>servicios/question-service</module>
         <module>servicios/review-service</module>
+        <module>servicios/notification-service</module>
     </modules>
 
     <properties>
