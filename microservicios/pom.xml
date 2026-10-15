@@ -23,6 +23,7 @@
         <module>servicios/question-service</module>
         <module>servicios/review-service</module>
         <module>servicios/notification-service</module>
+        <module>servicios/user-service</module>
     </modules>
 
     <properties>
