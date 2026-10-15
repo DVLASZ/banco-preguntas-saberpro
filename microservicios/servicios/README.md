@@ -6,7 +6,7 @@ Docker y su propio Swagger. Los servicios no se llaman entre sí: se comunican p
 | Servicio | Función | Estado |
 |---|---|---|
 | [`question-service`](question-service/) | Preguntas, validación estructural y ciclo de vida (HU-01 a HU-03) | Publicado |
-| `review-service` | Asignación de revisores, rondas de evaluación y decisión por unanimidad | Por publicar |
+| [`review-service`](review-service/) | Asignación de revisores, rondas de evaluación y decisión por unanimidad | Publicado |
 | [`notification-service`](notification-service/) | Bandeja de notificaciones y correo simulado | Publicado |
 | `history-service` | Historial de revisiones por pregunta | Por publicar |
 | `user-service` | Usuarios y roles | Por publicar |
