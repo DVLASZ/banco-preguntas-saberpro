@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Las claves públicas se piden a Keycloak (dirección interna) y el emisor debe ser el que ven los navegadores.
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/bancopreguntas/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/bancopreguntas}
+
+server:
+  port: ${GATEWAY_PORT:8080}
+
+gateway:
+  cors:
+    # Orígenes del navegador que pueden llamar al gateway (separados por comas).
+    allowed-origins: ${GATEWAY_ALLOWED_ORIGINS:http://localhost:4200}
+  # Cuánto espera una respuesta de un servicio antes de dar el circuito por fallido.
+  timeout: ${GATEWAY_TIMEOUT:10s}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+# Un solo Swagger para todos los servicios: cada documento se pide a través del gateway.
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: question-service
+        url: /docs/question-service/v3/api-docs
+      - name: review-service
+        url: /docs/review-service/v3/api-docs
+      - name: notification-service
+        url: /docs/notification-service/v3/api-docs
+      - name: history-service
+        url: /docs/history-service/v3/api-docs
+      - name: user-service
+        url: /docs/user-service/v3/api-docs
+    persist-authorization: true
