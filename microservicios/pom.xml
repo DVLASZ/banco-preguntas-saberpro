@@ -24,6 +24,7 @@
         <module>servicios/review-service</module>
         <module>servicios/notification-service</module>
         <module>servicios/user-service</module>
+        <module>infraestructura/discovery-server</module>
         <module>infraestructura/api-gateway</module>
     </modules>
 

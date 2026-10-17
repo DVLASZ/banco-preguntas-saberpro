@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: discovery-server
+
+server:
+  port: ${DISCOVERY_SERVER_PORT:8761}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+  client:
+    # Este servidor es el registro: no se registra en sí mismo ni consulta a otros.
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # En desarrollo una réplica caída debe salir del registro en segundos, no en minutos.
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 5000
+    # Sin caché de solo lectura: una réplica nueva o caída se ve de inmediato.
+    use-read-only-response-cache: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
