@@ -1,14 +1,15 @@
-# Infraestructura y servicio de preguntas del Banco de Preguntas Saber Pro (primera parte).
+# Infraestructura y servicios del Banco de Preguntas Saber Pro.
 #
-# Una instancia de PostgreSQL por microservicio (cada servicio posee sus datos) y un broker RabbitMQ para los
-# eventos. Los valores por defecto sirven para desarrollo local; para cambiarlos copia .env.example a .env y
-# edítalo (el archivo .env no se versiona).
+# Una instancia de PostgreSQL por microservicio (cada servicio posee sus datos), un broker RabbitMQ para los
+# eventos y Keycloak para la autenticación (JWT). Los valores por defecto sirven para desarrollo local; para
+# cambiarlos copia .env.example a .env y edítalo (el archivo .env no se versiona).
 #
-#   docker compose up -d --build     # PostgreSQL, RabbitMQ y question-service
-#   docker compose up -d postgres-question rabbitmq   # solo la infraestructura (el servicio desde el IDE)
+#   docker compose up -d --build              # todo
+#   docker compose up -d --scale review-service=3    # varias réplicas de un servicio (sin puerto fijo)
+#   SECURITY_MODE=headers docker compose up -d       # sin tokens: la identidad llega en X-User-Id / X-User-Roles
 #
-# En esta parte no hay autenticación con tokens: la identidad llega en las cabeceras X-User-Id y X-User-Roles
-# (modo "headers"). Los servicios que faltan, el gateway y Keycloak se agregan en las siguientes partes.
+# Keycloak: http://localhost:8180 (administración: usuario y clave de KEYCLOAK_ADMIN_*). El realm
+# "bancopreguntas" se importa de keycloak/bancopreguntas-realm.json con los usuarios de prueba.
 name: bancopreguntas
 
 x-postgres: &postgres
@@ -20,7 +21,30 @@ x-postgres: &postgres
     timeout: 3s
     retries: 10
 
+# Variables comunes de los servicios: broker y seguridad. En modo jwt cada servicio valida el token con las
+# claves públicas de Keycloak (dirección interna) y comprueba que el emisor sea el que ven los navegadores.
+x-service-env: &service-env
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+  BANCOPREGUNTAS_SECURITY_MODE: ${SECURITY_MODE:-jwt}
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bancopreguntas/protocol/openid-connect/certs
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}/realms/bancopreguntas
+  EUREKA_URL: http://discovery-server:8761/eureka
+
 services:
+  # ------------------------------------------------------------------ bases de datos
+  postgres-user:
+    <<: *postgres
+    container_name: bp-postgres-user
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: ${USER_DB_USER:-userdb}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD:-userdb}
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-data:/var/lib/postgresql/data
 
   postgres-question:
     <<: *postgres
@@ -34,6 +58,43 @@ services:
     volumes:
       - question-data:/var/lib/postgresql/data
 
+  postgres-review:
+    <<: *postgres
+    container_name: bp-postgres-review
+    environment:
+      POSTGRES_DB: review_db
+      POSTGRES_USER: ${REVIEW_DB_USER:-review}
+      POSTGRES_PASSWORD: ${REVIEW_DB_PASSWORD:-review}
+    ports:
+      - "5435:5432"
+    volumes:
+      - review-data:/var/lib/postgresql/data
+
+  postgres-notification:
+    <<: *postgres
+    container_name: bp-postgres-notification
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: ${NOTIFICATION_DB_USER:-notification}
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD:-notification}
+    ports:
+      - "5436:5432"
+    volumes:
+      - notification-data:/var/lib/postgresql/data
+
+  postgres-history:
+    <<: *postgres
+    container_name: bp-postgres-history
+    environment:
+      POSTGRES_DB: history_db
+      POSTGRES_USER: ${HISTORY_DB_USER:-history}
+      POSTGRES_PASSWORD: ${HISTORY_DB_PASSWORD:-history}
+    ports:
+      - "5437:5432"
+    volumes:
+      - history-data:/var/lib/postgresql/data
+
+  # ------------------------------------------------------------------ infraestructura
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: bp-rabbitmq
@@ -52,6 +113,78 @@ services:
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: bp-keycloak
+    restart: unless-stopped
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # El emisor de los tokens es siempre la dirección pública, entre otras cosas para que coincida con la
+      # que ven el navegador y los servicios; la interna (keycloak:8080) sigue sirviendo las claves.
+      KC_HOSTNAME: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./infraestructura/keycloak:/opt/keycloak/data/import:ro
+    healthcheck:
+      # La imagen no trae curl: se consulta el puerto de gestión (9000) con bash.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q '\"status\": \"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+
+  discovery-server:
+    build:
+      context: .
+      dockerfile: infraestructura/discovery-server/Dockerfile
+    image: bancopreguntas/discovery-server:0.1.0
+    container_name: bp-discovery-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"   # panel de Eureka: qué réplicas hay de cada servicio
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  # ------------------------------------------------------------------ servicios
+  user-service:
+    build:
+      context: .
+      dockerfile: servicios/user-service/Dockerfile
+    image: bancopreguntas/user-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      USER_DB_URL: jdbc:postgresql://postgres-user:5432/user_db
+      USER_DB_USER: ${USER_DB_USER:-userdb}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD:-userdb}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-client-secret}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
   question-service:
     build:
       context: .
@@ -63,14 +196,10 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    ports:
-      - "8082:8082"
+      discovery-server:
+        condition: service_healthy
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
-      BANCOPREGUNTAS_SECURITY_MODE: ${SECURITY_MODE:-headers}
-      EUREKA_CLIENT_ENABLED: "false"   # todavía no hay servidor de descubrimiento
+      <<: *service-env
       QUESTION_DB_URL: jdbc:postgresql://postgres-question:5432/question_db
       QUESTION_DB_USER: ${QUESTION_DB_USER:-question}
       QUESTION_DB_PASSWORD: ${QUESTION_DB_PASSWORD:-question}
@@ -81,6 +210,166 @@ services:
       retries: 12
       start_period: 40s
 
+  review-service:
+    build:
+      context: .
+      dockerfile: servicios/review-service/Dockerfile
+    image: bancopreguntas/review-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-review:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      REVIEW_DB_URL: jdbc:postgresql://postgres-review:5432/review_db
+      REVIEW_DB_USER: ${REVIEW_DB_USER:-review}
+      REVIEW_DB_PASSWORD: ${REVIEW_DB_PASSWORD:-review}
+      REVIEW_MAX_REVIEWERS: ${REVIEW_MAX_REVIEWERS:-5}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: servicios/notification-service/Dockerfile
+    image: bancopreguntas/notification-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-notification:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      NOTIFICATION_DB_URL: jdbc:postgresql://postgres-notification:5432/notification_db
+      NOTIFICATION_DB_USER: ${NOTIFICATION_DB_USER:-notification}
+      NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD:-notification}
+      NOTIFICATION_EMAIL_DOMAIN: ${NOTIFICATION_EMAIL_DOMAIN:-bancopreguntas.local}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  history-service:
+    build:
+      context: .
+      dockerfile: servicios/history-service/Dockerfile
+    image: bancopreguntas/history-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-history:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      HISTORY_DB_URL: jdbc:postgresql://postgres-history:5432/history_db
+      HISTORY_DB_USER: ${HISTORY_DB_USER:-history}
+      HISTORY_DB_PASSWORD: ${HISTORY_DB_PASSWORD:-history}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8085/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: infraestructura/api-gateway/Dockerfile
+    image: bancopreguntas/api-gateway:0.1.0
+    restart: unless-stopped
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bancopreguntas/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}/realms/bancopreguntas
+      GATEWAY_ALLOWED_ORIGINS: ${GATEWAY_ALLOWED_ORIGINS:-http://localhost:4200}
+      # DEBUG deja en el registro cada error que cuenta para el circuit breaker (por defecto solo sus cambios de estado).
+      LOGGING_LEVEL_CO_UNICAUCA_BANCOPREGUNTAS_GATEWAY_CONFIG: ${GATEWAY_LOG_LEVEL:-INFO}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  # Balanceador de entrada delante de las réplicas del gateway. Con él, el gateway también escala:
+  #   docker compose up -d --scale api-gateway=3
+  edge:
+    image: nginx:1.27-alpine
+    container_name: bp-edge
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    volumes:
+      - ./infraestructura/edge/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:8080"   # única puerta de entrada de la API
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/edge-health | grep -q UP"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+  # Cola de mensajes muertos: un mensaje que falla tras todos los reintentos del consumidor se guarda en
+  # bancopreguntas.dead-letter para revisarlo, en lugar de perderse. Se aplica por política (no cambia las colas).
+  rabbitmq-policy:
+    image: curlimages/curl:8.10.1
+    container_name: bp-rabbitmq-policy
+    restart: "no"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        U="$${RABBITMQ_USER}:$${RABBITMQ_PASSWORD}"; A=http://rabbitmq:15672/api
+        curl -sSf -u "$$U" -X PUT -H 'content-type: application/json' -d '{"type":"fanout","durable":true}' $$A/exchanges/%2F/bancopreguntas.dlx &&
+        curl -sSf -u "$$U" -X PUT -H 'content-type: application/json' -d '{"durable":true}' $$A/queues/%2F/bancopreguntas.dead-letter &&
+        curl -sSf -u "$$U" -X POST -H 'content-type: application/json' -d '{"routing_key":""}' $$A/bindings/%2F/e/bancopreguntas.dlx/q/bancopreguntas.dead-letter &&
+        curl -sSf -u "$$U" -X PUT -H 'content-type: application/json' -d '{"pattern":"[.]q[.]","apply-to":"queues","definition":{"dead-letter-exchange":"bancopreguntas.dlx"},"priority":1}' $$A/policies/%2F/dead-letter &&
+        echo "politica de mensajes muertos aplicada"
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+
+  frontend:
+    build:
+      context: ../frontend
+    image: bancopreguntas/frontend:0.1.0
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    ports:
+      - "4200:80"   # aplicación web
+    # Las direcciones del API y de Keycloak salen de config.json; para otro entorno, móntalo:
+    #   volumes: ["./mi-config.json:/usr/share/nginx/html/config.json:ro"]
+
 volumes:
+  user-data:
   question-data:
+  review-data:
+  notification-data:
+  history-data:
   rabbitmq-data:
