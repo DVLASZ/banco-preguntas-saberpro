@@ -9,7 +9,7 @@ Docker y su propio Swagger. Los servicios no se llaman entre sí: se comunican p
 | [`review-service`](review-service/) | Asignación de revisores, rondas de evaluación y decisión por unanimidad | Publicado |
 | [`notification-service`](notification-service/) | Bandeja de notificaciones y correo simulado | Publicado |
 | `history-service` | Historial de revisiones por pregunta | Por publicar |
-| `user-service` | Usuarios y roles | Por publicar |
+| [`user-service`](user-service/) | Usuarios y roles | Publicado |
 
 Todos comparten la biblioteca de [`../plataforma/bp-platform`](../plataforma/bp-platform/) y siguen la estructura
 descrita en [convenciones](../../docs/general/convenciones.md).

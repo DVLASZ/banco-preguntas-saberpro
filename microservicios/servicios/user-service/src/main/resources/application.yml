@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: ${USER_DB_URL:jdbc:postgresql://localhost:5433/user_db}
+    username: ${USER_DB_USER:userdb}
+    password: ${USER_DB_PASSWORD:userdb}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 4
+          initial-interval: 1s
+          multiplier: 2
+          max-interval: 10s
+
+server:
+  # Respeta X-Forwarded-* del gateway: Swagger muestra la dirección pública y no la de la réplica.
+  forward-headers-strategy: framework
+  port: ${USER_SERVICE_PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+
+user:
+  keycloak:
+    # Dirección de Keycloak vista desde este servicio (en Docker: http://keycloak:8080).
+    base-url: ${KEYCLOAK_URL:http://localhost:8180}
+    realm: ${KEYCLOAK_REALM:bancopreguntas}
+    # Cliente con permiso de solo lectura de usuarios y eventos (credenciales de cliente).
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:bancopreguntas-admin}
+    client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+  sync:
+    enabled: ${USER_SYNC_ENABLED:true}
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+    healthcheck:
+      enabled: true
+  instance:
+    # Las réplicas se anuncian por IP: así el gateway las alcanza dentro de la red de Docker.
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
