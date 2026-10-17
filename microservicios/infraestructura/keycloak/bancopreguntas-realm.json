@@ -1,0 +1,152 @@
+{
+  "realm": "bancopreguntas",
+  "displayName": "Banco de Preguntas Saber Pro",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "failureFactor": 10,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "eventsEnabled": true,
+  "eventsExpiration": 604800,
+  "eventsListeners": ["jboss-logging"],
+  "enabledEventTypes": ["LOGIN", "LOGIN_ERROR", "LOGOUT", "LOGOUT_ERROR"],
+  "adminEventsEnabled": false,
+  "roles": {
+    "realm": [
+      { "name": "ADMIN", "description": "Administra el banco: asigna revisores y publica preguntas" },
+      { "name": "AUTHOR", "description": "Crea, corrige y envía preguntas a revisión" },
+      { "name": "REVIEWER", "description": "Evalúa las preguntas que se le asignan" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "bancopreguntas-web",
+      "name": "Aplicación web del banco de preguntas",
+      "description": "Cliente público de la aplicación Angular: flujo de código con PKCE",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost:4200/*", "http://localhost:8080/*"],
+      "webOrigins": ["http://localhost:4200", "http://localhost:8080"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      }
+    },
+    {
+      "clientId": "bancopreguntas-admin",
+      "name": "Servicio de usuarios",
+      "description": "Cuenta de servicio con permiso de solo lectura de usuarios y eventos; la usa user-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "dev-admin-client-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-bancopreguntas-admin",
+      "enabled": true,
+      "serviceAccountClientId": "bancopreguntas-admin",
+      "realmRoles": [],
+      "clientRoles": {
+        "realm-management": ["view-users", "query-users", "view-events", "view-realm"]
+      }
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ada",
+      "lastName": "Administradora",
+      "email": "admin@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "autor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Andrés",
+      "lastName": "Autor Uno",
+      "email": "autor1@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["AUTHOR"]
+    },
+    {
+      "username": "autor2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Alicia",
+      "lastName": "Autora Dos",
+      "email": "autor2@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["AUTHOR"]
+    },
+    {
+      "username": "revisor1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Rafael",
+      "lastName": "Revisor Uno",
+      "email": "revisor1@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["REVIEWER"]
+    },
+    {
+      "username": "revisor2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Rocío",
+      "lastName": "Revisora Dos",
+      "email": "revisor2@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["REVIEWER"]
+    },
+    {
+      "username": "revisor3",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ricardo",
+      "lastName": "Revisor Tres",
+      "email": "revisor3@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["REVIEWER"]
+    },
+    {
+      "username": "revisor4",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Renata",
+      "lastName": "Revisora Cuatro",
+      "email": "revisor4@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["REVIEWER"]
+    },
+    {
+      "username": "revisor5",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Rodrigo",
+      "lastName": "Revisor Cinco",
+      "email": "revisor5@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["REVIEWER"]
+    }
+  ]
+}
