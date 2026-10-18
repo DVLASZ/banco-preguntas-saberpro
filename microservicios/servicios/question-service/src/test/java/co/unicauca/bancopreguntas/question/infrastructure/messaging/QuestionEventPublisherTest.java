@@ -78,12 +78,20 @@ class QuestionEventPublisherTest {
     }
 
     @Test
-    @DisplayName("question.published lleva quién publicó")
+    @DisplayName("question.published lleva quién publicó y el contenido de la pregunta")
     void publicada() throws Exception {
-        publicador.publicar(new QuestionPublished("Q-1", "admin-1"));
+        publicador.publicar(new QuestionPublished("Q-1", "admin-1", 2, "Observer", "LECTURA_CRITICA", "Patrones",
+                "Observer", "INTERMEDIO", "Contexto", "¿Qué patrón notifica?", "Factory", "Observer", "Singleton",
+                "Adapter", "B"));
 
         JsonNode datos = publicado("question.published").get("data");
 
         assertThat(datos.get("publishedBy").asText()).isEqualTo("admin-1");
+        assertThat(datos.get("version").asInt()).isEqualTo(2);
+        assertThat(datos.get("competency").asText()).isEqualTo("LECTURA_CRITICA");
+        assertThat(datos.get("difficulty").asText()).isEqualTo("INTERMEDIO");
+        assertThat(datos.get("statement").asText()).isEqualTo("¿Qué patrón notifica?");
+        assertThat(datos.get("optionB").asText()).isEqualTo("Observer");
+        assertThat(datos.get("correctAnswer").asText()).isEqualTo("B");
     }
 }

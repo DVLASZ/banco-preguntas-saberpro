@@ -619,7 +619,7 @@ class QuestionApplicationServiceTest {
 
             assertThat(eventos.publicados()).containsExactly(
                     new QuestionStateChanged(aprobada.getId(), "APROBADA", "PUBLICADA", "admin-1"),
-                    new QuestionPublished(aprobada.getId(), "admin-1"));
+                    QuestionPublished.de(servicio.obtener(aprobada.getId()), "admin-1"));
         }
 
         @Test

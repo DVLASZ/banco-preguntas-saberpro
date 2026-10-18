@@ -184,7 +184,7 @@ public class QuestionApplicationService {
                     "Solo se puede publicar una pregunta Aprobada; esta está " + actual.getEstado());
         }
         Question publicada = cambiarEstado(actual, EstadoPregunta.PUBLICADA, administrador.trim());
-        eventos.publicar(new QuestionPublished(id, administrador.trim()));
+        eventos.publicar(QuestionPublished.de(publicada, administrador.trim()));
         return publicada;
     }
 
