@@ -1,0 +1,14 @@
+# Publica los puertos de cada servicio para llamarlos directamente (sin gateway), por ejemplo para depurar:
+#   docker compose -f docker-compose.yml -f docker-compose.debug.yml up -d
+# No se puede combinar con --scale: cada servicio ocupa un puerto fijo del equipo.
+services:
+  user-service:
+    ports: ["8081:8081"]
+  question-service:
+    ports: ["8082:8082"]
+  review-service:
+    ports: ["8083:8083"]
+  notification-service:
+    ports: ["8084:8084"]
+  history-service:
+    ports: ["8085:8085"]
