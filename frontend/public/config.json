@@ -1,0 +1,6 @@
+{
+  "apiUrl": "http://localhost:8080",
+  "keycloakUrl": "http://localhost:8180",
+  "realm": "bancopreguntas",
+  "clientId": "bancopreguntas-web"
+}
