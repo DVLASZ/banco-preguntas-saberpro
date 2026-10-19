@@ -1,0 +1,27 @@
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: var(--tono-fondo);
+  color: var(--tono-texto);
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &.tono-rojo { --tono-fondo: var(--rojo-fondo); --tono-texto: var(--rojo); }
+  &.tono-ambar { --tono-fondo: var(--ambar-fondo); --tono-texto: var(--ambar); }
+  &.tono-azul { --tono-fondo: var(--azul-fondo); --tono-texto: var(--azul); }
+  &.tono-verde { --tono-fondo: var(--verde-fondo); --tono-texto: var(--verde); }
+  &.tono-turquesa { --tono-fondo: var(--turquesa-fondo); --tono-texto: var(--turquesa); }
+  &.tono-gris { --tono-fondo: var(--gris-fondo); --tono-texto: var(--texto-suave); }
+}

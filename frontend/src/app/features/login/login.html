@@ -1,0 +1,100 @@
+<div class="acceso">
+  <section class="presentacion">
+    <div class="marca">
+      <span class="logo"><bp-icono nombre="preguntas" [tamano]="24" /></span>
+      <span class="marca-texto"><strong>Banco de Preguntas</strong><small>SABER PRO</small></span>
+    </div>
+
+    <div class="mensaje">
+      <span class="etiqueta">PARA DOCENTES QUE TRANSFORMAN</span>
+      <h1>Grandes preguntas.<br />Mejores aprendizajes.</h1>
+      <p>Crea, revisa y comparte preguntas de calidad para Saber Pro. El conocimiento crece cuando lo construimos juntos.</p>
+    </div>
+
+    <div class="ilustracion" aria-hidden="true">
+      <div class="ejemplo">
+        <small>SP-1045</small>
+        <strong>Participación en el consejo estudiantil</strong>
+        <span class="linea"></span>
+        <span class="linea corta"></span>
+        <span class="aprobada"><i></i>Aprobada</span>
+      </div>
+      <div class="calidad">
+        <bp-icono nombre="escudo-ok" [tamano]="28" />
+        <div>
+          <strong>Calidad en cada ítem</strong>
+          <small>Revisión por pares, paso a paso.</small>
+        </div>
+      </div>
+    </div>
+
+    <p class="pie"><bp-icono nombre="birrete" [tamano]="18" /> Universidad del Cauca · Comunidad académica</p>
+  </section>
+
+  <section class="formulario">
+    <p class="ayuda-superior">¿Necesitas ayuda? <a href="mailto:soporte@bancopreguntas.local">Contactar soporte</a></p>
+
+    <form (submit)="entrar($event)" novalidate>
+      <h2>Bienvenido de nuevo</h2>
+      <p class="intro">Ingresa a tu espacio de trabajo y continúa creando.</p>
+
+      @if (expirada() && !error()) {
+        <div class="aviso info" role="status"><bp-icono nombre="info" /><p>Tu sesión expiró. Vuelve a iniciar sesión para continuar.</p></div>
+      }
+      @if (error(); as mensaje) {
+        <div class="aviso error" role="alert"><bp-icono nombre="alerta" /><p>{{ mensaje }}</p></div>
+      }
+
+      <div class="campo">
+        <label for="usuario">Usuario o correo institucional *</label>
+        <input
+          id="usuario"
+          type="text"
+          autocomplete="username"
+          placeholder="nombre.apellido@unicauca.edu.co"
+          [value]="usuario()"
+          [class.invalido]="usuarioVacio()"
+          (input)="usuario.set($any($event.target).value)"
+        />
+        @if (usuarioVacio()) {
+          <span class="error">Escribe tu usuario o correo.</span>
+        }
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña *</label>
+        <input
+          id="clave"
+          type="password"
+          autocomplete="current-password"
+          [value]="clave()"
+          [class.invalido]="claveVacia()"
+          (input)="clave.set($any($event.target).value)"
+        />
+        @if (claveVacia()) {
+          <span class="error">Escribe tu contraseña.</span>
+        }
+      </div>
+
+      <div class="fila-ayuda">
+        <button type="button" class="enlace" (click)="accesoInstitucional()">¿Olvidaste tu contraseña?</button>
+      </div>
+
+      <button type="submit" class="boton primario ancho" [disabled]="enviando()">
+        <bp-icono nombre="entrar" />
+        {{ enviando() ? 'Ingresando…' : 'Iniciar sesión' }}
+      </button>
+
+      <div class="separador"><span>o continúa con</span></div>
+
+      <button type="button" class="boton ancho" (click)="accesoInstitucional()">
+        <bp-icono nombre="edificio" />
+        Acceso institucional
+      </button>
+
+      <p class="solicitud">¿Aún no tienes una cuenta? Solicita acceso a tu administrador.</p>
+    </form>
+
+    <p class="derechos">© 2026 Banco de Preguntas Saber Pro · Privacidad y términos</p>
+  </section>
+</div>

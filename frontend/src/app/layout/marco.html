@@ -1,0 +1,71 @@
+<div class="marco">
+  <aside class="lateral">
+    <a class="marca" routerLink="/">
+      <span class="logo"><bp-icono nombre="preguntas" [tamano]="22" /></span>
+      <span class="marca-texto"><strong>Banco de Preguntas</strong><small>SABER PRO</small></span>
+    </a>
+
+    <div class="institucion">
+      <strong>Universidad del Cauca</strong>
+      <small>{{ perfil() }}</small>
+    </div>
+
+    <nav aria-label="Espacio de trabajo">
+      <p class="seccion">ESPACIO DE TRABAJO</p>
+      @for (opcion of opciones(); track opcion.ruta) {
+        <a class="opcion" [routerLink]="opcion.ruta" routerLinkActive="activa">
+          <bp-icono [nombre]="opcion.icono" />
+          <span>{{ opcion.texto }}</span>
+          @if (contador(opcion) > 0) {
+            <em>{{ contador(opcion) }}</em>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="consejo">
+      <bp-icono nombre="libro" [tamano]="20" />
+      <strong>Una buena pregunta inspira.</strong>
+      <p>Consulta la guía para construir ítems de calidad.</p>
+    </div>
+
+    <button type="button" class="salir" (click)="salir()">
+      <bp-icono nombre="salir" />
+      <span>Cerrar sesión</span>
+    </button>
+  </aside>
+
+  <div class="contenido">
+    <header class="superior">
+      <div class="migas">
+        <bp-icono nombre="casa" [tamano]="16" />
+        <span class="separador">/</span>
+        <span>{{ titulo() }}</span>
+      </div>
+      <div class="derecha">
+        <span class="fecha">{{ hoy }}</span>
+        <a class="campana" routerLink="/notificaciones" [attr.aria-label]="'Notificaciones: ' + notificaciones.noLeidas() + ' sin leer'">
+          <bp-icono nombre="campana" [tamano]="20" />
+          @if (notificaciones.noLeidas() > 0) {
+            <i></i>
+          }
+        </a>
+        <span class="divisor"></span>
+        @if (usuario(); as u) {
+          <div class="persona">
+            <bp-avatar [nombre]="u.nombre" />
+            <div>
+              <strong>{{ u.nombre }}</strong>
+              <small>{{ etiquetaDeRol() }}</small>
+            </div>
+          </div>
+        }
+      </div>
+    </header>
+
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+</div>
+<bp-avisos />

@@ -1,0 +1,260 @@
+.acceso {
+  display: grid;
+  grid-template-columns: 1.04fr 1fr;
+  min-height: 100vh;
+  background: var(--fondo);
+}
+
+.presentacion {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 56px;
+  background: linear-gradient(135deg, #1a1740 0%, #3a2c6e 60%, #3b2d72 100%);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  .logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--violeta);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .marca-texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+
+    strong {
+      font-size: 18px;
+    }
+
+    small {
+      color: var(--turquesa);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 11px;
+    }
+  }
+}
+
+.mensaje {
+  margin-top: 28px;
+
+  .etiqueta {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 1px solid var(--borde-fuerte);
+    border-radius: 999px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--turquesa);
+    margin-bottom: 22px;
+  }
+
+  h1 {
+    font-size: 54px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin-top: 22px;
+    max-width: 480px;
+    font-size: 17px;
+    color: var(--texto-suave);
+  }
+}
+
+.ilustracion {
+  position: relative;
+  height: 230px;
+  margin-top: 6px;
+
+  .ejemplo {
+    position: absolute;
+    left: 24px;
+    top: 0;
+    width: 330px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    small {
+      color: var(--texto-suave);
+    }
+
+    .linea {
+      display: block;
+      height: 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.14);
+      &.corta { width: 60%; }
+    }
+
+    .aprobada {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--verde-fondo);
+      color: var(--verde);
+      font-size: 12px;
+      font-weight: 600;
+
+      i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+    }
+  }
+
+  .calidad {
+    position: absolute;
+    left: 190px;
+    top: 120px;
+    width: 280px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: rgba(30, 28, 70, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    bp-icono {
+      color: var(--turquesa);
+      background: var(--turquesa-fondo);
+      padding: 10px;
+      border-radius: 12px;
+      line-height: 0;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+    }
+
+    small {
+      color: var(--texto-suave);
+    }
+  }
+}
+
+.pie {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--texto-suave);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  padding: 40px 96px 32px;
+  background: #0e0f26;
+
+  .ayuda-superior {
+    text-align: right;
+    color: var(--texto-suave);
+    font-size: 13px;
+  }
+
+  form {
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 504px;
+    width: 100%;
+  }
+
+  h2 {
+    font-size: 34px;
+    font-weight: 300;
+  }
+
+  .intro {
+    color: var(--texto-suave);
+    margin-top: -6px;
+  }
+
+  .fila-ayuda {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -6px;
+  }
+
+  .enlace {
+    background: none;
+    border: 0;
+    color: var(--turquesa);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .separador {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--texto-tenue);
+    font-size: 12px;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--borde);
+    }
+  }
+
+  .solicitud {
+    text-align: center;
+    color: var(--texto-suave);
+    font-size: 13px;
+  }
+
+  .derechos {
+    text-align: center;
+    color: var(--texto-tenue);
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .acceso {
+    grid-template-columns: 1fr;
+  }
+
+  .presentacion {
+    display: none;
+  }
+
+  .formulario {
+    padding: 32px 24px;
+  }
+}
