@@ -1,0 +1,55 @@
+<div class="selector">
+  <div class="cabecera">
+    <p class="ayuda">Selecciona entre 1 y {{ maximo() }} revisores para esta pregunta.</p>
+    <span class="contador" [class.excedido]="seleccion().exceso > 0">{{ seleccion().total }} / {{ maximo() }}</span>
+  </div>
+
+  @if (yaAsignados().length > 0) {
+    <p class="ya">Ya asignados: {{ yaAsignados().join(', ') }}. Solo puedes agregar más, no quitar.</p>
+  }
+
+  <div class="campo">
+    <label for="buscar-revisor">Buscar revisor</label>
+    <input id="buscar-revisor" type="search" placeholder="Buscar por nombre o usuario…" [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
+  </div>
+
+  @if (errorDeCarga(); as mensaje) {
+    <div class="aviso error" role="alert"><div><strong>No se pudo cargar la lista de revisores</strong><p>{{ mensaje }}</p></div></div>
+  } @else if (cargando()) {
+    <div class="esqueleto" style="height: 220px"></div>
+  } @else {
+    <ul class="lista" role="group" aria-label="Revisores disponibles">
+      @for (u of visibles(); track u.id) {
+        <li>
+          <label class="revisor" [class.marcado]="marcados().has(u.id)">
+            <input type="checkbox" [checked]="marcados().has(u.id)" (change)="alternar(u.id)" />
+            <bp-avatar [nombre]="u.nombre" [tamano]="34" />
+            <span class="datos"><strong>{{ u.nombre }}</strong><small>{{ u.id }}</small></span>
+          </label>
+        </li>
+      } @empty {
+        <li class="vacio">{{ buscar() ? 'Ningún revisor coincide con la búsqueda.' : 'No hay revisores disponibles.' }}</li>
+      }
+    </ul>
+  }
+
+  @if (seleccion().exceso > 0) {
+    <div class="aviso error" role="alert">
+      <bp-icono nombre="alerta" />
+      <div>
+        <strong>Has superado el límite de {{ maximo() }} revisores</strong>
+        <p>Hay {{ seleccion().total }} seleccionados. Desmarca al menos {{ seleccion().exceso }} para continuar; la asignación aún no se ha guardado.</p>
+      </div>
+    </div>
+  }
+
+  <footer class="pie">
+    <span class="estado" [class.invalida]="!seleccion().valida && marcados().size > 0">
+      {{ seleccion().valida ? 'Selección válida' : marcados().size > 0 ? 'Selección no válida' : 'Sin selección' }}
+    </span>
+    <button type="button" class="boton fantasma" (click)="limpiar()" [disabled]="marcados().size === 0">Limpiar</button>
+    <button type="button" class="boton primario" [disabled]="!seleccion().valida || enviando()" (click)="asignar()">
+      <bp-icono nombre="usuarios" /> {{ enviando() ? 'Asignando…' : etiquetaBoton() }}
+    </button>
+  </footer>
+</div>

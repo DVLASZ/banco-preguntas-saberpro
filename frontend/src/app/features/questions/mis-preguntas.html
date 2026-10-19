@@ -1,0 +1,115 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Mis preguntas</h1>
+      <p class="subtitulo">Tu banco de ideas, desde el primer borrador hasta la aprobación.</p>
+    </div>
+    <div class="acciones">
+      <a class="boton primario" routerLink="/crear"><bp-icono nombre="mas" /> Crear pregunta</a>
+    </div>
+  </header>
+
+  <section class="rejilla-estadisticas" aria-label="Resumen">
+    <div class="estadistica">
+      <div><div class="valor">{{ resumen()?.creadas ?? '—' }}</div><div class="etiqueta">Preguntas creadas</div></div>
+      <bp-icono nombre="preguntas" [tamano]="22" />
+    </div>
+    <div class="estadistica">
+      <div><div class="valor">{{ resumen()?.borradores ?? '—' }}</div><div class="etiqueta">Borradores</div></div>
+      <bp-icono nombre="lapiz" [tamano]="22" />
+    </div>
+    <div class="estadistica ambar">
+      <div><div class="valor">{{ resumen()?.enRevision ?? '—' }}</div><div class="etiqueta">En proceso de revisión</div></div>
+      <bp-icono nombre="reloj" [tamano]="22" />
+    </div>
+    <div class="estadistica verde">
+      <div><div class="valor">{{ resumen()?.aprobadas ?? '—' }}</div><div class="etiqueta">Preguntas aprobadas</div></div>
+      <bp-icono nombre="escudo-ok" [tamano]="22" />
+    </div>
+  </section>
+
+  <section class="filtros" aria-label="Filtros">
+    <div class="campo">
+      <label for="buscar">Buscar pregunta</label>
+      <input id="buscar" type="search" placeholder="Buscar por título o tema…" [value]="texto()" (input)="escribir($any($event.target).value)" />
+    </div>
+    <div class="campo">
+      <label for="estado">Estado</label>
+      <select id="estado" [value]="estado()" (change)="filtrarEstado($any($event.target).value)">
+        <option value="">Todos los estados</option>
+        @for (e of estados; track e.valor) {
+          <option [value]="e.valor">{{ e.texto }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="competencia">Competencia</label>
+      <select id="competencia" [value]="competencia()" (change)="filtrarCompetencia($any($event.target).value)">
+        <option value="">Todas las competencias</option>
+        @for (c of competencias; track c.valor) {
+          <option [value]="c.valor">{{ c.texto }}</option>
+        }
+      </select>
+    </div>
+  </section>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div>
+        <strong>No se pudieron cargar tus preguntas</strong>
+        <p>{{ mensaje }}</p>
+      </div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr><th>Pregunta</th><th>Competencia</th><th>Estado</th><th>Actualización</th><th></th></tr>
+        </thead>
+        <tbody>
+          @if (cargando() && !resultado()) {
+            @for (i of [1, 2, 3, 4]; track i) {
+              <tr><td colspan="5"><div class="esqueleto" style="height: 38px"></div></td></tr>
+            }
+          } @else {
+            @for (p of resultado()?.contenido; track p.id) {
+              <tr class="clicable" (click)="abrir(p)">
+                <td>
+                  <div class="titulo-fila">{{ p.nombre }}</div>
+                  <div class="detalle-fila">{{ codigoCorto(p.id) }} · {{ p.tema }} · {{ textoDificultad(p.dificultad) }}</div>
+                </td>
+                <td class="suave">{{ textoCompetencia(p.competencia) }}</td>
+                <td><bp-estado [estado]="p.estado" /></td>
+                <td class="suave">{{ fecha(p.actualizadaEn) }}</td>
+                <td class="accion" (click)="$event.stopPropagation()">
+                  @if (p.estado === 'BORRADOR') {
+                    <a class="boton chico" [routerLink]="['/preguntas', p.id, 'editar']">Editar</a>
+                  } @else {
+                    <a class="boton chico fantasma" [routerLink]="['/preguntas', p.id]">Ver</a>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="vacio">
+                  @if (texto() || estado() || competencia()) {
+                    <p>Ninguna pregunta coincide con los filtros.</p>
+                  } @else {
+                    <p>Aún no has creado preguntas.</p>
+                    <a class="boton primario chico" routerLink="/crear">Crear tu primera pregunta</a>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+      @if (resultado(); as r) {
+        <bp-paginacion [pagina]="r.pagina" [tamano]="r.tamano" [total]="r.totalElementos" elementos="preguntas" (cambia)="irA($event)" />
+      }
+    </div>
+  }
+
+  <p class="nota-pie"><bp-icono nombre="info" [tamano]="14" /> Las preguntas rechazadas pueden corregirse y enviarse nuevamente a revisión.</p>
+</div>

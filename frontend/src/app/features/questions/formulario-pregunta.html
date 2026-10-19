@@ -1,0 +1,161 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <p class="sobretitulo">
+        @if (codigo(); as c) {
+          {{ c }} · {{ edicion() ? 'Edición de borrador' : 'Nuevo ítem' }}
+        } @else {
+          Nuevo ítem
+        }
+      </p>
+      <h1>{{ edicion() ? 'Editar pregunta' : 'Crear pregunta' }}</h1>
+      <p class="subtitulo">Construye un ítem de selección múltiple con única respuesta.</p>
+    </div>
+    <bp-estado [estado]="guardada()?.estado ?? 'BORRADOR'" />
+  </header>
+
+  @if (errorDeCarga(); as mensaje) {
+    <div class="aviso error" role="alert"><div><strong>No se pudo cargar la pregunta</strong><p>{{ mensaje }}</p></div></div>
+  } @else if (cargando()) {
+    <div class="esqueleto" style="height: 420px"></div>
+  } @else {
+    @if (erroresDelServidor().length > 0) {
+      <div class="aviso error" role="alert">
+        <bp-icono nombre="alerta" />
+        <div>
+          <strong>La pregunta no cumple la validación estructural</strong>
+          <ul>
+            @for (d of erroresDelServidor(); track d) {
+              <li>{{ d }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+
+    <form class="cuadricula" (submit)="$event.preventDefault()" novalidate>
+      <section class="tarjeta contenido">
+        <div class="tarjeta-cabecera"><h2>Contenido del ítem</h2><span class="nota">* Campos obligatorios</span></div>
+
+        <div class="campo">
+          <label for="contexto">Contexto *</label>
+          <textarea id="contexto" rows="3" [value]="valor('contexto')" [class.invalido]="error('contexto')"
+            (input)="cambiar('contexto', $any($event.target).value)" (blur)="tocar('contexto')"></textarea>
+          @if (error('contexto'); as e) { <span class="error">{{ e }}</span> }
+        </div>
+
+        <div class="campo">
+          <label for="enunciado">Pregunta directa *</label>
+          <input id="enunciado" type="text" [value]="valor('enunciado')" [class.invalido]="error('enunciado')"
+            (input)="cambiar('enunciado', $any($event.target).value)" (blur)="tocar('enunciado')" />
+          @if (error('enunciado'); as e) { <span class="error">{{ e }}</span> }
+        </div>
+
+        <div class="opciones">
+          @for (l of letras; track l) {
+            <div class="campo">
+              <label [for]="'opcion' + l">{{ etiquetaOpcion(l) }} *</label>
+              <input [id]="'opcion' + l" type="text" [value]="textoOpcion(l)" [class.invalido]="error($any('opcion' + l))"
+                (input)="cambiar($any('opcion' + l), $any($event.target).value)" (blur)="tocar($any('opcion' + l))" />
+              @if (error($any('opcion' + l)); as e) { <span class="error">{{ e }}</span> }
+            </div>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="justificacion">Justificación de la respuesta *</label>
+          <textarea id="justificacion" rows="2" [value]="valor('justificacion')" [class.invalido]="error('justificacion')"
+            (input)="cambiar('justificacion', $any($event.target).value)" (blur)="tocar('justificacion')"></textarea>
+          @if (error('justificacion'); as e) { <span class="error">{{ e }}</span> }
+        </div>
+
+        <div class="campo">
+          <label for="bibliografia">Bibliografía *</label>
+          <input id="bibliografia" type="text" [value]="valor('bibliografia')" [class.invalido]="error('bibliografia')"
+            (input)="cambiar('bibliografia', $any($event.target).value)" (blur)="tocar('bibliografia')" />
+          @if (error('bibliografia'); as e) { <span class="error">{{ e }}</span> }
+        </div>
+      </section>
+
+      <aside class="clasificacion">
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><h2>Clasificación y respuesta</h2></div>
+
+          <div class="campo">
+            <label for="nombre">Título interno *</label>
+            <input id="nombre" type="text" [value]="valor('nombre')" [class.invalido]="error('nombre')"
+              (input)="cambiar('nombre', $any($event.target).value)" (blur)="tocar('nombre')" />
+            @if (error('nombre'); as e) { <span class="error">{{ e }}</span> }
+          </div>
+
+          <div class="campo">
+            <label for="competencia">Competencia *</label>
+            <select id="competencia" [class.invalido]="error('competencia')"
+              (change)="cambiar('competencia', $any($event.target).value)" (blur)="tocar('competencia')">
+              <option value="" disabled [selected]="!valor('competencia')">Selecciona…</option>
+              @for (c of competencias; track c.valor) { <option [value]="c.valor" [selected]="valor('competencia') === c.valor">{{ c.texto }}</option> }
+            </select>
+            @if (error('competencia'); as e) { <span class="error">{{ e }}</span> }
+          </div>
+
+          <div class="dos">
+            <div class="campo">
+              <label for="tema">Tema *</label>
+              <input id="tema" type="text" [value]="valor('tema')" [class.invalido]="error('tema')"
+                (input)="cambiar('tema', $any($event.target).value)" (blur)="tocar('tema')" />
+              @if (error('tema'); as e) { <span class="error">{{ e }}</span> }
+            </div>
+            <div class="campo">
+              <label for="subtema">Subtema *</label>
+              <input id="subtema" type="text" [value]="valor('subtema')" [class.invalido]="error('subtema')"
+                (input)="cambiar('subtema', $any($event.target).value)" (blur)="tocar('subtema')" />
+              @if (error('subtema'); as e) { <span class="error">{{ e }}</span> }
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="dificultad">Dificultad *</label>
+            <select id="dificultad" [class.invalido]="error('dificultad')"
+              (change)="cambiar('dificultad', $any($event.target).value)" (blur)="tocar('dificultad')">
+              <option value="" disabled [selected]="!valor('dificultad')">Selecciona…</option>
+              @for (d of dificultades; track d.valor) { <option [value]="d.valor" [selected]="valor('dificultad') === d.valor">{{ d.texto }}</option> }
+            </select>
+            @if (error('dificultad'); as e) { <span class="error">{{ e }}</span> }
+          </div>
+
+          <div class="campo">
+            <label for="respuesta">Respuesta correcta *</label>
+            <select id="respuesta" [class.invalido]="error('respuestaCorrecta')"
+              (change)="cambiar('respuestaCorrecta', $any($event.target).value)" (blur)="tocar('respuestaCorrecta')">
+              <option value="" disabled [selected]="!valor('respuestaCorrecta')">Selecciona…</option>
+              @for (l of letras; track l) {
+                <option [value]="l" [selected]="valor('respuestaCorrecta').toUpperCase() === l">{{ l }}{{ textoOpcion(l) ? ' · ' + textoOpcion(l) : '' }}</option>
+              }
+            </select>
+            @if (error('respuestaCorrecta'); as e) { <span class="error">{{ e }}</span> }
+          </div>
+
+          <div class="consejo">
+            <strong><bp-icono nombre="bombilla" [tamano]="16" /> Antes de enviar</strong>
+            <p>Usa distractores plausibles, una pregunta clara y fuentes verificables.</p>
+          </div>
+        </section>
+      </aside>
+    </form>
+
+    <footer class="pie-formulario">
+      <span class="estado-guardado">
+        @if (guardada(); as g) {
+          <bp-icono nombre="nube" [tamano]="16" /> Borrador guardado · {{ fechaHora(g.actualizadaEn) }}
+        }
+      </span>
+      <a class="boton fantasma" routerLink="/mis-preguntas">Cancelar</a>
+      <button type="button" class="boton" [disabled]="trabajando() !== null" (click)="guardarBorrador()">
+        <bp-icono nombre="guardar" /> {{ trabajando() === 'guardar' ? 'Guardando…' : 'Guardar borrador' }}
+      </button>
+      <button type="button" class="boton primario" [disabled]="trabajando() !== null" (click)="enviarARevision()">
+        <bp-icono nombre="enviar" /> {{ trabajando() === 'enviar' ? 'Enviando…' : 'Enviar a revisión' }}
+      </button>
+    </footer>
+  }
+</div>

@@ -1,0 +1,74 @@
+.pestanas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--texto-suave);
+    font-weight: 600;
+    cursor: pointer;
+
+    em {
+      font-style: normal;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--texto-tenue);
+    }
+
+    &:hover {
+      color: var(--texto);
+    }
+
+    &.activa {
+      background: var(--turquesa-fondo);
+      border-color: var(--turquesa-borde);
+      color: var(--turquesa);
+
+      em {
+        color: var(--turquesa);
+      }
+    }
+  }
+
+  .orden {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--texto-suave);
+    font-size: 13px;
+  }
+}
+
+.suave {
+  color: var(--texto-suave);
+}
+
+.rechaza {
+  color: var(--rojo);
+  font-weight: 600;
+}
+
+.aprueba {
+  color: var(--verde);
+  font-weight: 600;
+}
+
+.accion {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.aviso.error {
+  align-items: center;
+  justify-content: space-between;
+}

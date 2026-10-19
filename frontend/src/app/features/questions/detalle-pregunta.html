@@ -1,0 +1,161 @@
+<div class="pagina">
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert"><div><strong>No se pudo cargar la pregunta</strong><p>{{ mensaje }}</p></div></div>
+    <a class="volver" [routerLink]="volverA()"><bp-icono nombre="flecha-izq" [tamano]="16" /> {{ volverTexto() }}</a>
+  } @else if (cargando()) {
+    <div class="esqueleto" style="height: 120px; margin-bottom: 20px"></div>
+    <div class="esqueleto" style="height: 360px"></div>
+  } @else if (pregunta(); as p) {
+    <header class="pagina-cabecera">
+      <div>
+        <p class="sobretitulo">{{ codigoCorto(p.id) }} · Detalle de pregunta</p>
+        <h1>{{ p.nombre }}</h1>
+        <p class="subtitulo">
+          Versión {{ p.version }} · Creada el {{ fecha(p.creadaEn) }} · Actualizada el {{ fecha(p.actualizadaEn) }}
+        </p>
+      </div>
+      <div class="acciones">
+        <bp-estado [estado]="p.estado" />
+        @if (puedeCorregir()) {
+          <button type="button" class="boton primario" [disabled]="trabajando()" (click)="corregir()">
+            <bp-icono nombre="lapiz" /> Corregir pregunta
+          </button>
+        }
+        @if (puedeEditar()) {
+          <a class="boton primario" [routerLink]="['/preguntas', p.id, 'editar']"><bp-icono nombre="lapiz" /> Editar borrador</a>
+        }
+        @if (puedePublicar()) {
+          <button type="button" class="boton primario" [disabled]="trabajando()" (click)="publicar()">
+            <bp-icono nombre="publicar" /> Publicar
+          </button>
+        }
+      </div>
+    </header>
+
+    @if (p.estado === 'RECHAZADA') {
+      <div class="aviso error" role="status">
+        <bp-icono nombre="alerta" />
+        <div>
+          <strong>Esta pregunta necesita ajustes antes de publicarse</strong>
+          <p>Los revisores dejaron sus observaciones. Corrige la versión actual y envíala nuevamente a revisión.</p>
+        </div>
+      </div>
+    } @else if (p.estado === 'APROBADA') {
+      <div class="aviso exito" role="status">
+        <bp-icono nombre="escudo-ok" />
+        <div>
+          <strong>Pregunta aprobada por los revisores</strong>
+          <p>Queda lista para que el administrador la publique en el banco.</p>
+        </div>
+      </div>
+    } @else if (p.estado === 'PUBLICADA') {
+      <div class="aviso exito" role="status">
+        <bp-icono nombre="publicar" />
+        <div>
+          <strong>Pregunta publicada</strong>
+          <p>Ya hace parte del banco de preguntas.</p>
+        </div>
+      </div>
+    }
+
+    <div class="columnas">
+      <div class="columna">
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><h2>Contenido del ítem</h2><span class="nota">Dificultad {{ textoDificultad(p.dificultad).toLowerCase() }}</span></div>
+          <p class="clasificacion">{{ textoCompetencia(p.competencia) }} / {{ p.tema }} / {{ p.subtema }}</p>
+          <p class="contexto">{{ p.contexto }}</p>
+          <p class="enunciado">{{ p.enunciado }}</p>
+
+          @if (completo()) {
+            <ul class="lista-opciones">
+              @for (l of opciones; track l) {
+                <li [class.correcta]="l === p.respuestaCorrecta.toUpperCase()">
+                  <b>{{ l }}</b><span>{{ opcion(p, l) }}</span>
+                  @if (l === p.respuestaCorrecta.toUpperCase()) { <em>Respuesta correcta</em> }
+                </li>
+              }
+            </ul>
+            <h3>Justificación</h3>
+            <p class="texto">{{ p.justificacion }}</p>
+            <h3>Bibliografía</h3>
+            <p class="texto">{{ p.bibliografia }}</p>
+          } @else {
+            <p class="correcta">Respuesta correcta: {{ respuesta() }}</p>
+          }
+          <button type="button" class="enlace" (click)="completo.set(!completo())">
+            {{ completo() ? 'Ocultar contenido completo' : 'Ver contenido completo' }}
+            <bp-icono [nombre]="completo() ? 'chevron-abajo' : 'flecha-arriba-der'" [tamano]="14" />
+          </button>
+        </section>
+
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><h2>Historial de estados</h2><span class="nota">Versión {{ p.version }}</span></div>
+          <ol class="linea-tiempo">
+            @for (h of historial(); track $index) {
+              <li [class]="'tono-' + h.tono">
+                <i></i>
+                <div class="cuerpo"><strong>{{ h.texto }}</strong><small>{{ h.quien }}</small></div>
+                <time>{{ h.cuando }}</time>
+              </li>
+            }
+          </ol>
+          <a class="enlace" [routerLink]="['/historial', p.id]">Ver historial completo <bp-icono nombre="flecha-arriba-der" [tamano]="14" /></a>
+        </section>
+
+        <a class="volver" [routerLink]="volverA()"><bp-icono nombre="flecha-izq" [tamano]="16" /> {{ volverTexto() }}</a>
+      </div>
+
+      <div class="columna">
+        <section class="tarjeta">
+          @if (rondas().length === 0) {
+            <div class="tarjeta-cabecera"><h2>Observaciones de los revisores</h2></div>
+            <p class="vacio">
+              @if (p.estado === 'BORRADOR') { Esta pregunta aún no se ha enviado a revisión. } @else { Todavía no hay observaciones. }
+            </p>
+          } @else {
+            @for (ronda of rondas(); track ronda.numero; let primera = $first) {
+              <details class="ronda" [open]="primera">
+                <summary>
+                  <h2>Ronda {{ ronda.numero }} <small>· versión {{ ronda.versionDePregunta }}</small></h2>
+                  <span class="resumen-ronda"><bp-estado-ronda [estado]="ronda.estado" /> <span class="nota">{{ ronda.totalDeEvaluadas }} de {{ ronda.totalDeRevisores }}</span></span>
+                </summary>
+                @if (!ronda.detalleVisible) {
+                  <p class="vacio">Las observaciones se mostrarán cuando termine la ronda.</p>
+                } @else {
+                  @for (r of ronda.revisores; track r.revisorId) {
+                    @if (r.evaluacion; as ev) {
+                      <article class="observacion">
+                        <header>
+                          <bp-avatar [nombre]="r.revisorId" [tamano]="34" />
+                          <div><strong>{{ r.revisorId }}</strong><small>{{ fechaHora(ev.enviadaEn) }}</small></div>
+                          @if (ev.tardia) { <span class="etiqueta-tardia">Observación tardía</span> }
+                          <span class="decision" [class.rechaza]="ev.decision === 'RECHAZAR'" [class.aprueba]="ev.decision === 'APROBAR'">
+                            {{ ev.decision === 'RECHAZAR' ? 'Rechazar' : 'Aprobar' }}
+                          </span>
+                        </header>
+                        <p>{{ ev.observacion || 'Sin observaciones.' }}</p>
+                      </article>
+                    } @else {
+                      <article class="observacion pendiente">
+                        <header>
+                          <bp-avatar [nombre]="r.revisorId" [tamano]="34" />
+                          <div><strong>{{ r.revisorId }}</strong><small>No evaluó esta ronda</small></div>
+                        </header>
+                      </article>
+                    }
+                  }
+                }
+              </details>
+            }
+            @if (p.estado === 'RECHAZADA') {
+              <div class="nueva-version">
+                <strong>Una nueva versión, una nueva oportunidad</strong>
+                <p>Las observaciones y el historial se conservarán al corregir. El reenvío iniciará un nuevo ciclo de revisión con los mismos revisores.</p>
+              </div>
+            }
+          }
+        </section>
+      </div>
+    </div>
+  }
+</div>

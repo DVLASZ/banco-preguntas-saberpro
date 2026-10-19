@@ -1,0 +1,98 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Bandeja del revisor</h1>
+      <p class="subtitulo">Tu criterio fortalece el banco. Revisa los ítems que te han sido asignados.</p>
+    </div>
+  </header>
+
+  <section class="rejilla-estadisticas" aria-label="Resumen">
+    <div class="estadistica azul">
+      <div><div class="valor">{{ resumen()?.pendientes ?? '—' }}</div><div class="etiqueta">Por evaluar</div></div>
+      <bp-icono nombre="bandeja" [tamano]="22" />
+    </div>
+    <div class="estadistica verde">
+      <div><div class="valor">{{ resumen()?.evaluadas ?? '—' }}</div><div class="etiqueta">Evaluadas</div></div>
+      <bp-icono nombre="doble-check" [tamano]="22" />
+    </div>
+    <div class="estadistica ambar">
+      <div><div class="valor">{{ resumen()?.conRondaRechazada ?? '—' }}</div><div class="etiqueta">En ronda ya rechazada</div></div>
+      <bp-icono nombre="mensaje" [tamano]="22" />
+    </div>
+  </section>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="pestana() === 'PENDIENTES'" [attr.aria-selected]="pestana() === 'PENDIENTES'" (click)="cambiarPestana('PENDIENTES')">
+      Asignadas <em>{{ resumen()?.pendientes ?? '' }}</em>
+    </button>
+    <button type="button" role="tab" [class.activa]="pestana() === 'EVALUADAS'" [attr.aria-selected]="pestana() === 'EVALUADAS'" (click)="cambiarPestana('EVALUADAS')">
+      Completadas <em>{{ resumen()?.evaluadas ?? '' }}</em>
+    </button>
+    <span class="orden"><bp-icono nombre="ordenar" [tamano]="16" /> Más recientes primero</span>
+  </div>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar tu bandeja</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="tabla">
+      <table>
+        <thead>
+          <tr><th>Pregunta asignada</th><th>Autor</th><th>Estado de la ronda</th><th>{{ pestana() === 'PENDIENTES' ? 'Asignada' : 'Mi decisión' }}</th><th></th></tr>
+        </thead>
+        <tbody>
+          @if (cargando() && !resultado()) {
+            @for (i of [1, 2, 3]; track i) {
+              <tr><td colspan="5"><div class="esqueleto" style="height: 38px"></div></td></tr>
+            }
+          } @else {
+            @for (a of resultado()?.contenido; track a.preguntaId + a.ronda) {
+              <tr class="clicable" (click)="abrir(a)">
+                <td>
+                  <div class="titulo-fila">{{ a.titulo || 'Sin título' }}</div>
+                  <div class="detalle-fila">{{ codigoCorto(a.preguntaId) }} · {{ textoCompetencia(a.competencia) }} · ronda {{ a.ronda }}</div>
+                </td>
+                <td class="suave">{{ a.autorId }}</td>
+                <td>
+                  @switch (a.estadoRonda) {
+                    @case ('EN_CURSO') { <bp-insignia texto="En revisión" tono="azul" /> }
+                    @case ('RECHAZADA') { <bp-insignia texto="Rechazada · observación tardía" tono="ambar" /> }
+                    @case ('APROBADA') { <bp-insignia texto="Aprobada" tono="verde" /> }
+                    @default { <bp-insignia texto="Cerrada" tono="gris" /> }
+                  }
+                </td>
+                <td class="suave">
+                  @if (pestana() === 'PENDIENTES') {
+                    {{ fechaCorta(a.asignadaEn) }}
+                  } @else {
+                    <span [class.rechaza]="a.miDecision === 'RECHAZAR'" [class.aprueba]="a.miDecision === 'APROBAR'">
+                      {{ a.miDecision === 'RECHAZAR' ? 'Rechazar' : 'Aprobar' }}
+                    </span>
+                  }
+                </td>
+                <td class="accion" (click)="$event.stopPropagation()">
+                  <a class="boton chico" [class.primario]="pestana() === 'PENDIENTES' && $first" [routerLink]="['/evaluar', a.preguntaId]">
+                    {{ pestana() === 'PENDIENTES' ? 'Evaluar' : 'Ver' }}
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="vacio">
+                  @if (pestana() === 'PENDIENTES') { No tienes preguntas por evaluar. ¡Buen trabajo! } @else { Todavía no has evaluado preguntas. }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+      @if (resultado(); as r) {
+        <bp-paginacion [pagina]="r.pagina" [tamano]="r.tamano" [total]="r.totalElementos" elementos="preguntas" (cambia)="irA($event)" />
+      }
+    </div>
+  }
+
+  <p class="nota-pie"><bp-icono nombre="info" [tamano]="14" /> Tu evaluación es independiente y definitiva. Si la ronda ya fue rechazada, tu observación se suma sin cambiar el resultado.</p>
+</div>

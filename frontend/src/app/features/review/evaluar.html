@@ -1,0 +1,157 @@
+<div class="pagina">
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert"><div><strong>No se pudo cargar la pregunta</strong><p>{{ mensaje }}</p></div></div>
+    <a class="volver" routerLink="/bandeja"><bp-icono nombre="flecha-izq" [tamano]="16" /> Volver a la bandeja</a>
+  } @else if (cargando()) {
+    <div class="esqueleto" style="height: 100px; margin-bottom: 20px"></div>
+    <div class="esqueleto" style="height: 420px"></div>
+  } @else if (pregunta(); as p) {
+    <header class="pagina-cabecera">
+      <div>
+        <p class="sobretitulo">{{ codigoCorto(p.id) }} · Revisión académica</p>
+        <h1>Evaluar pregunta</h1>
+        <p class="subtitulo">
+          Autor: {{ p.autorId }}
+          @if (yo(); as mio) { · Asignada el {{ fechaCorta(mio.asignadoEn) }} }
+          @if (ronda(); as r) { · Ronda {{ r.numero }} }
+        </p>
+      </div>
+      @if (ronda(); as r) { <bp-estado-ronda [estado]="r.estado" /> }
+    </header>
+
+    <div class="columnas">
+      <section class="tarjeta item">
+        <div class="tarjeta-cabecera"><h2>{{ p.nombre }}</h2><span class="nota">{{ codigoCorto(p.id) }} · Versión {{ p.version }}</span></div>
+        <p class="clasificacion">{{ textoCompetencia(p.competencia) }} / {{ p.tema }} / {{ p.subtema }} · {{ textoDificultad(p.dificultad) }}</p>
+
+        <h3>Contexto</h3>
+        <p class="texto">{{ p.contexto }}</p>
+        <p class="enunciado">{{ p.enunciado }}</p>
+
+        <ul class="opciones">
+          @for (l of letras; track l) {
+            <li [class.correcta]="l === p.respuestaCorrecta.toUpperCase()">
+              <b>{{ l }}</b><span>{{ opcion(p, l) }}</span>
+              @if (l === p.respuestaCorrecta.toUpperCase()) { <em>Respuesta correcta</em> }
+            </li>
+          }
+        </ul>
+
+        <h3>Justificación</h3>
+        <p class="texto">{{ p.justificacion }}</p>
+        <h3>Bibliografía</h3>
+        <p class="texto">{{ p.bibliografia }}</p>
+      </section>
+
+      <div class="derecha">
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><h2>Tu evaluación</h2><span class="nota">{{ yo()?.revisorId }}</span></div>
+
+          @switch (situacion()) {
+            @case ('evaluada') {
+              @if (yo()?.evaluacion; as ev) {
+                <div class="aviso exito" role="status">
+                  <bp-icono nombre="check" />
+                  <div>
+                    <strong>Ya enviaste tu evaluación: {{ ev.decision === 'APROBAR' ? 'Aprobar' : 'Rechazar' }}</strong>
+                    <p>{{ fechaHora(ev.enviadaEn) }}{{ ev.tardia ? ' · observación tardía' : '' }}. La evaluación es definitiva.</p>
+                  </div>
+                </div>
+                @if (ev.observacion) { <p class="mi-observacion">{{ ev.observacion }}</p> }
+              }
+            }
+            @case ('cerrada') {
+              <div class="aviso" role="status">
+                <bp-icono nombre="info" />
+                <div><strong>Esta ronda ya terminó</strong><p>Ya no se admiten evaluaciones en esta ronda.</p></div>
+              </div>
+            }
+            @case ('ajena') {
+              <div class="aviso error" role="alert">
+                <bp-icono nombre="alerta" />
+                <div><strong>No estás asignado a esta pregunta</strong><p>Solo los revisores asignados pueden evaluarla.</p></div>
+              </div>
+            }
+            @default {
+              @if (situacion() === 'tardia') {
+                <div class="aviso info" role="status">
+                  <bp-icono nombre="info" />
+                  <div>
+                    <strong>La ronda ya fue rechazada</strong>
+                    <p>Tu evaluación quedará como observación tardía: el autor la leerá, pero no cambia el resultado.</p>
+                  </div>
+                </div>
+              }
+              <p class="ayuda">Comprueba la claridad, la clave y la calidad de los distractores.</p>
+              <div class="decisiones" role="radiogroup" aria-label="Decisión">
+                <button type="button" role="radio" [attr.aria-checked]="decision() === 'APROBAR'" class="decision aprobar" [class.elegida]="decision() === 'APROBAR'" (click)="elegir('APROBAR')">
+                  <i></i> Aprobar
+                </button>
+                <button type="button" role="radio" [attr.aria-checked]="decision() === 'RECHAZAR'" class="decision rechazar" [class.elegida]="decision() === 'RECHAZAR'" (click)="elegir('RECHAZAR')">
+                  <i></i> Rechazar
+                </button>
+              </div>
+
+              <div class="campo">
+                <label for="observacion">Observaciones {{ decision() === 'RECHAZAR' ? '*' : '' }}</label>
+                <textarea id="observacion" rows="4" placeholder="Explica los ajustes necesarios…" [value]="observacion()"
+                  [class.invalido]="intento() && errorDeObservacion()"
+                  (input)="observacion.set($any($event.target).value)"></textarea>
+                @if (errorDeObservacion(); as e) {
+                  @if (intento() || observacion().length > maximo) { <span class="error">{{ e }}</span> }
+                }
+                <span class="ayuda">{{ observacion().length }} / {{ maximo }}</span>
+              </div>
+
+              @if (confirmando()) {
+                <div class="aviso" role="alertdialog" aria-label="Confirmar envío">
+                  <bp-icono nombre="alerta" />
+                  <div>
+                    <strong>Una vez enviada, tu evaluación es definitiva</strong>
+                    <p>Vas a {{ decision() === 'APROBAR' ? 'aprobar' : 'rechazar' }} esta pregunta. No podrás cambiarla después.</p>
+                    <div class="confirmacion">
+                      <button type="button" class="boton chico" (click)="confirmando.set(false)">Revisar</button>
+                      <button type="button" class="boton chico primario" [disabled]="enviando()" (click)="enviar()">{{ enviando() ? 'Enviando…' : 'Confirmar envío' }}</button>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="pie-evaluacion">
+                  <span class="pista" [class.obligatoria]="decision() === 'RECHAZAR'">{{ pista() }}</span>
+                  <button type="button" class="boton primario" [disabled]="!puedeEnviar()" (click)="pedirConfirmacion()">
+                    <bp-icono nombre="enviar" /> Enviar evaluación
+                  </button>
+                </div>
+              }
+            }
+          }
+        </section>
+
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><h2>Otros revisores</h2><span class="nota">{{ colegas().length }} de {{ colegasTotal() }} evaluaciones</span></div>
+          @if (colegas().length === 0) {
+            <p class="ayuda">Todavía ninguno de tus colegas ha enviado su evaluación.</p>
+          } @else {
+            <div class="colegas">
+              @for (c of colegas(); track c.revisorId) {
+                @if (c.evaluacion; as ev) {
+                  <article class="colega">
+                    <header>
+                      <bp-avatar [nombre]="c.revisorId" [tamano]="30" />
+                      <div><strong>{{ c.revisorId }}</strong><small>{{ fechaHora(ev.enviadaEn) }}</small></div>
+                      <span class="decision-texto" [class.rechaza]="ev.decision === 'RECHAZAR'" [class.aprueba]="ev.decision === 'APROBAR'">{{ ev.decision === 'RECHAZAR' ? 'Rechazar' : 'Aprobar' }}</span>
+                    </header>
+                    <p>{{ ev.observacion || 'Sin observaciones.' }}</p>
+                  </article>
+                }
+              }
+            </div>
+          }
+          <p class="ayuda independiente">Tu decisión es independiente. El autor recibirá las observaciones al finalizar la revisión.</p>
+        </section>
+      </div>
+    </div>
+
+    <p class="pie-pagina"><a routerLink="/bandeja"><bp-icono nombre="flecha-izq" [tamano]="16" /> Volver a la bandeja</a> <span>La versión original no se modifica.</span></p>
+  }
+</div>

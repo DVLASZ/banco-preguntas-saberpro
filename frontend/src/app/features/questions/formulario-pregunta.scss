@@ -1,0 +1,89 @@
+.cuadricula {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .tarjeta-cabecera {
+    margin-bottom: 0;
+  }
+}
+
+.clasificacion .tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .tarjeta-cabecera {
+    margin-bottom: 0;
+  }
+}
+
+.opciones,
+.dos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+.consejo {
+  background: var(--violeta-fondo);
+  border: 1px solid rgba(108, 92, 231, 0.35);
+  border-radius: 12px;
+  padding: 14px 16px;
+
+  strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--azul);
+    margin-bottom: 4px;
+  }
+
+  p {
+    color: var(--texto-suave);
+    font-size: 13px;
+  }
+}
+
+.aviso ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: #f3b4c0;
+}
+
+.pie-formulario {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+
+  .estado-guardado {
+    margin-right: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--texto-suave);
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .cuadricula {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .opciones,
+  .dos {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,69 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Asignar revisores</h1>
+      <p class="subtitulo">Distribuye las preguntas pendientes entre los expertos de tu institución.</p>
+    </div>
+    <div class="acciones">
+      <bp-insignia [texto]="total() + ' pendientes de asignación'" tono="ambar" />
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar la cola</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="cuadricula">
+      <section class="tarjeta cola">
+        <div class="tarjeta-cabecera"><h2>Preguntas pendientes</h2><span class="nota">{{ visibles().length }} de {{ total() }}</span></div>
+        <div class="campo">
+          <label for="buscar-cola">Buscar en la cola</label>
+          <input id="buscar-cola" type="search" placeholder="Buscar por título, ID o autor…" [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
+        </div>
+        @if (cargando() && pendientes().length === 0) {
+          <div class="esqueleto" style="height: 110px"></div>
+          <div class="esqueleto" style="height: 110px"></div>
+        } @else {
+          <ul class="lista">
+            @for (p of visibles(); track p.preguntaId) {
+              <li>
+                <button type="button" class="caso" [class.elegido]="seleccionada()?.preguntaId === p.preguntaId" (click)="elegir(p)">
+                  <span class="fila"><small>{{ codigoCorto(p.preguntaId) }}</small><bp-insignia texto="Pendiente de revisión" tono="ambar" /></span>
+                  <strong>{{ p.titulo || 'Sin título' }}</strong>
+                  <span class="suave">{{ textoCompetencia(p.competencia) }}</span>
+                  <span class="tenue">{{ p.autorId }} · {{ fechaCorta(p.enviadaEn) }} · ronda {{ p.ronda }}</span>
+                  @if (seleccionada()?.preguntaId === p.preguntaId) { <bp-icono class="marca" nombre="check" [tamano]="16" /> }
+                </button>
+              </li>
+            } @empty {
+              <li class="vacio">
+                @if (buscar()) { Ninguna pregunta coincide con la búsqueda. } @else { No hay preguntas pendientes de asignación. }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="tarjeta seleccion">
+        @if (seleccionada(); as caso) {
+          <p class="sobretitulo">Asignación · {{ codigoCorto(caso.preguntaId) }}</p>
+          <h2>Seleccionar revisores</h2>
+          <p class="suave titulo-caso">{{ caso.titulo }} · de {{ caso.autorId }}</p>
+          <bp-selector-revisores
+            [preguntaId]="caso.preguntaId"
+            [autorId]="caso.autorId"
+            [maximo]="maximo()"
+            (asignado)="alAsignar(caso)"
+          />
+        } @else {
+          <div class="vacio-seleccion">
+            <bp-icono nombre="usuarios" [tamano]="32" />
+            <p>Elige una pregunta de la cola para asignarle revisores.</p>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>
