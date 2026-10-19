@@ -29,7 +29,7 @@ public class ApplicationConfig {
                                                       ProcessedEvents procesados,
                                                       PoliticaDeDecision politica,
                                                       Clock reloj,
-                                                      @Value("${review.max-reviewers:5}") int maximoDeRevisores) {
+                                                      @Value("${review.max-reviewers:3}") int maximoDeRevisores) {
         return new ReviewApplicationService(repositorio, eventos, procesados, politica, reloj,
                 () -> UUID.randomUUID().toString(), maximoDeRevisores);
     }

@@ -53,8 +53,8 @@ springdoc:
     operations-sorter: method
 
 review:
-  # Maximo de revisores por pregunta (el minimo es siempre 1).
-  max-reviewers: ${REVIEW_MAX_REVIEWERS:5}
+  # Maximo de revisores por pregunta (el minimo es siempre 1). Los docentes piden de 1 a 3; se puede ampliar sin tocar el codigo.
+  max-reviewers: ${REVIEW_MAX_REVIEWERS:3}
 
 eureka:
   client:
