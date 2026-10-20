@@ -1,0 +1,256 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "user-service",
+    "description": "Directorio de usuarios del Banco de Preguntas Saber Pro, sincronizado con Keycloak (la fuente de verdad de usuarios, roles y contraseñas), y auditoría de inicios de sesión. El administrador lo usa para elegir revisores.",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://172.18.0.19:8081",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Usuarios",
+      "description": "Directorio de usuarios sincronizado con Keycloak"
+    }
+  ],
+  "paths": {
+    "/api/users/sync": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Sincronizar ahora con Keycloak: usuarios nuevos y inicios de sesión. Rol ADMIN.",
+        "description": "Normalmente se hace solo cada pocos segundos; esto fuerza una vuelta.",
+        "operationId": "sincronizar",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Listar usuarios, por ejemplo los revisores disponibles. Rol ADMIN.",
+        "description": "rol=REVIEWER lista los candidatos a revisor. texto busca en usuario, nombre y correo sin distinguir mayúsculas. Por defecto solo trae cuentas activas.",
+        "operationId": "listar",
+        "parameters": [
+          {
+            "name": "rol",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "texto",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "soloActivos",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageResponseUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Quién soy: mi usuario, roles y perfil. Cualquier rol del sistema.",
+        "operationId": "yo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SyncResponse": {
+        "type": "object",
+        "properties": {
+          "usuariosCreados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usuariosActualizados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usuariosDesactivados": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "iniciosDeSesionPublicados": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PageResponseUserResponse": {
+        "type": "object",
+        "properties": {
+          "contenido": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            }
+          },
+          "pagina": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tamano": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElementos": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "activo": {
+            "type": "boolean"
+          },
+          "ultimoInicioDeSesion": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "correo": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sincronizado": {
+            "type": "boolean"
+          },
+          "ultimoInicioDeSesion": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "description": "Token de acceso de Keycloak",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

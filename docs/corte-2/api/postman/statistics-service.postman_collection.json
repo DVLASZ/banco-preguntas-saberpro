@@ -1,0 +1,1093 @@
+{
+  "info": {
+    "_postman_id": "47904e84-d193-5c3f-84df-93e0a89b47ec",
+    "name": "Banco de Preguntas · statistics-service",
+    "description": "RF-25 a RF-28: historial, estadísticas, fortalezas y debilidades de cada estudiante (statistics-service). Publica una pregunta, el estudiante presenta un simulacro y se consulta su seguimiento. Ejecutar de arriba abajo con `SaberPro_Local`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 · Sesión",
+      "item": [
+        {
+          "name": "Iniciar sesión como autor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAutor', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "autor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAutor}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAdmin', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAdmin}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como revisor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenRevisor1', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenRevisor1}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como revisor2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenRevisor2', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor2"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenRevisor2}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como estudiante1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenEstudiante1', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "estudiante1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenEstudiante1}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como estudiante2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenEstudiante2', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "estudiante2"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenEstudiante2}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como docente1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenDocente', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "docente1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenDocente}}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 · Preparación",
+      "item": [
+        {
+          "name": "Preparar · crear una pregunta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (201)', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('qId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Preparar · enviarla a revisión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/submit"
+          }
+        },
+        {
+          "name": "Preparar · asignar dos revisores",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// el envío viaja por RabbitMQ hasta assignment-service: se espera antes de asignar",
+                  "setTimeout(function () {}, 3000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": [\n    \"revisor1\",\n    \"revisor2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        },
+        {
+          "name": "Preparar · el revisor 1 aprueba",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// la asignación viaja por RabbitMQ hasta evaluation-service: se espera antes de evaluar",
+                  "setTimeout(function () {}, 3000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APROBAR\",\n  \"observacion\": \"Cumple\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "Preparar · el revisor 2 aprueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APROBAR\",\n  \"observacion\": \"De acuerdo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "Preparar · publicarla",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// la decisión de la ronda viaja por RabbitMQ hasta lifecycle-service: se espera antes de publicar",
+                  "setTimeout(function () {}, 3000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('queda Publicada', function () { pm.expect(pm.response.json().estado).to.eql('PUBLICADA'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/publish"
+          }
+        },
+        {
+          "name": "Preparar · el estudiante genera un simulacro",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// los eventos viajan por RabbitMQ: se espera un momento antes de consultar",
+                  "setTimeout(function () {}, 1500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (201)', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('simId', pm.response.json().id);",
+                  "pm.collectionVariables.set('qSim', pm.response.json().preguntas[0].preguntaId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"competencias\": [\n    \"LECTURA_CRITICA\"\n  ],\n  \"cantidad\": 1,\n  \"duracionMinutos\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/simulations"
+          }
+        },
+        {
+          "name": "Preparar · contesta la pregunta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preguntaId\": \"{{qSim}}\",\n  \"opcion\": \"B\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/simulations/{{simId}}/answers"
+          }
+        },
+        {
+          "name": "Preparar · finaliza el simulacro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/simulations/{{simId}}/finish"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · El estudiante",
+      "item": [
+        {
+          "name": "RF-25 Mi historial de simulacros",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// los eventos viajan por RabbitMQ: se espera un momento antes de consultar",
+                  "setTimeout(function () {}, 1500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('incluye el simulacro terminado con su puntaje', function () { var e = j.contenido.filter(function (x) { return x.simulacroId === pm.collectionVariables.get('simId'); }); pm.expect(e.length).to.eql(1); pm.expect(e[0].puntaje).to.eql(100); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/me/history"
+          }
+        },
+        {
+          "name": "RF-26 Mis estadísticas individuales",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('cuenta los simulacros y calcula el promedio', function () { pm.expect(j.simulacros).to.be.at.least(1); pm.expect(j.puntajePromedio).to.be.within(0, 100); pm.expect(j.mejorPuntaje).to.eql(100); });",
+                  "pm.test('trae el desempeño por competencia', function () { pm.expect(j.porCompetencia.length).to.be.at.least(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/me/stats"
+          }
+        },
+        {
+          "name": "RF-27 Mis fortalezas y debilidades por competencia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae los umbrales y las listas', function () { pm.expect(j.umbralFortaleza).to.be.above(j.umbralDebilidad - 1); pm.expect(j).to.have.property('fortalezas'); pm.expect(j).to.have.property('debilidades'); pm.expect(j).to.have.property('intermedias'); pm.expect(j).to.have.property('sinDatosSuficientes'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/me/competencies"
+          }
+        },
+        {
+          "name": "Un estudiante sin simulacros recibe ceros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('estadísticas en cero o con sus propios simulacros', function () { pm.expect(pm.response.json().simulacros).to.be.at.least(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/me/stats"
+          }
+        },
+        {
+          "name": "Mi historial sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (401)', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/statistics/me/history"
+          }
+        },
+        {
+          "name": "Mi historial como docente (prohibido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenDocente}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/me/history"
+          }
+        },
+        {
+          "name": "Mi historial con paginación inválida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400)', function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/me/history?size=0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · RF-28 Docentes y coordinadores: seguimiento de un estudiante",
+      "item": [
+        {
+          "name": "Estadísticas de un estudiante (docente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('es del estudiante pedido', function () { pm.expect(pm.response.json().estudianteId).to.eql('estudiante1'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenDocente}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/students/estudiante1/stats"
+          }
+        },
+        {
+          "name": "Historial de un estudiante (administrador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/students/estudiante1/history"
+          }
+        },
+        {
+          "name": "Fortalezas y debilidades de un estudiante (docente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenDocente}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/students/estudiante1/competencies"
+          }
+        },
+        {
+          "name": "Seguimiento de otro estudiante como estudiante (prohibido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenEstudiante2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/statistics/students/estudiante1/stats"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "qId",
+      "value": ""
+    },
+    {
+      "key": "simId",
+      "value": ""
+    },
+    {
+      "key": "qSim",
+      "value": ""
+    }
+  ]
+}

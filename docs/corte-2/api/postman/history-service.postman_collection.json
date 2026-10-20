@@ -1,0 +1,496 @@
+{
+  "info": {
+    "_postman_id": "d6a737c0-a915-5c77-a1e7-eb766a186890",
+    "name": "Banco de Preguntas · history-service",
+    "description": "Historial por pregunta y auditoría. Crea y envía una pregunta para generar entradas. Ejecutar de arriba abajo con el entorno `SaberPro_Local`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 · Sesión",
+      "item": [
+        {
+          "name": "Iniciar sesión como autor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAutor', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "autor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAutor}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAdmin', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAdmin}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como revisor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenRevisor1', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenRevisor1}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como revisor2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenRevisor2', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor2"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenRevisor2}}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 · Preparación",
+      "item": [
+        {
+          "name": "Preparar · crear una pregunta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (201)', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('qId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Preparar · enviar la pregunta a revisión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/submit"
+          }
+        },
+        {
+          "name": "Preparar · asignar dos revisores",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// el envío viaja por RabbitMQ hasta assignment-service: se espera antes de asignar",
+                  "setTimeout(function () {}, 3000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": [\n    \"revisor1\",\n    \"revisor2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · Historial",
+      "item": [
+        {
+          "name": "Historial de la pregunta (autor)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// los eventos viajan por RabbitMQ: se espera un momento antes de consultar",
+                  "setTimeout(function () {}, 1500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('registra el envío y los cambios de estado', function () { var t = pm.response.json().map(function (e) { return e.tipo; }); pm.expect(t).to.include('PREGUNTA_ENVIADA'); pm.expect(t).to.include('CAMBIO_DE_ESTADO'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/history/questions/{{qId}}"
+          }
+        },
+        {
+          "name": "Historial de la pregunta (administrador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('el administrador ve también la asignación de revisores', function () { var t = pm.response.json().map(function (e) { return e.tipo; }); pm.expect(t).to.include('REVISORES_ASIGNADOS'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/history/questions/{{qId}}"
+          }
+        },
+        {
+          "name": "Historial de la pregunta (revisor asignado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/history/questions/{{qId}}"
+          }
+        },
+        {
+          "name": "Mi historial",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('es una página con entradas', function () { pm.expect(pm.response.json().contenido.length).to.be.above(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/history/me"
+          }
+        },
+        {
+          "name": "Historial sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (401)', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": "{{baseUrl}}/api/history/me"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "qId",
+      "value": ""
+    }
+  ]
+}

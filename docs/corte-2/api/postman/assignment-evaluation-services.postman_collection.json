@@ -1,0 +1,970 @@
+{
+  "info": {
+    "_postman_id": "b3ba16db-b71a-543e-a21c-95841a3b060c",
+    "name": "Banco de Preguntas · assignment-service y evaluation-service",
+    "description": "HU-04 y HU-05: asignación de revisores (assignment-service) y evaluación por pares (evaluation-service), que el gateway reparte por ruta. HU-04 y HU-05: asignar de 1 a 3 revisores, evaluar y decidir por unanimidad. Ejecutar de arriba abajo con el entorno `SaberPro_Local`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 · Sesión",
+      "item": [
+        {
+          "name": "Iniciar sesión como autor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAutor', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "autor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAutor}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAdmin', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAdmin}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como revisor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenRevisor1', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenRevisor1}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como revisor2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenRevisor2', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "revisor2"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenRevisor2}}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 · Preparación",
+      "item": [
+        {
+          "name": "Preparar · crear una pregunta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (201)', function () { pm.response.to.have.status(201); });",
+                  "pm.collectionVariables.set('qId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Preparar · enviar la pregunta a revisión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · HU-04 Asignar revisores",
+      "item": [
+        {
+          "name": "Configuración (mínimo y máximo de revisores)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('de 1 a 3 revisores', function () { pm.expect(j.minimoDeRevisores).to.eql(1); pm.expect(j.maximoDeRevisores).to.eql(3); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reviews/config"
+          }
+        },
+        {
+          "name": "Pendientes de asignación (administrador)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// los eventos viajan por RabbitMQ: se espera un momento antes de consultar",
+                  "setTimeout(function () {}, 1500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('incluye la pregunta enviada', function () { pm.expect(pm.response.text()).to.include(pm.collectionVariables.get('qId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reviews/pending-assignment"
+          }
+        },
+        {
+          "name": "Pendientes de asignación como autor (prohibido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reviews/pending-assignment"
+          }
+        },
+        {
+          "name": "Asignar 0 revisores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        },
+        {
+          "name": "Asignar 4 revisores (el máximo es 3)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": [\n    \"revisor1\",\n    \"revisor2\",\n    \"revisor3\",\n    \"revisor4\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        },
+        {
+          "name": "Asignar al autor como revisor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 403 o 409 o 422)', function () { pm.expect([400, 403, 409, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": [\n    \"autor1\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        },
+        {
+          "name": "Asignar como autor (prohibido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": [\n    \"revisor1\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        },
+        {
+          "name": "Asignar dos revisores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('la ronda 1 tiene 2 revisores', function () { var r = pm.response.json().rondas[0]; pm.expect(r.numero).to.eql(1); pm.expect(r.totalDeRevisores).to.eql(2); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reviewerIds\": [\n    \"revisor1\",\n    \"revisor2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/assignments"
+          }
+        },
+        {
+          "name": "La pregunta pasó a En revisión",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// los eventos viajan por RabbitMQ: se espera un momento antes de consultar",
+                  "setTimeout(function () {}, 1500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('estado En revisión', function () { pm.expect(pm.response.json().estado).to.eql('EN_REVISION'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · HU-05 Evaluar",
+      "item": [
+        {
+          "name": "Preguntas asignadas al revisor 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('incluye la pregunta', function () { pm.expect(pm.response.text()).to.include(pm.collectionVariables.get('qId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reviews/assigned"
+          }
+        },
+        {
+          "name": "Rechazar sin observación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"RECHAZAR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "Evaluar sin estar asignado (autor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APROBAR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "El revisor 1 aprueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('la ronda sigue pendiente (unanimidad)', function () { pm.expect(pm.response.json().resultadoDeLaRonda).to.eql('PENDIENTE'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APROBAR\",\n  \"observacion\": \"Cumple con los criterios\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "El revisor 1 evalúa otra vez (rechazado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 409)', function () { pm.expect([400, 409]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APROBAR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "El revisor 2 aprueba",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('la ronda queda aprobada', function () { pm.expect(pm.response.json().resultadoDeLaRonda).to.eql('APROBADA'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenRevisor2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"APROBAR\",\n  \"observacion\": \"De acuerdo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}/evaluations"
+          }
+        },
+        {
+          "name": "El autor lee las observaciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('ve las observaciones de los revisores', function () { pm.expect(pm.response.text()).to.include('Cumple con los criterios'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/reviews/{{qId}}"
+          }
+        },
+        {
+          "name": "La pregunta quedó Aprobada",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// los eventos viajan por RabbitMQ: se espera un momento antes de consultar",
+                  "setTimeout(function () {}, 1500);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('estado Aprobada', function () { pm.expect(pm.response.json().estado).to.eql('APROBADA'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "qId",
+      "value": ""
+    }
+  ]
+}

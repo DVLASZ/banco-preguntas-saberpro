@@ -4,15 +4,18 @@ Tercera iteración del Sistema de Banco de Preguntas Saber Pro. Los requisitos o
 [`EntregablesTercerCorte2026.2-IngSoft2.docx`](../general/enunciados/EntregablesTercerCorte2026.2-IngSoft2.docx).
 Esta carpeta se llena a medida que se avanza; hoy recoge el alcance y el estado.
 
+> **Adelantado:** los simulacros y el seguimiento académico (RF-21 a RF-28), que los docentes ubicaron en este corte, ya
+> están construidos en el backend: ver [simulacros y seguimiento](simulacros-y-seguimiento.md).
+
 ## Alcance del corte
 
 | Requisito | Detalle | Estado |
 |---|---|---|
-| HU-06 | El autor lista y ve el historial de revisiones y sus observaciones para sacar una versión mejorada | Servicio de historial y pantalla de historial construidos; falta revisarlos contra el enunciado |
+| HU-06 | El autor lista y ve el historial de revisiones y sus observaciones para sacar una versión mejorada | Hecha: el autor ve las rondas con las observaciones de cada revisor, la línea de tiempo de la pregunta, puede reabrir la rechazada, corregirla y reenviarla (verificado de punta a punta en Docker) |
 | Autenticación y autorización con JWT | Sistema externo (Keycloak); usuarios y roles pueden gestionarse por Postman | Keycloak y validación de JWT en el gateway y en cada servicio ya funcionan (adelantado desde el corte 2) |
-| Arquitectura hexagonal con DDD | En **un** microservicio con reglas de dominio (revisión o gestión de preguntas): agregados, objetos de valor, servicios de dominio y repositorios | Pendiente |
+| Arquitectura hexagonal con DDD | En **un** microservicio con reglas de dominio (revisión o gestión de preguntas): agregados, objetos de valor, servicios de dominio y repositorios | Los servicios ya separan dominio, puertos y adaptadores (vigilado con ArchUnit); falta el modelado formal en DDD de un servicio y su documento |
 | Dockerización | Todo el sistema con Docker Compose | Construido: un solo comando levanta bases, broker, Keycloak, servicios, gateway y frontend |
-| Documento de arquitectura | Documento final en PDF y repositorio que sirva de carta de presentación | Pendiente; se arma con los documentos de cada corte |
+| Documento de arquitectura | Documento final en PDF y repositorio que sirva de carta de presentación | Pendiente el PDF; el README raíz ya presenta el proyecto y se arma con los documentos de cada corte, incluidos [las decisiones y SOLID](../corte-2/10-decisiones-y-solid.md) |
 | Sustentación | Presencial, de 10 minutos más preguntas, vendiendo el producto a los docentes | Pendiente |
 
 ## Lo que se decidió con los docentes para este corte

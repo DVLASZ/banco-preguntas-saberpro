@@ -2,123 +2,756 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://bancopreguntas.local/schemas/eventos.schema.json",
   "title": "Eventos de dominio del Banco de Preguntas",
-  "description": "Sobre común y cuerpo de cada evento publicado en el exchange bancopreguntas.events (topic). La routing key es igual al campo type.",
+  "description": "Sobre común y cuerpo de cada evento publicado en el exchange bancopreguntas.events (topic). La routing key es igual al campo type. Corresponde a los registros de domain/event de cada servicio.",
   "type": "object",
-  "required": ["eventId", "type", "occurredAt", "data"],
+  "required": [
+    "eventId",
+    "type",
+    "occurredAt",
+    "data"
+  ],
   "properties": {
-    "eventId": { "type": "string", "format": "uuid", "description": "Identificador único; los consumidores lo usan para la idempotencia" },
-    "type": {
+    "eventId": {
       "type": "string",
+      "format": "uuid",
+      "description": "Identificador único; los consumidores lo usan para la idempotencia"
+    },
+    "type": {
       "enum": [
         "question.submitted",
+        "question.reopened",
+        "question.state-changed",
+        "question.published",
         "review.reviewers-assigned",
         "review.evaluation-submitted",
         "review.completed",
-        "question.state-changed"
+        "simulation.completed",
+        "statistics.student-updated",
+        "notification.created",
+        "auth.login-succeeded",
+        "auth.login-failed"
       ]
     },
-    "occurredAt": { "type": "string", "format": "date-time" },
-    "data": { "type": "object" }
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data": {
+      "type": "object"
+    }
   },
   "oneOf": [
     {
       "properties": {
-        "type": { "const": "question.submitted" },
-        "data": { "$ref": "#/$defs/QuestionSubmitted" }
+        "type": {
+          "const": "question.submitted"
+        },
+        "data": {
+          "$ref": "#/$defs/QuestionSubmitted"
+        }
       }
     },
     {
       "properties": {
-        "type": { "const": "review.reviewers-assigned" },
-        "data": { "$ref": "#/$defs/ReviewersAssigned" }
+        "type": {
+          "const": "question.reopened"
+        },
+        "data": {
+          "$ref": "#/$defs/QuestionReopened"
+        }
       }
     },
     {
       "properties": {
-        "type": { "const": "review.evaluation-submitted" },
-        "data": { "$ref": "#/$defs/EvaluationSubmitted" }
+        "type": {
+          "const": "question.state-changed"
+        },
+        "data": {
+          "$ref": "#/$defs/QuestionStateChanged"
+        }
       }
     },
     {
       "properties": {
-        "type": { "const": "review.completed" },
-        "data": { "$ref": "#/$defs/ReviewCompleted" }
+        "type": {
+          "const": "question.published"
+        },
+        "data": {
+          "$ref": "#/$defs/QuestionPublished"
+        }
       }
     },
     {
       "properties": {
-        "type": { "const": "question.state-changed" },
-        "data": { "$ref": "#/$defs/QuestionStateChanged" }
+        "type": {
+          "const": "review.reviewers-assigned"
+        },
+        "data": {
+          "$ref": "#/$defs/ReviewersAssigned"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "review.evaluation-submitted"
+        },
+        "data": {
+          "$ref": "#/$defs/EvaluationSubmitted"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "review.completed"
+        },
+        "data": {
+          "$ref": "#/$defs/ReviewCompleted"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "simulation.completed"
+        },
+        "data": {
+          "$ref": "#/$defs/SimulationCompleted"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "auth.login-succeeded"
+        },
+        "data": {
+          "$ref": "#/$defs/LoginSucceeded"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "auth.login-failed"
+        },
+        "data": {
+          "$ref": "#/$defs/LoginFailed"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "statistics.student-updated"
+        },
+        "data": {
+          "$ref": "#/$defs/StudentStatisticsUpdated"
+        }
+      }
+    },
+    {
+      "properties": {
+        "type": {
+          "const": "notification.created"
+        },
+        "data": {
+          "$ref": "#/$defs/NotificationCreated"
+        }
       }
     }
   ],
   "$defs": {
     "QuestionSubmitted": {
       "type": "object",
-      "required": ["questionId", "authorId", "title", "competency"],
+      "description": "El autor envió la pregunta (o su versión corregida) a revisión. Lo publica lifecycle-service.",
+      "required": [
+        "questionId",
+        "authorId",
+        "title",
+        "competency",
+        "version"
+      ],
       "properties": {
-        "questionId": { "type": "string", "format": "uuid" },
-        "authorId": { "type": "string", "format": "uuid" },
-        "title": { "type": "string" },
-        "competency": { "type": "string" }
-      }
+        "questionId": {
+          "type": "string"
+        },
+        "authorId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "competency": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "QuestionReopened": {
+      "type": "object",
+      "description": "El autor reabrió una pregunta rechazada; vuelve a Borrador con una versión nueva. Lo publica lifecycle-service.",
+      "required": [
+        "questionId",
+        "authorId",
+        "version"
+      ],
+      "properties": {
+        "questionId": {
+          "type": "string"
+        },
+        "authorId": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 2
+        }
+      },
+      "additionalProperties": true
+    },
+    "QuestionStateChanged": {
+      "type": "object",
+      "description": "Cualquier cambio de estado de la pregunta. Lo publica lifecycle-service, que es quien lleva el ciclo de vida; question-service guarda una copia del estado y usa sequence para ignorar avisos repetidos o atrasados.",
+      "required": [
+        "questionId",
+        "to"
+      ],
+      "properties": {
+        "questionId": {
+          "type": "string"
+        },
+        "from": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "to": {
+          "type": "string"
+        },
+        "changedBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "null cuando el cambio lo hizo el sistema (por ejemplo, al asignar revisores)"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Número de cambios de estado que lleva la pregunta; solo crece. Quien guarda una copia del estado ignora los avisos con una secuencia ya aplicada."
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Versión del contenido de la pregunta tras el cambio."
+        }
+      },
+      "additionalProperties": true
+    },
+    "QuestionPublished": {
+      "type": "object",
+      "description": "El administrador publicó una pregunta aprobada. Lleva el contenido de la pregunta para que catalog-service arme su catálogo sin consultar a question-service. Lo publica lifecycle-service.",
+      "required": [
+        "questionId",
+        "publishedBy",
+        "version",
+        "title",
+        "competency",
+        "topic",
+        "subtopic",
+        "difficulty",
+        "context",
+        "statement",
+        "optionA",
+        "optionB",
+        "optionC",
+        "optionD",
+        "correctAnswer"
+      ],
+      "properties": {
+        "questionId": {
+          "type": "string"
+        },
+        "publishedBy": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "competency": {
+          "type": "string"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "subtopic": {
+          "type": "string"
+        },
+        "difficulty": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "optionA": {
+          "type": "string"
+        },
+        "optionB": {
+          "type": "string"
+        },
+        "optionC": {
+          "type": "string"
+        },
+        "optionD": {
+          "type": "string"
+        },
+        "correctAnswer": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ]
+        }
+      },
+      "additionalProperties": true
     },
     "ReviewersAssigned": {
       "type": "object",
-      "required": ["questionId", "authorId", "reviewerIds", "assignedBy"],
+      "description": "Se asignaron revisores a una ronda. Lo publica assignment-service. Lleva también la versión, el título y la competencia de la pregunta para que evaluation-service arme su copia de la ronda aunque este evento llegue antes que question.submitted.",
+      "required": [
+        "questionId",
+        "authorId",
+        "round",
+        "reviewerIds",
+        "assignedBy",
+        "automatic"
+      ],
       "properties": {
-        "questionId": { "type": "string", "format": "uuid" },
-        "authorId": { "type": "string", "format": "uuid" },
+        "questionId": {
+          "type": "string"
+        },
+        "authorId": {
+          "type": "string"
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
         "reviewerIds": {
           "type": "array",
+          "items": {
+            "type": "string"
+          },
           "minItems": 1,
-          "maxItems": 3,
-          "uniqueItems": true,
-          "items": { "type": "string", "format": "uuid" }
+          "maxItems": 3
         },
-        "assignedBy": { "type": "string", "format": "uuid" }
-      }
+        "assignedBy": {
+          "type": "string",
+          "description": "el administrador, o \"system\" en la reasignación automática"
+        },
+        "automatic": {
+          "type": "boolean"
+        },
+        "questionVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Versión de la pregunta que se revisa en la ronda."
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "competency": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
     },
     "EvaluationSubmitted": {
       "type": "object",
-      "required": ["questionId", "reviewerId", "decision"],
+      "description": "Un revisor envió su evaluación. Lo publica evaluation-service.",
+      "required": [
+        "questionId",
+        "authorId",
+        "round",
+        "reviewerId",
+        "decision",
+        "late"
+      ],
       "properties": {
-        "questionId": { "type": "string", "format": "uuid" },
-        "reviewerId": { "type": "string", "format": "uuid" },
-        "decision": { "type": "string", "enum": ["APROBAR", "RECHAZAR"] },
-        "observation": { "type": "string" }
-      }
+        "questionId": {
+          "type": "string"
+        },
+        "authorId": {
+          "type": "string"
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reviewerId": {
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "APROBAR",
+            "RECHAZAR"
+          ]
+        },
+        "observation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "late": {
+          "type": "boolean",
+          "description": "true si llegó cuando la ronda ya se había rechazado"
+        }
+      },
+      "additionalProperties": true
     },
     "ReviewCompleted": {
       "type": "object",
-      "required": ["questionId", "authorId", "result", "observations"],
+      "description": "La ronda se decidió por unanimidad (o por un rechazo). Lo publica evaluation-service.",
+      "required": [
+        "questionId",
+        "authorId",
+        "round",
+        "result",
+        "observations"
+      ],
       "properties": {
-        "questionId": { "type": "string", "format": "uuid" },
-        "authorId": { "type": "string", "format": "uuid" },
-        "result": { "type": "string", "enum": ["APPROVED", "REJECTED"] },
+        "questionId": {
+          "type": "string"
+        },
+        "authorId": {
+          "type": "string"
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "result": {
+          "enum": [
+            "APPROVED",
+            "REJECTED"
+          ]
+        },
         "observations": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["reviewerId", "decision"],
+            "required": [
+              "reviewerId",
+              "decision"
+            ],
             "properties": {
-              "reviewerId": { "type": "string", "format": "uuid" },
-              "decision": { "type": "string", "enum": ["APROBAR", "RECHAZAR"] },
-              "text": { "type": "string" }
+              "reviewerId": {
+                "type": "string"
+              },
+              "decision": {
+                "enum": [
+                  "APROBAR",
+                  "RECHAZAR"
+                ]
+              },
+              "text": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
             }
           }
         }
-      }
+      },
+      "additionalProperties": true
     },
-    "QuestionStateChanged": {
+    "SimulationCompleted": {
       "type": "object",
-      "required": ["questionId", "from", "to", "changedBy"],
+      "description": "Un simulacro terminó (lo finalizó el estudiante o se agotó el tiempo) y ya está calificado. Lo publica simulation-service.",
+      "required": [
+        "simulationId",
+        "studentId",
+        "finishedAt",
+        "durationSeconds",
+        "expired",
+        "total",
+        "correct",
+        "incorrect",
+        "unanswered",
+        "score",
+        "byCompetency"
+      ],
       "properties": {
-        "questionId": { "type": "string", "format": "uuid" },
-        "from": { "type": "string" },
-        "to": { "type": "string" },
-        "changedBy": { "type": ["string", "null"], "format": "uuid", "description": "Nulo cuando el cambio lo provoca un evento y no un usuario" }
-      }
+        "simulationId": {
+          "type": "string"
+        },
+        "studentId": {
+          "type": "string"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "durationSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expired": {
+          "type": "boolean",
+          "description": "true si lo cerró el sistema por tiempo agotado"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "correct": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "incorrect": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unanswered": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "byCompetency": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "competency",
+              "correct",
+              "total"
+            ],
+            "properties": {
+              "competency": {
+                "type": "string"
+              },
+              "correct": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "LoginSucceeded": {
+      "type": "object",
+      "description": "Inicio de sesión correcto, tomado de los eventos de Keycloak. Lo publica user-service.",
+      "required": [
+        "userId",
+        "loggedInAt"
+      ],
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "ip": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "loggedInAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    "LoginFailed": {
+      "type": "object",
+      "description": "Intento de inicio de sesión fallido. Lo publica user-service.",
+      "required": [
+        "userId",
+        "attemptedAt"
+      ],
+      "properties": {
+        "userId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ip": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "attemptedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    "StudentStatisticsUpdated": {
+      "type": "object",
+      "description": "Las estadísticas de un estudiante cambiaron porque terminó otro simulacro. Lo publica statistics-service; report-service arma con él el reporte del grupo sin recalcular nada. simulations solo crece: un evento viejo se reconoce por ese número.",
+      "required": [
+        "studentId",
+        "simulations",
+        "scoreSum",
+        "average",
+        "best",
+        "last",
+        "trend",
+        "weaknesses",
+        "byCompetency",
+        "updatedAt"
+      ],
+      "properties": {
+        "studentId": {
+          "type": "string"
+        },
+        "simulations": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scoreSum": {
+          "type": "number",
+          "description": "Suma de los puntajes de todos sus simulacros (permite promediar el grupo sin perder exactitud)"
+        },
+        "average": {
+          "type": "number"
+        },
+        "best": {
+          "type": "number"
+        },
+        "last": {
+          "type": "number"
+        },
+        "trend": {
+          "enum": [
+            "MEJORANDO",
+            "ESTABLE",
+            "EMPEORANDO",
+            "SIN_DATOS"
+          ]
+        },
+        "weaknesses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Competencias por debajo del umbral de debilidad"
+        },
+        "byCompetency": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "competency",
+              "correct",
+              "total"
+            ],
+            "properties": {
+              "competency": {
+                "type": "string"
+              },
+              "correct": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    "NotificationCreated": {
+      "type": "object",
+      "description": "Se creó un aviso en la bandeja de un usuario. Lo publica notification-service; email-service lo escucha para enviar el correo (simulado) y dejarlo en su registro.",
+      "required": [
+        "notificationId",
+        "recipientId",
+        "kind",
+        "subject",
+        "message",
+        "createdAt"
+      ],
+      "properties": {
+        "notificationId": {
+          "type": "string"
+        },
+        "recipientId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Tipo de aviso, por ejemplo REVISION_APROBADA"
+        },
+        "questionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "subject": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
     }
   }
 }

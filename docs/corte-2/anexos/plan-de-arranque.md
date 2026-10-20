@@ -1,166 +1,130 @@
-# Corte 2 — Plan de arranque (listo para ejecutar tras confirmar con Libardo)
+# Estructura, puertos y reglas de negocio (como quedó construido)
 
-Complementa a `Corte2-Diseno-Microservicios.md`. Todo está basado en las respuestas del Docente 1. **No se escribe código ni se toca el repo hasta confirmar con Libardo.**
+Este anexo nació como plan de arranque antes de escribir código y se actualizó con lo que se construyó. Para el detalle
+de la seguridad y la resiliencia ver [08](../08-implementacion-seguridad-y-resiliencia.md); para el diseño de la
+arquitectura, [03](../03-arquitectura-c4-uml.md).
 
-## 0. Puerta de salida: lo que se confirmó con Libardo
+## 1. Qué se reutilizó del primer corte
 
-> Libardo ya respondió; las respuestas y decisiones están en [consultas a los docentes](../../general/consultas-a-docentes.md). La tabla se conserva como registro de lo que se preguntó.
+Del código del monolito (`monolito/`) se migró el dominio, que ya estaba separado de la interfaz Swing:
 
-| # | Punto | Impacto si cambia |
+| Pieza del monolito | Dónde quedó | Observación |
 |---|---|---|
-| 1 | Quién publica y archiva; transiciones sin retorno | Tabla de estados de `question-service` |
-| 2 | Primer rechazo cierra la revisión, o se espera a todos | Lógica de `review-service` |
-| 3 | Unanimidad y 1 a 3 revisores (contrastar con Docente 1) | `review-service` |
-| 4 | ~~Correo real obligatorio, o basta simulado~~ **Resuelto:** simulado (Libardo) | `notification-service` |
-| 5 | Angular o React; frontend en el Compose | Fase del frontend |
-| 6 | Login mínimo con token firmado | `user-service` y gateway |
-| 7 | Escalabilidad: qué evidencia | Fase de la prueba de carga |
-| 8 | Bases: una instancia por servicio | `docker-compose` |
+| `EstadoPregunta` (7 estados, `puedePasarA`) | `lifecycle-service` | Se conservó la tabla de transiciones; cada estado es una clase (patrón State) |
+| `Question`, `QuestionDistractors`, `Competencia`, `Dificultad` | `question-service` | Dominio puro, adaptado (versión de la pregunta, Builder, copia del estado) |
+| `ContenidoPregunta`, `Competencia`, `Dificultad` | `validation-service` | La entrada de las reglas de validación |
+| Reglas de validación y `QuestionValidator` | `validation-service` | Siete reglas independientes; el validador las ejecuta todas y reúne las violaciones |
+| `FiltroPreguntas`, `Pagina` | `question-service` | Listado con filtros y paginación (HU-03) |
+| Repositorio con adaptador JPA | `question-service` | Ahora sobre PostgreSQL con Flyway |
+| Módulo de revisión y su estrategia de decisión | `assignment-service` y `evaluation-service` | Se amplió a 1–3 revisores, rondas y la estrategia `PoliticaDeDecision` (`Unanimidad`); la asignación y la evaluación son servicios separados |
+| Observer del primer corte | RabbitMQ | El Observer en memoria se reemplazó por eventos reales entre servicios |
+| Presentación Swing | No se migró | El frontend nuevo es web (Angular) |
+| Módulo de usuarios (SQLite) | Keycloak y `user-service` | Los usuarios y la autenticación pasaron a Keycloak |
 
-Lo demás (RabbitMQ, Spring Boot, usuarios precargados, autorización en el gateway) coincide con lo que ya se asumió.
+El análisis completo está en [reutilización del monolito](../../general/reutilizacion-del-monolito.md).
 
-## 1. Qué se reutiliza del Corte 1
-
-Código de `modulo-preguntas` (leído, sin modificarlo):
-
-| Pieza existente | Va a | Observación |
-|---|---|---|
-| `EstadoPregunta` (7 estados, `puedePasarA`) | `question-service` | Hoy: Borrador→Pendiente→En revisión→Aprobada/Rechazada; Rechazada→Borrador; Aprobada→Publicada; todo→Archivada. Es compatible con "estados sin retorno" |
-| `Question`, `ContenidoPregunta`, `QuestionDistractors`, `Competencia`, `Dificultad` | `question-service` | Dominio puro: copiar y adaptar |
-| `domain/validation/*` (8 reglas, `QuestionValidator`) | `question-service` | Patrón de reglas encadenadas; se conserva tal cual |
-| `QuestionService`, `FiltroPreguntas`, `Pagina` | `question-service` | Lista con filtros y paginación (HU-03) |
-| `QuestionRepository` + adaptador JPA del Taller 6 | `question-service` | Puerto y adaptador listos |
-| `FuenteDePreguntasParaRevisar`, `TodasLasPreguntasEnRevision` (Strategy) | `review-service` | Base para la política de decisión |
-| `Subject`/`Observer` | referencia | Se reemplaza por eventos reales de RabbitMQ |
-| Presentación Swing (`presentation/*`) | **no se migra** | El frontend nuevo es web |
-| `modulo-usuarios` (SQLite) | `user-service` | Usuarios y roles adaptados a PostgreSQL |
-| `modulo-api-rest` | semilla de `question-service` | Controlador, mapper, `ApiError`, `GlobalExceptionHandler` |
-
-## 2. Estructura del repositorio (cuando se autorice)
-
-Ramas: `corte-1` (copia congelada del estado actual de `main`) y `corte-2` (trabajo nuevo). Merge a `main` solo al terminar y con tu confirmación.
+## 2. Estructura del repositorio
 
 ```
-microservicios/
-  api-gateway/            (Spring Cloud Gateway)
-  user-service/
-  question-service/
-  review-service/
-  notification-service/
-  audit-service/          (opcional)
-  frontend/               (Angular o React)
-  load-tests/             (k6)
-  docker-compose.yml
-  .env.example            (sin credenciales reales)
-  postman/                (una colección por servicio)
-docs/                     (segundo corte)
+├── monolito/                 Corte 1 (también en la rama corte-1)
+├── frontend/                 Angular
+├── microservicios/
+│   ├── plataforma/bp-platform/     Biblioteca común: seguridad JWT, sobre de eventos, Outbox, errores, OpenAPI
+│   ├── servicios/                  los 14 servicios: user, question, validation, lifecycle, assignment, evaluation,
+│   │                               notification, email, history, audit, catalog, simulation, statistics y report
+│   ├── infraestructura/            api-gateway, discovery-server, edge (nginx) y keycloak
+│   ├── pruebas-de-carga/           k6
+│   ├── pruebas-funcionales/        Recorrido de las historias contra Docker
+│   ├── docker-compose.yml          Toda la pila con un comando
+│   └── .env.example                Variables de entorno de desarrollo (el .env no se versiona)
+└── docs/                     general, corte-1, corte-2 y corte-3
 ```
 
-Cada servicio: `pom.xml` propio (Spring Boot 3, Java 21), `Dockerfile`, `mvnw`, paquetes `api / application / domain / infrastructure`, y **sin anotaciones de Spring dentro de `domain`**.
+Cada servicio tiene su `pom.xml`, `Dockerfile` y los paquetes `api / application / domain / infrastructure`, sin
+anotaciones de Spring dentro de `domain` (lo vigila `ArquitecturaTest`).
 
 ## 3. Puertos y contenedores
 
-| Servicio | Puerto | Base de datos (contenedor propio) | Puerto host de la base |
+| Contenedor | Puerto | Base de datos | Puerto de la base en el equipo |
 |---|---|---|---|
-| api-gateway | 8080 | — | — |
-| user-service | 8081 | `user_db` | 5433 |
-| question-service | 8082 | `question_db` | 5434 |
-| review-service | 8083 | `review_db` | 5435 |
-| notification-service | 8084 | `notification_db` | 5436 |
-| audit-service | 8085 | `audit_db` | 5437 |
-| RabbitMQ | 5672 / panel 15672 | — | — |
-| Mailpit (correo de pruebas) | 1025 / panel 8025 | — | — |
 | frontend | 4200 | — | — |
+| edge → api-gateway | 8080 | — | — |
+| keycloak | 8180 | — | — |
+| discovery-server | 8761 | — | — |
+| user-service | 8081 (solo depuración) | `user_db` | 5433 |
+| question-service | 8082 (solo depuración) | `question_db` | 5434 |
+| assignment-service | 8083 (solo depuración) | `assignment_db` | 5445 |
+| notification-service | 8084 (solo depuración) | `notification_db` | 5436 |
+| history-service | 8085 (solo depuración) | `history_db` | 5437 |
+| simulation-service | 8086 (solo depuración) | `simulation_db` | 5438 |
+| statistics-service | 8087 (solo depuración) | `statistics_db` | 5439 |
+| email-service | 8090 (solo depuración) | `email_db` | 5440 |
+| audit-service | 8091 (solo depuración) | `audit_db` | 5441 |
+| catalog-service | 8092 (solo depuración) | `catalog_db` | 5443 |
+| report-service | 8093 (solo depuración) | `report_db` | 5442 |
+| lifecycle-service | 8094 (solo depuración) | `lifecycle_db` | 5444 |
+| validation-service | 8095 (solo depuración) | — (sin base de datos) | — |
+| evaluation-service | 8096 (solo depuración) | `evaluation_db` | 5446 |
+| RabbitMQ | 5672 / panel 15672 | — | — |
 
-Variables en `.env` (ignorado por git): usuario y clave de cada base, credenciales de RabbitMQ, y `SMTP_HOST/PORT/USER/PASS/FROM` (en desarrollo apuntan a Mailpit).
+Las variables (usuarios y claves de las bases, RabbitMQ, Keycloak, `SECURITY_MODE`, `REVIEW_MAX_REVIEWERS`,
+`NOTIFICATION_EMAIL_DOMAIN`) están en `.env.example`.
 
-## 4. Roles y rutas (autorización en el gateway)
+## 4. Roles y rutas
+
+La autorización está en el gateway (tabla `RoleRules`) y se repite en cada controlador.
 
 | Rol | Puede |
 |---|---|
-| ADMIN | Ver preguntas pendientes de revisión, asignar de 1 a 3 revisores, listar revisores elegibles, ver todo el listado |
-| AUTHOR | Crear y editar (solo en Borrador) sus preguntas, listarlas, enviarlas a revisión, ver las observaciones de sus preguntas |
-| REVIEWER | Listar sus asignadas, evaluar (observaciones + aprobar/rechazar), ver las observaciones de los demás revisores de la misma pregunta |
-| Todos | Ver y marcar leídas sus notificaciones |
+| ADMIN | Ver todas las preguntas y las pendientes de asignación, asignar de 1 a 3 revisores, publicar, listar y sincronizar usuarios, ver la auditoría y los correos enviados |
+| AUTHOR | Crear y editar (solo en Borrador) sus preguntas, listarlas, enviarlas a revisión, reabrir las rechazadas, ver las observaciones y el historial de las suyas |
+| REVIEWER | Listar sus preguntas asignadas, evaluar (decisión y observación) y ver las observaciones de los demás revisores de la misma pregunta |
+| Todos los de arriba | Ver y marcar como leídas sus notificaciones |
+| STUDENT | Generar, presentar y finalizar sus simulacros; ver su historial, estadísticas y fortalezas |
+| TEACHER | Consultar simulacros y el seguimiento de cualquier estudiante; reporte del grupo |
 
-Usuarios precargados (semilla con contraseñas BCrypt): 1 administrador, 2 autores, 3 revisores. El login está en `user-service` y el gateway valida el token.
+Los usuarios y roles de demostración están en [datos semilla](datos-semilla.md).
 
 ## 5. Eventos (RabbitMQ)
 
-Exchange `bancopreguntas.events` (topic, durable). Cola por consumidor: `review.q.question-submitted`, `question.q.reviewers-assigned`, `question.q.review-completed`, `notification.q.all`, `audit.q.all`. Mensajes persistentes con confirmación y consumidores idempotentes.
-
-Sobre de todos los eventos:
-
-```json
-{
-  "eventId": "uuid",
-  "type": "review.completed",
-  "occurredAt": "2026-10-06T10:15:30Z",
-  "data": { }
-}
-```
-
-| Evento | `data` |
-|---|---|
-| `question.submitted` | `questionId`, `authorId`, `title`, `competency` |
-| `review.reviewers-assigned` | `questionId`, `authorId`, `reviewerIds[]`, `assignedBy` |
-| `review.evaluation-submitted` | `questionId`, `reviewerId`, `decision`, `observation` |
-| `review.completed` | `questionId`, `authorId`, `result` (`APPROVED` / `REJECTED`), `observations[]` |
-| `question.state-changed` | `questionId`, `from`, `to`, `changedBy` |
+Exchange `bancopreguntas.events` (*topic*, durable). Cada consumidor tiene su cola (`review.q.question-submitted`,
+`question.q.reviewers-assigned`, `notification.q.…`, `history.q.…`) con mensajes persistentes, reintentos y cola de
+mensajes muertos. El catálogo completo y el cuerpo de cada evento están en [02](../02-contextos-y-eventos.md) y en el
+[esquema JSON](../api/eventos/eventos.schema.json).
 
 ## 6. API REST (detrás del gateway, prefijo `/api`)
 
-| Servicio | Endpoints |
-|---|---|
-| user-service | `POST /auth/login`, `GET /users/me`, `GET /users?role=REVIEWER` |
-| question-service | `POST /questions`, `GET /questions?author&state&competency&topic&page&size`, `GET /questions/{id}`, `PUT /questions/{id}` (solo Borrador), `POST /questions/{id}/submit`, `GET /questions/pending-review` (admin) |
-| review-service | `POST /reviews/{questionId}/assignments`, `GET /reviews/assigned`, `GET /reviews/{questionId}`, `POST /reviews/{questionId}/evaluations` |
-| notification-service | `GET /notifications`, `PATCH /notifications/{id}/read` |
-
-Cada servicio expone su Swagger (`/swagger-ui.html`) y su colección de Postman, construidos a medida que se desarrolla (lo pidió el Docente 1).
+La lista de endpoints por servicio y rol está en el [README de microservicios](../../../microservicios/README.md#endpoints-principales);
+los contratos OpenAPI generados por los servicios están en [`api/openapi`](../api/openapi/) y cada servicio expone su Swagger
+en `/swagger-ui.html`.
 
 ## 7. Reglas de negocio
 
-- 1 a 3 revisores por pregunta; el autor nunca es su revisor; un revisor no se repite.
-- Pasa a "En revisión" en cuanto se asignan los revisores (evento `review.reviewers-assigned`).
-- Aprobación por **unanimidad**. Con un rechazo, la pregunta es devuelta. **Pendiente (Libardo):** si cierra al primer rechazo o espera a todos.
-- Los revisores ven las observaciones de sus colegas; sin puntaje rígido.
-- Rechazar exige observación (propia, a validar).
-- Edición solo en Borrador; tras el rechazo vuelve a Borrador (regla existente de Corte 1).
-- Sin borrado físico (RNF-16).
+- De 1 a 3 revisores por pregunta (el máximo es configurable con `REVIEW_MAX_REVIEWERS`, por defecto 3); el autor nunca es
+  su revisor y un revisor no se repite en la misma ronda.
+- La pregunta pasa a «En revisión» en cuanto se asignan los revisores (evento `review.reviewers-assigned`).
+- Aprobación por **unanimidad**. Con un solo rechazo la ronda se cierra y la pregunta queda Rechazada; las observaciones que
+  lleguen después se guardan como tardías.
+- Los revisores ven las observaciones de sus colegas; no hay puntaje rígido. Rechazar exige una observación.
+- Una pregunta solo se edita en Borrador; la rechazada se reabre (vuelve a Borrador con una versión nueva) y al reenviarla se
+  abre una ronda nueva con los mismos revisores.
+- Sin borrado físico (RNF-16): todo cambio de estado queda en el historial.
 
 ## 8. Pruebas
 
-- Unitarias de todas las clases de dominio (entidades y servicios), como en el Corte 1.
-- Integración por servicio: repositorios contra PostgreSQL real con Testcontainers (requiere Docker abierto), y consumo y publicación de eventos contra RabbitMQ.
-- Prueba de carga con k6 aparte (no cuenta como unitaria).
-- Meta: mantener los 330 tests del Corte 1 como referencia y no bajar la calidad del dominio migrado.
+Ver [plan de pruebas](plan-de-pruebas.md).
 
-## 9. Orden de construcción y definición de terminado
+## 9. Cómo se construyó (orden de las fases)
 
 | Fase | Resultado verificable |
 |---|---|
-| 0 | Ramas creadas; `docker compose up` levanta 4 bases, RabbitMQ y Mailpit sanos |
-| 1 | `question-service` con HU-01 a 03 por Swagger y Postman, pruebas verdes |
-| 2 | `user-service` (login y revisores) y `api-gateway` con roles |
-| 3 | `review-service`: asignación 1 a 3 y eventos `question.submitted`/`reviewers-assigned`; la pregunta cambia a "En revisión" sola |
-| 4 | HU-05 completa + `notification-service` con correo en Mailpit |
-| 5 | Prueba de carga: 1 réplica contra varias, anotando el límite de la máquina |
-| 6 | Frontend contra el gateway (HU 1 a 5) |
-| 7 | Documento, Sprint 2 y video |
-
-Las fases 1 a 5 se prueban sin interfaz. Cada fase termina con commit propio.
-
-## 10. Lo que tienes que preparar tú
-
-1. Abrir Docker Desktop (el motor estaba apagado).
-2. Decidir Angular o React (recomendado: Angular).
-3. Crear la cuenta de correo para el SMTP real y una **contraseña de aplicación**. No me pases la clave por chat: va en tu `.env` local.
-4. Confirmar con Libardo los 8 puntos de la sección 0.
-5. Crear "Sprint 2" en Jira y arrastrar las historias SCRUM-40 a SCRUM-50.
-
-## 11. Riesgos
-
-- Testcontainers y varias bases a la vez consumen RAM; 23 GB alcanza.
-- Outlook puede exigir OAuth2 para SMTP; el plan B es Gmail con contraseña de aplicación.
-- Si Libardo cambia la regla de revisión, solo se toca `review-service`.
+| 0 | Ramas creadas; `docker compose up` levanta las bases y el broker sanos |
+| 1 | `question-service` con HU-01 a HU-03 probados por Swagger y Postman |
+| 2 | `user-service`, `api-gateway` y roles |
+| 3 | `assignment-service` (entonces parte de `review-service`): asignación de 1 a 3 revisores y eventos; la pregunta pasa sola a «En revisión» |
+| 4 | HU-05 completa y `notification-service` con correo simulado |
+| 5 | Prueba de carga con k6: una réplica contra varias, anotando el límite de la máquina |
+| 6 | Keycloak, frontend Angular, `history-service`, Outbox y resiliencia |
+| 7 | Documentación, planificación del Sprint 2 y sustentación |
+| 8 | Por adelantado del corte 3: simulacros y seguimiento (RF-21 a RF-28) |
+| 9 | Redistribución en 14 servicios pequeños: validación, ciclo de vida, asignación, evaluación, correo, auditoría, catálogo, estadísticas y reportes salen de los servicios que los contenían |

@@ -1,167 +1,886 @@
 {
   "info": {
-    "name": "question-service",
-    "description": "Colección de pruebas del servicio de preguntas. Por defecto llama directamente al servicio (puerto 8082) con la identidad en las cabeceras X-User-Id y X-User-Roles. Cambia las variables baseUrl, userId y roles según lo que pruebes: autor (AUTHOR) o administrador (ADMIN).",
+    "_postman_id": "9a0feaa6-f56f-5630-b79e-6ccd19d937df",
+    "name": "Banco de Preguntas · question-service",
+    "description": "HU-01 a HU-03: crear, validar, listar y enviar a revisión. Ejecutar de arriba abajo con el entorno `SaberPro_Local`.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8082" },
-    { "key": "userId", "value": "autor1" },
-    { "key": "roles", "value": "AUTHOR" },
-    { "key": "questionId", "value": "" }
-  ],
   "item": [
     {
-      "name": "Crear pregunta (autor)",
-      "event": [
+      "name": "0 · Sesión",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('201 Creada', () => pm.response.to.have.status(201));",
-              "const cuerpo = pm.response.json();",
-              "pm.collectionVariables.set('questionId', cuerpo.id);",
-              "pm.test('queda en BORRADOR', () => pm.expect(cuerpo.estado).to.eql('BORRADOR'));"
-            ]
+          "name": "Iniciar sesión como autor1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAutor', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "autor1"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAutor}}."
+          }
+        },
+        {
+          "name": "Iniciar sesión como admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('trae un token de acceso', function () { pm.expect(j.access_token).to.be.a('string'); });",
+                  "pm.collectionVariables.set('tokenAdmin', j.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "bancopreguntas-web"
+                },
+                {
+                  "key": "username",
+                  "value": "admin"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}"
+                }
+              ]
+            },
+            "url": "{{keycloakUrl}}/realms/bancopreguntas/protocol/openid-connect/token",
+            "description": "Obtiene el JWT de Keycloak con el flujo de contraseña del cliente de pruebas locales y lo guarda en {{tokenAdmin}}."
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-User-Id", "value": "{{userId}}" },
-          { "key": "X-User-Roles", "value": "{{roles}}" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Patrón Observer\",\n  \"contexto\": \"Una aplicación debe actualizar varias ventanas cuando cambian los datos.\",\n  \"enunciado\": \"¿Qué patrón notifica a varios objetos cuando cambia el estado de otro?\",\n  \"opcionA\": \"Factory\",\n  \"opcionB\": \"Observer\",\n  \"opcionC\": \"Singleton\",\n  \"opcionD\": \"Adapter\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"Observer define una dependencia uno a muchos.\",\n  \"bibliografia\": \"Gamma et al. (1994).\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"subtema\": \"Observer\",\n  \"dificultad\": \"INTERMEDIO\"\n}"
-        },
-        "url": { "raw": "{{baseUrl}}/api/questions", "host": ["{{baseUrl}}"], "path": ["api", "questions"] }
-      }
+      ]
     },
     {
-      "name": "Listar mis preguntas (autor)",
-      "event": [
-        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "X-User-Id", "value": "{{userId}}" },
-          { "key": "X-User-Roles", "value": "{{roles}}" }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/questions?page=0&size=10",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "questions"],
-          "query": [
-            { "key": "page", "value": "0" },
-            { "key": "size", "value": "10" },
-            { "key": "estado", "value": "BORRADOR", "disabled": true },
-            { "key": "competencia", "value": "LECTURA_CRITICA", "disabled": true },
-            { "key": "texto", "value": "observer", "disabled": true }
-          ]
-        }
-      }
-    },
-    {
-      "name": "Ver una pregunta",
-      "event": [
-        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "X-User-Id", "value": "{{userId}}" },
-          { "key": "X-User-Roles", "value": "{{roles}}" }
-        ],
-        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}"] }
-      }
-    },
-    {
-      "name": "Modificar una pregunta en borrador (autor)",
-      "request": {
-        "method": "PUT",
-        "header": [
-          { "key": "X-User-Id", "value": "{{userId}}" },
-          { "key": "X-User-Roles", "value": "{{roles}}" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"nombre\": \"Patrón Observer (corregida)\",\n  \"contexto\": \"Una aplicación debe actualizar varias ventanas cuando cambian los datos.\",\n  \"enunciado\": \"¿Qué patrón notifica a varios objetos cuando cambia el estado de otro?\",\n  \"opcionA\": \"Factory\",\n  \"opcionB\": \"Observer\",\n  \"opcionC\": \"Singleton\",\n  \"opcionD\": \"Adapter\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"Observer define una dependencia uno a muchos entre objetos.\",\n  \"bibliografia\": \"Gamma et al. (1994).\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Patrones de diseño\",\n  \"subtema\": \"Observer\",\n  \"dificultad\": \"INTERMEDIO\"\n}"
-        },
-        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}"] }
-      }
-    },
-    {
-      "name": "Enviar a revisión (autor)",
-      "event": [
+      "name": "1 · HU-01 Crear pregunta",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('200 OK', () => pm.response.to.have.status(200));",
-              "pm.test('pasa a PENDIENTE_REVISION', () => pm.expect(pm.response.json().estado).to.eql('PENDIENTE_REVISION'));"
-            ]
+          "name": "Crear una pregunta válida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (201)', function () { pm.response.to.have.status(201); });",
+                  "var j = pm.response.json();",
+                  "pm.test('queda en Borrador, versión 1', function () { pm.expect(j.estado).to.eql('BORRADOR'); pm.expect(j.version).to.eql(1); });",
+                  "pm.collectionVariables.set('qId', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear con dos preguntas directas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('informa las violaciones', function () { pm.expect(pm.response.text().length).to.be.above(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Qué es? ¿Y esto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear con «todas las anteriores»",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('informa las violaciones', function () { pm.expect(pm.response.text().length).to.be.above(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"Todas las anteriores\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear con el contexto vacío",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('informa las violaciones', function () { pm.expect(pm.response.text().length).to.be.above(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \" \",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear con opciones repetidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('informa las violaciones', function () { pm.expect(pm.response.text().length).to.be.above(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear con la respuesta correcta fuera de A–D",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 422)', function () { pm.expect([400, 422]).to.include(pm.response.code); });",
+                  "pm.test('informa las violaciones', function () { pm.expect(pm.response.text().length).to.be.above(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"E\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (401)', function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
+          }
+        },
+        {
+          "name": "Crear como administrador (prohibido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions"
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-User-Id", "value": "{{userId}}" },
-          { "key": "X-User-Roles", "value": "{{roles}}" }
-        ],
-        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}/submit", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}", "submit"] }
-      }
+      ]
     },
     {
-      "name": "Reabrir una pregunta rechazada (autor)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-User-Id", "value": "{{userId}}" },
-          { "key": "X-User-Roles", "value": "{{roles}}" }
-        ],
-        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}/reopen", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}", "reopen"] }
-      }
+      "name": "2 · HU-03 Consultar y listar",
+      "item": [
+        {
+          "name": "Obtener la pregunta por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('es la pregunta creada', function () { pm.expect(pm.response.json().id).to.eql(pm.collectionVariables.get('qId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}"
+          }
+        },
+        {
+          "name": "Listar mis preguntas con filtro de estado y paginación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test('es una página con la pregunta', function () { pm.expect(j.contenido.length).to.be.above(0); pm.expect(j).to.have.property('totalPaginas'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions?estado=BORRADOR&page=0&size=5"
+          }
+        },
+        {
+          "name": "Buscar por competencia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions?competencia=LECTURA_CRITICA"
+          }
+        },
+        {
+          "name": "Obtener una pregunta que no existe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (404)', function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/no-existe"
+          }
+        },
+        {
+          "name": "Listar todas (administrador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/all"
+          }
+        },
+        {
+          "name": "Listar todas como autor (prohibido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (403)', function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/all"
+          }
+        }
+      ]
     },
     {
-      "name": "Listar todas las preguntas (administrador)",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "X-User-Id", "value": "admin" },
-          { "key": "X-User-Roles", "value": "ADMIN" }
-        ],
-        "url": { "raw": "{{baseUrl}}/api/questions/all?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "questions", "all"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
-      }
-    },
+      "name": "3 · Corregir y enviar a revisión (HU-02)",
+      "item": [
+        {
+          "name": "Modificar el borrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('se guardó el cambio', function () { pm.expect(pm.response.json().nombre).to.include('corregida'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal (corregida)\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}"
+          }
+        },
+        {
+          "name": "Enviar a revisión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('pasa a Pendiente de revisión', function () { pm.expect(pm.response.json().estado).to.eql('PENDIENTE_REVISION'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/submit"
+          }
+        },
+        {
+          "name": "Enviar otra vez (transición inválida)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 409 o 422)', function () { pm.expect([400, 409, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/submit"
+          }
+        },
+        {
+          "name": "Modificar fuera de Borrador (rechazado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 409 o 422)', function () { pm.expect([400, 409, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Idea principal de un texto\",\n  \"contexto\": \"La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.\",\n  \"enunciado\": \"¿Cuál es la idea principal del texto?\",\n  \"opcionA\": \"La energía solar es costosa\",\n  \"opcionB\": \"La energía solar es una alternativa limpia y económica\",\n  \"opcionC\": \"Los combustibles fósiles son renovables\",\n  \"opcionD\": \"La energía solar solo sirve de día\",\n  \"respuestaCorrecta\": \"B\",\n  \"justificacion\": \"El texto presenta la energía solar como alternativa limpia y barata.\",\n  \"bibliografia\": \"Texto de ejemplo, 2026\",\n  \"competencia\": \"LECTURA_CRITICA\",\n  \"tema\": \"Idea principal\",\n  \"subtema\": \"Textos argumentativos\",\n  \"dificultad\": \"BASICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}"
+          }
+        },
+        {
+          "name": "Preguntas pendientes de revisión (administrador)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (200)', function () { pm.response.to.have.status(200); });",
+                  "pm.test('incluye la pregunta enviada', function () { pm.expect(pm.response.text()).to.include(pm.collectionVariables.get('qId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/pending-review"
+          }
+        },
+        {
+          "name": "Publicar sin estar aprobada (rechazado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 409 o 422)', function () { pm.expect([400, 409, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/publish"
+          }
+        },
+        {
+          "name": "Reabrir sin estar rechazada (rechazado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('el código de respuesta es el esperado (400 o 409 o 422)', function () { pm.expect([400, 409, 422]).to.include(pm.response.code); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAutor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/questions/{{qId}}/reopen"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
     {
-      "name": "Listar pendientes de revisión (administrador)",
-      "request": {
-        "method": "GET",
-        "header": [
-          { "key": "X-User-Id", "value": "admin" },
-          { "key": "X-User-Roles", "value": "ADMIN" }
-        ],
-        "url": { "raw": "{{baseUrl}}/api/questions/pending-review?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["api", "questions", "pending-review"], "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] }
-      }
-    },
-    {
-      "name": "Publicar una pregunta aprobada (administrador)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "X-User-Id", "value": "admin" },
-          { "key": "X-User-Roles", "value": "ADMIN" }
-        ],
-        "url": { "raw": "{{baseUrl}}/api/questions/{{questionId}}/publish", "host": ["{{baseUrl}}"], "path": ["api", "questions", "{{questionId}}", "publish"] }
-      }
+      "key": "qId",
+      "value": ""
     }
   ]
 }
