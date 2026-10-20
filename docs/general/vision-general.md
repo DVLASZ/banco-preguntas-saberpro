@@ -14,6 +14,8 @@ revisores, que los revisores evalúen por unanimidad y que el administrador publ
 | Autor | Crea, edita en borrador, envía a revisión y corrige las preguntas rechazadas; ve el historial de revisiones |
 | Revisor | Ve las preguntas que se le asignaron, deja observaciones y aprueba o rechaza |
 | Administrador | Asigna revisores, publica las preguntas aprobadas y consulta la información del sistema |
+| Estudiante | Genera y presenta simulacros con preguntas publicadas (con tiempo y calificación automática) y ve su progreso |
+| Docente | Consulta el progreso de los estudiantes y los reportes del grupo |
 
 ## Cómo evoluciona por cortes
 
@@ -21,7 +23,7 @@ revisores, que los revisores evalúen por unanimidad y que el administrador publ
 |---|---|---|---|
 | 1 | Monolito modular de escritorio (Java Swing) con las historias HU-01 a HU-04 | [`monolito/`](../../monolito/README.md) y rama `corte-1` | [`docs/corte-1`](../corte-1/README.md) |
 | 2 | Microservicios orientados a eventos (Spring Boot, RabbitMQ, PostgreSQL) con frontend web en Angular | [`microservicios/`](../../microservicios/README.md) y `frontend/` (se publica por partes) | [`docs/corte-2`](../corte-2/README.md) |
-| 3 | Seguridad con Keycloak, hexagonal con DDD en un servicio, Docker Compose y documento final | Los mismos de `microservicios/` y `frontend/` | [`docs/corte-3`](../corte-3/README.md) |
+| 3 | Seguridad con Keycloak (adelantada al corte 2), historia del historial del autor (adelantada), hexagonal con DDD en un servicio, Docker Compose (adelantado) y documento final | Los mismos de `microservicios/` y `frontend/` | [`docs/corte-3`](../corte-3/README.md) |
 
 Cada corte reutiliza al anterior: el dominio del monolito pasó a los microservicios (ver
 [reutilización del monolito](reutilizacion-del-monolito.md)) y el monolito se conserva como referencia.
@@ -41,8 +43,14 @@ banco-preguntas-saberpro/
 │   └── modulos/          Módulos Maven: usuarios, preguntas, simulacros, microkernel, revisión y api-rest
 ├── microservicios/       Cortes 2 y 3
 │   ├── plataforma/       Biblioteca común (bp-platform)
-│   └── servicios/        question-service (los demás servicios, el gateway, Keycloak y el frontend se publican por partes)
+│   ├── servicios/        los 14 servicios: user, question, validation, lifecycle, assignment, evaluation, notification, email, history, audit, catalog, simulation, statistics y report
+│   ├── infraestructura/  api-gateway, discovery-server, edge (nginx) y keycloak
+│   ├── pruebas-de-carga/ y pruebas-funcionales/
+│   └── docker-compose.yml
+└── frontend/             Aplicación web en Angular
 ```
+
+El código se publica por partes en la rama `corte-2`; esta estructura es la del proyecto completo.
 
 ## Equipo
 

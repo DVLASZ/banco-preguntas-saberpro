@@ -21,7 +21,7 @@ El monolito sigue disponible de dos formas:
 | Módulo del monolito | Destino en la arquitectura distribuida | Qué se reutiliza | Qué cambia |
 |---|---|---|---|
 | `modulo-preguntas` | `question-service` | El dominio completo: `Question`, `EstadoPregunta`, `ContenidoPregunta`, filtros, paginación y las reglas de validación estructural | La persistencia pasa de JDBC/SQLite a JPA sobre PostgreSQL con Flyway; las vistas Swing (MVC y Observer) se reemplazan por una API REST y eventos |
-| `modulo-revision` | `review-service` | Asignación de revisores, directorio de revisores y notificador, como puertos | Se amplía a 1–3 revisores, evaluaciones con observaciones y decisión por unanimidad; el aviso a los revisores pasa a ser un evento |
+| `modulo-revision` | `assignment-service` y `evaluation-service` | Asignación de revisores, directorio de revisores y notificador, como puertos | Se amplía a 1–3 revisores, evaluaciones con observaciones y decisión por unanimidad; el aviso a los revisores pasa a ser un evento |
 | `modulo-usuarios` | Keycloak + `user-service` | Roles (administrador, autor, revisor) y las reglas de contraseña como referencia | La autenticación deja de ser propia: la emite Keycloak y los servicios validan el token |
 | `modulo-microkernel` | Servicio de generación por plugins (por definir) | Núcleo, plugins y tuberías tal como están | Se expondría como servicio que publica preguntas en el banco; no es parte de esta iteración |
 | `modulo-simulacros` | Contexto de Simulacros (corte 3) | Dominio de generación y presentación | Quedará como servicio propio cuando se aborde ese contexto |
