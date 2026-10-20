@@ -7,6 +7,7 @@ import co.unicauca.bancopreguntas.question.domain.AccesoDenegadoException;
 import co.unicauca.bancopreguntas.question.domain.CambioEstado;
 import co.unicauca.bancopreguntas.question.domain.ContenidoPregunta;
 import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
+import co.unicauca.bancopreguntas.question.domain.FaseDePregunta;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
 import co.unicauca.bancopreguntas.question.domain.OperacionNoPermitidaException;
 import co.unicauca.bancopreguntas.question.domain.Pagina;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -127,10 +129,7 @@ public class QuestionApplicationService {
     public Question actualizarContenido(String id, ContenidoPregunta contenido, String usuario) {
         Question actual = obtener(id);
         exigirAutor(actual, usuario);
-        if (actual.getEstado() != EstadoPregunta.BORRADOR) {
-            throw new OperacionNoPermitidaException(
-                    "Solo se puede modificar una pregunta en estado Borrador; esta está " + actual.getEstado());
-        }
+        actual.exigirEditable();
         validador.validarOLanzar(contenido);
         Question modificada = construir(id, contenido, actual.getEstado(), actual.getAutor(),
                 actual.getCreadaEn(), reloj.instant(), actual.getVersion());
@@ -144,12 +143,9 @@ public class QuestionApplicationService {
     public Question enviarARevision(String id, String usuario) {
         Question actual = obtener(id);
         exigirAutor(actual, usuario);
-        if (actual.getEstado() != EstadoPregunta.BORRADOR) {
-            throw new OperacionNoPermitidaException(
-                    "Solo se puede enviar a revisión una pregunta en estado Borrador; esta está " + actual.getEstado());
-        }
+        EstadoPregunta destino = actual.fase().enviarARevision();   // la fase rechaza si no es un borrador
         validador.validarOLanzar(ContenidoPregunta.de(actual));
-        Question enviada = cambiarEstado(actual, EstadoPregunta.PENDIENTE_REVISION, usuario.trim());
+        Question enviada = cambiarEstado(actual, destino, usuario.trim());
         eventos.publicar(new QuestionSubmitted(id, enviada.getAutor(), enviada.getNombre(),
                 enviada.getCompetencia().name(), enviada.getVersion()));
         return enviada;
@@ -179,11 +175,7 @@ public class QuestionApplicationService {
      */
     public Question publicar(String id, String administrador) {
         Question actual = obtener(id);
-        if (actual.getEstado() != EstadoPregunta.APROBADA) {
-            throw new OperacionNoPermitidaException(
-                    "Solo se puede publicar una pregunta Aprobada; esta está " + actual.getEstado());
-        }
-        Question publicada = cambiarEstado(actual, EstadoPregunta.PUBLICADA, administrador.trim());
+        Question publicada = cambiarEstado(actual, actual.fase().publicar(), administrador.trim());
         eventos.publicar(QuestionPublished.de(publicada, administrador.trim()));
         return publicada;
     }
@@ -197,7 +189,7 @@ public class QuestionApplicationService {
             LOG.debug("Evento {} ya procesado; se ignora", eventId);
             return;
         }
-        aplicarCambioPorEvento(preguntaId, EstadoPregunta.PENDIENTE_REVISION, EstadoPregunta.EN_REVISION);
+        aplicarCambioPorEvento(preguntaId, FaseDePregunta::iniciarRevision);
     }
 
     /**
@@ -209,19 +201,22 @@ public class QuestionApplicationService {
             LOG.debug("Evento {} ya procesado; se ignora", eventId);
             return;
         }
-        aplicarCambioPorEvento(preguntaId, EstadoPregunta.EN_REVISION,
-                aprobada ? EstadoPregunta.APROBADA : EstadoPregunta.RECHAZADA);
+        aplicarCambioPorEvento(preguntaId, aprobada ? FaseDePregunta::aprobar : FaseDePregunta::rechazar);
     }
 
-    private void aplicarCambioPorEvento(String preguntaId, EstadoPregunta esperado, EstadoPregunta nuevo) {
+    /** Aplica el cambio que pide un evento; si la fase actual de la pregunta no lo admite, el evento se ignora. */
+    private void aplicarCambioPorEvento(String preguntaId, Function<FaseDePregunta, EstadoPregunta> transicion) {
         Question pregunta = repositorio.buscarPorId(preguntaId).orElse(null);
         if (pregunta == null) {
             LOG.warn("Llegó un evento para la pregunta {}, que no existe; se ignora", preguntaId);
             return;
         }
-        if (pregunta.getEstado() != esperado) {
-            LOG.warn("La pregunta {} está en {} y el evento esperaba {}; se ignora",
-                    preguntaId, pregunta.getEstado(), esperado);
+        EstadoPregunta nuevo;
+        try {
+            nuevo = transicion.apply(pregunta.fase());
+        } catch (OperacionNoPermitidaException e) {
+            LOG.warn("La pregunta {} está en {} y no admite el cambio que pide el evento; se ignora",
+                    preguntaId, pregunta.getEstado());
             return;
         }
         cambiarEstado(pregunta, nuevo, null);

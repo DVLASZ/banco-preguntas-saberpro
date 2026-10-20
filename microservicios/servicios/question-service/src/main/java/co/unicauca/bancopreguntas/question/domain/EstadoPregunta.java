@@ -3,9 +3,8 @@ package co.unicauca.bancopreguntas.question.domain;
 /**
  * Estados por los que puede pasar una pregunta del banco de preguntas.
  * Corresponde exactamente al ciclo de vida definido en RF-14 del proyecto
- * de curso (ver Taller 3 — modelo C4, Nivel 4: componente de Gestión de
- * Preguntas), y {@link #puedePasarA(EstadoPregunta)} concentra las
- * transiciones válidas entre ellos (RF-15).
+ * de curso. Es el identificador del estado (se guarda y viaja en los eventos); lo que se puede hacer en cada
+ * uno, incluidas las transiciones válidas (RF-15), lo decide su {@link FaseDePregunta} (patrón State).
  */
 public enum EstadoPregunta {
     BORRADOR("Borrador"),
@@ -28,20 +27,12 @@ public enum EstadoPregunta {
      * eliminarlas físicamente.
      */
     public boolean puedePasarA(EstadoPregunta destino) {
-        if (destino == null) {
-            return false;
-        }
-        if (destino == ARCHIVADA) {
-            return true;
-        }
-        return switch (this) {
-            case BORRADOR -> destino == PENDIENTE_REVISION;
-            case PENDIENTE_REVISION -> destino == EN_REVISION;
-            case EN_REVISION -> destino == APROBADA || destino == RECHAZADA;
-            case APROBADA -> destino == PUBLICADA;
-            case RECHAZADA -> destino == BORRADOR;
-            case PUBLICADA, ARCHIVADA -> false;
-        };
+        return fase().puedePasarA(destino);
+    }
+
+    /** El comportamiento de este estado (patrón State): qué se puede hacer con una pregunta que está en él. */
+    public FaseDePregunta fase() {
+        return FaseDePregunta.de(this);
     }
 
     @Override

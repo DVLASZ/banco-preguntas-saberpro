@@ -195,7 +195,7 @@ public class Question {
      * @throws OperacionNoPermitidaException si el estado actual no puede pasar al nuevo
      */
     public Question conEstado(EstadoPregunta nuevoEstado, Instant ahora) {
-        if (!estado.puedePasarA(nuevoEstado)) {
+        if (!fase().puedePasarA(nuevoEstado)) {
             throw new OperacionNoPermitidaException(
                     "No se puede pasar una pregunta de " + estado + " a " + nuevoEstado);
         }
@@ -215,17 +215,61 @@ public class Question {
      * @throws OperacionNoPermitidaException si la pregunta no está en un estado desde el que pueda volver a Borrador
      */
     public Question reabrir(Instant ahora) {
-        if (!estado.puedePasarA(EstadoPregunta.BORRADOR)) {
-            throw new OperacionNoPermitidaException(
-                    "Solo se puede reabrir una pregunta Rechazada; esta está " + estado);
-        }
+        EstadoPregunta destino = fase().reabrir();
         return Question.builder()
                 .id(id).nombre(nombre).contexto(contexto).enunciado(enunciado).opciones(opciones)
                 .respuestaCorrecta(respuestaCorrecta).justificacion(justificacion)
-                .bibliografia(bibliografia).estado(EstadoPregunta.BORRADOR).competencia(competencia)
+                .bibliografia(bibliografia).estado(destino).competencia(competencia)
                 .tema(tema).subtema(subtema).dificultad(dificultad).autor(autor)
                 .creadaEn(creadaEn).actualizadaEn(ahora).version(version + 1)
                 .build();
+    }
+
+    // ------------------------------------------------------------------ ciclo de vida (patrón State)
+
+    /** La fase en la que está la pregunta: ella decide qué operaciones admite. */
+    public FaseDePregunta fase() {
+        return estado.fase();
+    }
+
+    /** Si el autor todavía puede modificar el contenido (solo en Borrador). */
+    public boolean esEditable() {
+        return fase().editable();
+    }
+
+    /** @throws OperacionNoPermitidaException si la pregunta ya no se puede modificar */
+    public void exigirEditable() {
+        fase().exigirEditable();
+    }
+
+    /** Copia de la pregunta enviada a revisión. @throws OperacionNoPermitidaException si no está en Borrador */
+    public Question enviarARevision(Instant ahora) {
+        return conEstado(fase().enviarARevision(), ahora);
+    }
+
+    /** Copia de la pregunta con la revisión iniciada. @throws OperacionNoPermitidaException si no está Pendiente de revisión */
+    public Question iniciarRevision(Instant ahora) {
+        return conEstado(fase().iniciarRevision(), ahora);
+    }
+
+    /** Copia de la pregunta aprobada. @throws OperacionNoPermitidaException si no está En revisión */
+    public Question aprobar(Instant ahora) {
+        return conEstado(fase().aprobar(), ahora);
+    }
+
+    /** Copia de la pregunta rechazada. @throws OperacionNoPermitidaException si no está En revisión */
+    public Question rechazar(Instant ahora) {
+        return conEstado(fase().rechazar(), ahora);
+    }
+
+    /** Copia de la pregunta publicada. @throws OperacionNoPermitidaException si no está Aprobada */
+    public Question publicar(Instant ahora) {
+        return conEstado(fase().publicar(), ahora);
+    }
+
+    /** Copia de la pregunta archivada; se puede desde cualquier estado (RNF-16). */
+    public Question archivar(Instant ahora) {
+        return conEstado(fase().archivar(), ahora);
     }
 
     @Override
