@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: tracking-service
+  datasource:
+    url: ${TRACKING_DB_URL:jdbc:postgresql://localhost:5439/tracking_db}
+    username: ${TRACKING_DB_USER:tracking}
+    password: ${TRACKING_DB_PASSWORD:tracking}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 4
+          initial-interval: 1s
+          multiplier: 2
+          max-interval: 10s
+
+server:
+  # Respeta X-Forwarded-* del gateway: Swagger muestra la dirección pública y no la de la réplica.
+  forward-headers-strategy: framework
+  port: ${TRACKING_SERVICE_PORT:8087}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+    healthcheck:
+      enabled: true
+  instance:
+    # Las réplicas se anuncian por IP: así el gateway las alcanza dentro de la red de Docker.
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+
+tracking:
+  # Aciertos (en %) desde los que una competencia se considera fortaleza, y por debajo de los que se considera debilidad.
+  strength-threshold: ${TRACKING_STRENGTH_THRESHOLD:70}
+  weakness-threshold: ${TRACKING_WEAKNESS_THRESHOLD:50}
+  # Preguntas contestadas que se necesitan en una competencia para opinar sobre ella.
+  min-answered: ${TRACKING_MIN_ANSWERED:5}
+
+bancopreguntas:
+  events:
+    outbox:
+      # Este servicio solo escucha eventos: no publica ninguno, así que no tiene bandeja de salida (ni el relevo que la lee).
+      enabled: false
