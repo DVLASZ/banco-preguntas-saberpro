@@ -1,0 +1,67 @@
+.recorrido {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--borde);
+  }
+
+  li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 16px;
+    align-items: start;
+
+    .icono {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--superficie-3);
+      border: 2px solid var(--superficie);
+      color: var(--punto, var(--texto-suave));
+    }
+
+    .cuerpo {
+      display: flex;
+      flex-direction: column;
+
+      p {
+        color: var(--texto-suave);
+      }
+    }
+
+    time {
+      color: var(--texto-tenue);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    &.tono-rojo { --punto: var(--rojo); }
+    &.tono-ambar { --punto: var(--ambar); }
+    &.tono-azul { --punto: var(--azul); }
+    &.tono-verde { --punto: var(--verde); }
+    &.tono-turquesa { --punto: var(--turquesa); }
+
+    &.vacio {
+      display: block;
+      color: var(--texto-suave);
+      text-align: center;
+    }
+  }
+}

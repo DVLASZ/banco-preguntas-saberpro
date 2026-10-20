@@ -1,0 +1,77 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Publicar preguntas</h1>
+      <p class="subtitulo">Las preguntas aprobadas por unanimidad esperan tu publicación en el banco.</p>
+    </div>
+  </header>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="vista() === 'APROBADA'" [attr.aria-selected]="vista() === 'APROBADA'" (click)="cambiarVista('APROBADA')">
+      Por publicar <em>{{ porPublicar() ?? '' }}</em>
+    </button>
+    <button type="button" role="tab" [class.activa]="vista() === 'PUBLICADA'" [attr.aria-selected]="vista() === 'PUBLICADA'" (click)="cambiarVista('PUBLICADA')">Publicadas</button>
+    <button type="button" role="tab" [class.activa]="vista() === 'TODAS'" [attr.aria-selected]="vista() === 'TODAS'" (click)="cambiarVista('TODAS')">Todas</button>
+  </div>
+
+  <section class="filtros" aria-label="Filtros">
+    <div class="campo">
+      <label for="buscar">Buscar pregunta</label>
+      <input id="buscar" type="search" placeholder="Buscar por título o tema…" [value]="texto()" (input)="escribir($any($event.target).value)" />
+    </div>
+    <div class="campo">
+      <label for="competencia">Competencia</label>
+      <select id="competencia" [value]="competencia()" (change)="filtrarCompetencia($any($event.target).value)">
+        <option value="">Todas las competencias</option>
+        @for (c of competencias; track c.valor) { <option [value]="c.valor">{{ c.texto }}</option> }
+      </select>
+    </div>
+  </section>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudieron cargar las preguntas</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Pregunta</th><th>Autor</th><th>Competencia</th><th>Estado</th><th>Actualización</th><th></th></tr></thead>
+        <tbody>
+          @if (cargando() && !resultado()) {
+            @for (i of [1, 2, 3]; track i) { <tr><td colspan="6"><div class="esqueleto" style="height: 38px"></div></td></tr> }
+          } @else {
+            @for (p of resultado()?.contenido; track p.id) {
+              <tr>
+                <td>
+                  <a class="titulo-fila" [routerLink]="['/preguntas', p.id]">{{ p.nombre }}</a>
+                  <div class="detalle-fila">{{ codigoCorto(p.id) }} · versión {{ p.version }}</div>
+                </td>
+                <td class="suave">{{ p.autorId }}</td>
+                <td class="suave">{{ textoCompetencia(p.competencia) }}</td>
+                <td><bp-estado [estado]="p.estado" /></td>
+                <td class="suave">{{ fecha(p.actualizadaEn) }}</td>
+                <td class="accion">
+                  @if (p.estado === 'APROBADA') {
+                    <button type="button" class="boton chico primario" [disabled]="publicando() === p.id" (click)="publicar(p)">
+                      <bp-icono nombre="publicar" [tamano]="16" /> {{ publicando() === p.id ? 'Publicando…' : 'Publicar' }}
+                    </button>
+                  } @else {
+                    <a class="boton chico fantasma" [routerLink]="['/preguntas', p.id]">Ver</a>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="vacio">
+                @if (vista() === 'APROBADA') { No hay preguntas aprobadas esperando publicación. } @else { No hay preguntas que mostrar. }
+              </td></tr>
+            }
+          }
+        </tbody>
+      </table>
+      @if (resultado(); as r) {
+        <bp-paginacion [pagina]="r.pagina" [tamano]="r.tamano" [total]="r.totalElementos" elementos="preguntas" (cambia)="irA($event)" />
+      }
+    </div>
+  }
+</div>

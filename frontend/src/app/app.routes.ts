@@ -20,6 +20,7 @@ export const routes: Routes = [
     component: Marco,
     canActivate: [authGuard],
     children: [
+      // Autor
       {
         path: 'mis-preguntas',
         canActivate: [rolGuard('AUTHOR')],
@@ -44,12 +45,26 @@ export const routes: Routes = [
         data: { titulo: 'Detalle de pregunta' },
         loadComponent: () => import('./features/questions/detalle-pregunta').then((m) => m.DetallePregunta),
       },
+      // Administrador
       {
         path: 'asignar',
         canActivate: [rolGuard('ADMIN')],
         data: { titulo: 'Asignar revisores' },
         loadComponent: () => import('./features/review/asignar-revisores').then((m) => m.AsignarRevisores),
       },
+      {
+        path: 'publicacion',
+        canActivate: [rolGuard('ADMIN')],
+        data: { titulo: 'Publicar preguntas' },
+        loadComponent: () => import('./features/admin/publicacion').then((m) => m.Publicacion),
+      },
+      {
+        path: 'auditoria',
+        canActivate: [rolGuard('ADMIN')],
+        data: { titulo: 'Auditoría' },
+        loadComponent: () => import('./features/admin/auditoria').then((m) => m.Auditoria),
+      },
+      // Revisor
       {
         path: 'bandeja',
         canActivate: [rolGuard('REVIEWER')],
@@ -61,6 +76,25 @@ export const routes: Routes = [
         canActivate: [rolGuard('REVIEWER')],
         data: { titulo: 'Bandeja del revisor' },
         loadComponent: () => import('./features/review/evaluar').then((m) => m.Evaluar),
+      },
+      // Todos los roles
+      {
+        path: 'notificaciones',
+        canActivate: [rolGuard('ADMIN', 'AUTHOR', 'REVIEWER')],
+        data: { titulo: 'Notificaciones' },
+        loadComponent: () => import('./features/notifications/notificaciones').then((m) => m.Notificaciones),
+      },
+      {
+        path: 'historial',
+        canActivate: [rolGuard('ADMIN', 'AUTHOR', 'REVIEWER')],
+        data: { titulo: 'Historial' },
+        loadComponent: () => import('./features/history/historial').then((m) => m.Historial),
+      },
+      {
+        path: 'historial/:id',
+        canActivate: [rolGuard('ADMIN', 'AUTHOR', 'REVIEWER')],
+        data: { titulo: 'Historial' },
+        loadComponent: () => import('./features/history/historial-pregunta').then((m) => m.HistorialPregunta),
       },
     ],
   },

@@ -1,0 +1,41 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Historial</h1>
+      <p class="subtitulo">Lo que ha pasado con tus preguntas, de lo más reciente a lo más antiguo.</p>
+    </div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar el historial</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (cargando() && !resultado()) {
+    <div class="esqueleto" style="height: 80px; margin-bottom: 8px"></div>
+    <div class="esqueleto" style="height: 80px; margin-bottom: 8px"></div>
+    <div class="esqueleto" style="height: 80px"></div>
+  } @else {
+    <div class="feed">
+      @for (g of grupos(); track g.dia) {
+        <h2 class="dia">{{ g.dia }}</h2>
+        @for (e of g.items; track e.id) {
+          <article class="entrada">
+            <span class="icono" [class]="'tono-' + entradas[e.tipo].tono"><bp-icono [nombre]="entradas[e.tipo].icono" [tamano]="18" /></span>
+            <div class="cuerpo">
+              <strong>{{ entradas[e.tipo].texto }}</strong>
+              <p>{{ e.resumen }}</p>
+              @if (e.preguntaId) { <a [routerLink]="['/historial', e.preguntaId]">Ver recorrido de {{ codigoCorto(e.preguntaId) }} →</a> }
+            </div>
+            <time>{{ hora(e.ocurridaEn) }}</time>
+          </article>
+        }
+      } @empty {
+        <div class="vacio"><bp-icono nombre="flujo" [tamano]="28" /><p>Todavía no hay actividad en tu historial.</p></div>
+      }
+      @if (resultado(); as r) {
+        <bp-paginacion [pagina]="r.pagina" [tamano]="r.tamano" [total]="r.totalElementos" elementos="eventos" (cambia)="irA($event)" />
+      }
+    </div>
+  }
+</div>

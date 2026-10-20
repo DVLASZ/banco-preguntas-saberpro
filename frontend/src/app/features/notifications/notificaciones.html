@@ -1,0 +1,78 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Notificaciones</h1>
+      <p class="subtitulo">Cada avance de tus preguntas, en un solo lugar.</p>
+    </div>
+    <div class="acciones">
+      <button type="button" class="boton" [disabled]="noLeidas() === 0" (click)="marcarTodas()">
+        <bp-icono nombre="doble-check" /> Marcar todas como leídas
+      </button>
+    </div>
+  </header>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="pestana() === 'todas'" (click)="cambiarPestana('todas')">Todas</button>
+    <button type="button" role="tab" [class.activa]="pestana() === 'noLeidas'" (click)="cambiarPestana('noLeidas')">No leídas · {{ noLeidas() }}</button>
+    <button type="button" role="tab" [class.activa]="pestana() === 'revision'" (click)="cambiarPestana('revision')">Revisión</button>
+    <button type="button" role="tab" [class.activa]="pestana() === 'sistema'" (click)="cambiarPestana('sistema')">Sistema</button>
+  </div>
+
+  <div class="columnas">
+    <section class="lista" aria-label="Notificaciones">
+      @if (error(); as mensaje) {
+        <div class="aviso error" role="alert">
+          <div><strong>No se pudieron cargar tus notificaciones</strong><p>{{ mensaje }}</p></div>
+          <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+        </div>
+      } @else if (cargando()) {
+        <div class="esqueleto" style="height: 90px; margin-bottom: 8px"></div>
+        <div class="esqueleto" style="height: 90px; margin-bottom: 8px"></div>
+        <div class="esqueleto" style="height: 90px"></div>
+      } @else {
+        @for (g of grupos(); track g.dia) {
+          <h2 class="dia">{{ g.dia }}</h2>
+          @for (n of g.items; track n.id) {
+            <article class="notificacion" [class.sin-leer]="!n.leida" tabindex="0" (click)="abrir(n)" (keydown.enter)="abrir(n)">
+              <span class="icono" [class]="'tono-' + tipos[n.tipo].tono"><bp-icono [nombre]="tipos[n.tipo].icono" [tamano]="20" /></span>
+              <div class="cuerpo">
+                <strong>{{ n.asunto }}</strong>
+                <p>{{ n.mensaje }}</p>
+                @if (n.preguntaId) { <span class="enlace">{{ textoEnlace(n) }} →</span> }
+              </div>
+              <div class="lateral">
+                <time>{{ hora(n.creadaEn) }}</time>
+                @if (!n.leida) { <i class="punto" aria-label="Sin leer"></i> }
+              </div>
+            </article>
+          }
+        } @empty {
+          <div class="vacio">
+            <bp-icono nombre="campana" [tamano]="28" />
+            <p>{{ pestana() === 'noLeidas' ? 'No tienes notificaciones sin leer.' : 'Todavía no tienes notificaciones.' }}</p>
+          </div>
+        }
+        @if (hayMas()) {
+          <button type="button" class="boton ancho" [disabled]="cargandoMas()" (click)="cargarMas()">
+            {{ cargandoMas() ? 'Cargando…' : 'Cargar notificaciones anteriores' }}
+          </button>
+        } @else if (grupos().length > 0) {
+          <p class="al-dia">Estás al día · Mostrando la actividad más reciente</p>
+        }
+      }
+    </section>
+
+    <aside class="laterales">
+      <section class="tarjeta">
+        <h2>Tus avisos</h2>
+        <p class="suave">Cada aviso también se envía por correo institucional (simulado).</p>
+        @if (correo(); as c) { <p class="correo"><bp-icono nombre="correo" [tamano]="16" /> {{ c }}</p> }
+      </section>
+      <section class="tarjeta destacada">
+        <bp-icono nombre="flujo" [tamano]="24" />
+        <h2>Cada revisión cuenta</h2>
+        <p>Las observaciones son una oportunidad para mejorar. Consulta el detalle de tu pregunta para conocer el siguiente paso.</p>
+      </section>
+    </aside>
+  </div>
+</div>

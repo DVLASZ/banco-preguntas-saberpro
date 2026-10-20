@@ -1,0 +1,102 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Auditoría</h1>
+      <p class="subtitulo">Todo lo que ocurre en el banco: preguntas, revisiones, inicios de sesión y correos enviados.</p>
+    </div>
+  </header>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" role="tab" [class.activa]="vista() === 'actividad'" [attr.aria-selected]="vista() === 'actividad'" (click)="cambiarVista('actividad')">Actividad</button>
+    <button type="button" role="tab" [class.activa]="vista() === 'correos'" [attr.aria-selected]="vista() === 'correos'" (click)="cambiarVista('correos')">Correos simulados</button>
+  </div>
+
+  @if (vista() === 'actividad') {
+    <section class="filtros" aria-label="Filtros">
+      <div class="campo">
+        <label for="tipo">Tipo de evento</label>
+        <select id="tipo" [value]="tipo()" (change)="filtrarTipo($any($event.target).value)">
+          <option value="">Todos los eventos</option>
+          @for (t of tipos; track t.valor) { <option [value]="t.valor">{{ t.texto }}</option> }
+        </select>
+      </div>
+      <div class="campo">
+        <label for="actor">Usuario</label>
+        <input id="actor" type="search" placeholder="Nombre de usuario…" [value]="actor()" (input)="escribirActor($any($event.target).value)" />
+      </div>
+      <div class="campo">
+        <label for="pregunta">Pregunta (identificador)</label>
+        <input id="pregunta" type="search" placeholder="Identificador completo…" [value]="pregunta()" (input)="escribirPregunta($any($event.target).value)" />
+      </div>
+    </section>
+  }
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar la información</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (vista() === 'actividad') {
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Cuándo</th><th>Evento</th><th>Usuario</th><th>Detalle</th><th></th></tr></thead>
+        <tbody>
+          @if (cargando() && !actividad()) {
+            @for (i of [1, 2, 3, 4]; track i) { <tr><td colspan="5"><div class="esqueleto" style="height: 34px"></div></td></tr> }
+          } @else {
+            @for (e of actividad()?.contenido; track e.id) {
+              <tr class="clicable" (click)="alternar(e.id)">
+                <td class="suave nowrap">{{ fechaHora(e.ocurridaEn) }}</td>
+                <td>
+                  <span class="evento" [class]="'tono-' + entradas[e.tipo].tono">
+                    <bp-icono [nombre]="entradas[e.tipo].icono" [tamano]="16" /> {{ entradas[e.tipo].texto }}
+                  </span>
+                </td>
+                <td class="suave">{{ e.actorId || 'Sistema' }}</td>
+                <td>
+                  {{ e.resumen }}
+                  @if (e.preguntaId) { <a class="enlace-pregunta" [routerLink]="['/historial', e.preguntaId]" (click)="$event.stopPropagation()">{{ codigoCorto(e.preguntaId) }}</a> }
+                </td>
+                <td class="suave"><bp-icono [nombre]="abierto() === e.id ? 'chevron-abajo' : 'chevron-der'" [tamano]="16" /></td>
+              </tr>
+              @if (abierto() === e.id) {
+                <tr class="detalle"><td colspan="5"><pre>{{ detalles(e) || 'Sin detalles.' }}</pre></td></tr>
+              }
+            } @empty {
+              <tr><td colspan="5" class="vacio">No hay actividad que coincida con los filtros.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+      @if (actividad(); as r) {
+        <bp-paginacion [pagina]="r.pagina" [tamano]="r.tamano" [total]="r.totalElementos" elementos="eventos" (cambia)="irA($event)" />
+      }
+    </div>
+  } @else {
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Enviado</th><th>Para</th><th>Asunto</th><th>Mensaje</th></tr></thead>
+        <tbody>
+          @if (cargando() && !correos()) {
+            @for (i of [1, 2, 3]; track i) { <tr><td colspan="4"><div class="esqueleto" style="height: 34px"></div></td></tr> }
+          } @else {
+            @for (c of correos()?.contenido; track c.notificacionId) {
+              <tr>
+                <td class="suave nowrap">{{ fechaHora(c.enviadoEn) }}</td>
+                <td><span class="titulo-fila">{{ c.para }}</span></td>
+                <td>{{ c.asunto }}</td>
+                <td class="suave mensaje">{{ c.cuerpo }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="vacio">Todavía no se ha enviado ningún correo.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+      @if (correos(); as r) {
+        <bp-paginacion [pagina]="r.pagina" [tamano]="r.tamano" [total]="r.totalElementos" elementos="correos" (cambia)="irA($event)" />
+      }
+    </div>
+    <p class="nota-pie"><bp-icono nombre="info" [tamano]="14" /> Los correos son simulados: se registran aquí en lugar de salir a un servidor real.</p>
+  }
+</div>

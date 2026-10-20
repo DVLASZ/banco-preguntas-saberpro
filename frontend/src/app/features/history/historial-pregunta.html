@@ -1,0 +1,33 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <p class="sobretitulo">{{ codigo(id()) }} · Recorrido</p>
+      <h1>Historial de la pregunta</h1>
+      <p class="subtitulo">Cada paso de su revisión, en orden. Ves lo que corresponde a tu rol.</p>
+    </div>
+    <div class="acciones"><button type="button" class="boton" (click)="volver()"><bp-icono nombre="flecha-izq" /> Volver</button></div>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert"><div><strong>No se pudo cargar el historial</strong><p>{{ mensaje }}</p></div></div>
+  } @else if (cargando()) {
+    <div class="esqueleto" style="height: 320px"></div>
+  } @else {
+    <section class="tarjeta">
+      <ol class="recorrido">
+        @for (e of lista(); track e.id) {
+          <li [class]="'tono-' + entradas[e.tipo].tono">
+            <span class="icono"><bp-icono [nombre]="entradas[e.tipo].icono" [tamano]="16" /></span>
+            <div class="cuerpo">
+              <strong>{{ entradas[e.tipo].texto }}</strong>
+              <p>{{ e.resumen }}</p>
+            </div>
+            <time>{{ fechaHora(e.ocurridaEn) }}</time>
+          </li>
+        } @empty {
+          <li class="vacio">No hay eventos registrados para esta pregunta.</li>
+        }
+      </ol>
+    </section>
+  }
+</div>
