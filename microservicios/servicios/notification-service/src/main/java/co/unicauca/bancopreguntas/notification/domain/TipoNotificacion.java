@@ -11,5 +11,11 @@ public enum TipoNotificacion {
     /** Un revisor dejó su observación después de que la ronda ya se había rechazado. */
     OBSERVACION_TARDIA,
     /** El administrador publicó la pregunta del autor. */
-    PREGUNTA_PUBLICADA
+    PREGUNTA_PUBLICADA,
+    /** Al autor: su pregunta entró en revisión porque se le asignaron revisores. */
+    PREGUNTA_EN_REVISION,
+    /** Al administrador: un revisor envió su evaluación. */
+    EVALUACION_RECIBIDA,
+    /** Al administrador y a los revisores: terminó la revisión de la pregunta. */
+    RESULTADO_DE_REVISION
 }

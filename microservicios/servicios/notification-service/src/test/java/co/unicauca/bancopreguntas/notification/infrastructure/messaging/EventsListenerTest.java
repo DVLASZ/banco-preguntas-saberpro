@@ -56,7 +56,7 @@ class EventsListenerTest {
                  "assignedBy":"system","automatic":true}}
                 """));
 
-        verify(servicio).alAsignarseRevisores("e-3", "Q-1", 2, List.of("r1", "r2"), true);
+        verify(servicio).alAsignarseRevisores("e-3", "Q-1", "a-1", 2, List.of("r1", "r2"), true, "system");
     }
 
     @Test
@@ -66,7 +66,7 @@ class EventsListenerTest {
                 {"eventId":"e-4","data":{"questionId":"Q-1","reviewerIds":["r1"]}}
                 """));
 
-        verify(servicio).alAsignarseRevisores("e-4", "Q-1", 1, List.of("r1"), false);
+        verify(servicio).alAsignarseRevisores("e-4", "Q-1", null, 1, List.of("r1"), false, null);
     }
 
     @Test

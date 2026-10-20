@@ -44,8 +44,9 @@ public class EventsListener {
     @RabbitListener(queues = RabbitTopology.QUEUE_REVIEWERS_ASSIGNED)
     public void alAsignarseRevisores(Message mensaje) {
         IncomingEvent e = lector.leer(mensaje);
-        notificaciones.alAsignarseRevisores(e.eventId(), e.requireText("questionId"), e.optionalInt("round", 1),
-                e.requireTextList("reviewerIds"), e.data().path("automatic").asBoolean(false));
+        notificaciones.alAsignarseRevisores(e.eventId(), e.requireText("questionId"), e.optionalText("authorId"),
+                e.optionalInt("round", 1), e.requireTextList("reviewerIds"), e.data().path("automatic").asBoolean(false),
+                e.optionalText("assignedBy"));
     }
 
     @RabbitListener(queues = RabbitTopology.QUEUE_REVIEW_COMPLETED)

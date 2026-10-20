@@ -22,12 +22,13 @@ public class JpaQuestionInfoRepository implements QuestionInfoRepository {
                 .orElseGet(() -> new QuestionInfoEntity(info.preguntaId(), info.titulo(), info.autorId()));
         entidad.setTitle(info.titulo());
         entidad.setAuthorId(info.autorId());
+        entidad.setAdminId(info.administradorId());
         repositorio.saveAndFlush(entidad);
     }
 
     @Override
     public Optional<InfoPregunta> buscar(String preguntaId) {
         return repositorio.findById(preguntaId)
-                .map(e -> new InfoPregunta(e.getQuestionId(), e.getTitle(), e.getAuthorId()));
+                .map(e -> new InfoPregunta(e.getQuestionId(), e.getTitle(), e.getAuthorId(), e.getAdminId()));
     }
 }

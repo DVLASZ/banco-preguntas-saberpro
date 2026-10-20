@@ -16,6 +16,10 @@ class InMemoryNotificationRepository implements NotificationRepository {
 
     private final Map<String, Notificacion> todas = new LinkedHashMap<>();
 
+    void vaciar() {
+        todas.clear();
+    }
+
     List<Notificacion> todas() {
         return List.copyOf(todas.values());
     }

@@ -183,6 +183,19 @@ class JpaNotificationRepositoryTest {
     }
 
     @Test
+    @DisplayName("recuerda el administrador que asignó los revisores")
+    void administradorDeLaPregunta() {
+        String pregunta = id();
+        informacion.guardar(new InfoPregunta(pregunta, "Observer", "autor-1"));
+        assertThat(informacion.buscar(pregunta).orElseThrow().administradorId()).isNull();
+
+        informacion.guardar(new InfoPregunta(pregunta, "Observer", "autor-1").conAdministrador("admin-1"));
+        em.clear();
+
+        assertThat(informacion.buscar(pregunta).orElseThrow().administradorId()).isEqualTo("admin-1");
+    }
+
+    @Test
     @DisplayName("la pregunta puede no tener título")
     void sinTitulo() {
         String pregunta = id();

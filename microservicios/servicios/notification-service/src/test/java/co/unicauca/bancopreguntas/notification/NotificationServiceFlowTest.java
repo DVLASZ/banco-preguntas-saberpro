@@ -96,26 +96,30 @@ class NotificationServiceFlowTest {
                 "{\"questionId\":\"%s\",\"authorId\":\"%s\",\"round\":1,\"reviewerId\":\"%s\",\"decision\":\"APROBAR\",\"observation\":\"Yo la veo bien\",\"late\":true}"
                         .formatted(q, autor, r2)));
 
-        // el revisor encuentra su aviso de asignación
+        // el revisor encuentra su aviso de asignación y luego el resultado de la revisión
         JsonNode delRevisor = llamar(HttpMethod.GET, "/api/notifications", r1).getBody();
-        assertThat(delRevisor.get("contenido")).hasSize(1);
-        assertThat(delRevisor.get("contenido").get(0).get("tipo").asText()).isEqualTo("REVISORES_ASIGNADOS");
-        assertThat(delRevisor.get("contenido").get(0).get("asunto").asText()).contains("Patrón Observer");
+        assertThat(delRevisor.get("contenido").findValuesAsText("tipo"))
+                .containsExactly("RESULTADO_DE_REVISION", "REVISORES_ASIGNADOS");
+        assertThat(delRevisor.get("contenido").get(1).get("asunto").asText()).contains("Patrón Observer");
 
-        // el autor ve el rechazo con la observación y luego la observación tardía, la más reciente primero
+        // el administrador que asignó recibe el resultado de la revisión
+        JsonNode delAdministrador = llamar(HttpMethod.GET, "/api/notifications", "admin-1").getBody();
+        assertThat(delAdministrador.get("contenido").findValuesAsText("tipo")).contains("RESULTADO_DE_REVISION");
+
+        // el autor ve que su pregunta entró en revisión, el rechazo con la observación y la observación tardía, la más reciente primero
         JsonNode delAutor = llamar(HttpMethod.GET, "/api/notifications", autor).getBody();
         assertThat(delAutor.get("contenido").findValuesAsText("tipo"))
-                .containsExactly("OBSERVACION_TARDIA", "REVISION_RECHAZADA");
+                .containsExactly("OBSERVACION_TARDIA", "REVISION_RECHAZADA", "PREGUNTA_EN_REVISION");
         assertThat(delAutor.get("contenido").get(1).get("mensaje").asText()).contains("Hay dos respuestas posibles");
         assertThat(llamar(HttpMethod.GET, "/api/notifications/unread-count", autor).getBody().get("noLeidas").asInt())
-                .isEqualTo(2);
+                .isEqualTo(3);
 
         // el autor lee una y luego el resto
         String id = delAutor.get("contenido").get(0).get("id").asText();
         assertThat(llamar(HttpMethod.POST, "/api/notifications/" + id + "/read", autor).getBody().get("leida").asBoolean())
                 .isTrue();
-        assertThat(llamar(HttpMethod.GET, "/api/notifications?soloNoLeidas=true", autor).getBody().get("contenido")).hasSize(1);
-        assertThat(llamar(HttpMethod.POST, "/api/notifications/read-all", autor).getBody().get("marcadas").asInt()).isEqualTo(1);
+        assertThat(llamar(HttpMethod.GET, "/api/notifications?soloNoLeidas=true", autor).getBody().get("contenido")).hasSize(2);
+        assertThat(llamar(HttpMethod.POST, "/api/notifications/read-all", autor).getBody().get("marcadas").asInt()).isEqualTo(2);
         assertThat(llamar(HttpMethod.GET, "/api/notifications/unread-count", autor).getBody().get("noLeidas").asInt()).isZero();
 
         // los correos simulados salieron a las direcciones derivadas del usuario

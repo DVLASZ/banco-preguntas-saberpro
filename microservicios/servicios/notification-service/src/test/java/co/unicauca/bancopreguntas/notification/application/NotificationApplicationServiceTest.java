@@ -70,9 +70,9 @@ class NotificationApplicationServiceTest {
     void asignacion() {
         preguntaEnviada();
 
-        servicio.alAsignarseRevisores("e-1", "q-1", 1, List.of("rev-1", "rev-2"), false);
+        servicio.alAsignarseRevisores("e-1", "q-1", "autor-1", 1, List.of("rev-1", "rev-2"), false, "admin-1");
 
-        assertThat(notificaciones.todas()).hasSize(2)
+        assertThat(notificaciones.todas()).filteredOn(n -> n.tipo() == TipoNotificacion.REVISORES_ASIGNADOS).hasSize(2)
                 .allSatisfy(n -> {
                     assertThat(n.tipo()).isEqualTo(TipoNotificacion.REVISORES_ASIGNADOS);
                     assertThat(n.preguntaId()).isEqualTo("q-1");
@@ -80,8 +80,61 @@ class NotificationApplicationServiceTest {
                     assertThat(n.correoEnviadoEn()).isEqualTo(T0);
                     assertThat(n.leida()).isFalse();
                 });
-        assertThat(notificaciones.todas()).extracting(Notificacion::destinatarioId).containsExactly("rev-1", "rev-2");
-        assertThat(correo.enviados()).extracting(c -> c.para()).containsExactly("rev-1@correo.test", "rev-2@correo.test");
+        assertThat(notificaciones.todas()).extracting(Notificacion::destinatarioId)
+                .containsExactly("rev-1", "rev-2", "autor-1");
+        assertThat(correo.enviados()).extracting(c -> c.para())
+                .containsExactly("rev-1@correo.test", "rev-2@correo.test", "autor-1@correo.test");
+    }
+
+    @Test
+    @DisplayName("asignar revisores avisa al autor que su pregunta entró en revisión")
+    void avisoAlAutor() {
+        preguntaEnviada();
+
+        servicio.alAsignarseRevisores("e-1", "q-1", "autor-1", 1, List.of("rev-1"), false, "admin-1");
+
+        assertThat(notificaciones.todas()).filteredOn(n -> n.destinatarioId().equals("autor-1")).singleElement()
+                .satisfies(n -> {
+                    assertThat(n.tipo()).isEqualTo(TipoNotificacion.PREGUNTA_EN_REVISION);
+                    assertThat(n.mensaje()).contains("En revisión");
+                });
+    }
+
+    @Test
+    @DisplayName("el administrador que asignó recibe cada evaluación y el resultado; los revisores que evaluaron, el resultado")
+    void avisosAlAdministradorYRevisores() {
+        preguntaEnviada();
+        servicio.alAsignarseRevisores("e-1", "q-1", "autor-1", 1, List.of("rev-1", "rev-2"), false, "admin-1");
+        notificaciones.vaciar();
+
+        servicio.alEnviarseUnaEvaluacion("e-3", "q-1", "autor-1", 1, "rev-1", "APROBAR", "Bien", false);
+        assertThat(notificaciones.todas()).singleElement().satisfies(n -> {
+            assertThat(n.destinatarioId()).isEqualTo("admin-1");
+            assertThat(n.tipo()).isEqualTo(TipoNotificacion.EVALUACION_RECIBIDA);
+            assertThat(n.mensaje()).contains("rev-1").contains("APROBAR").contains("Bien");
+        });
+        notificaciones.vaciar();
+
+        servicio.alCompletarseUnaRevision("e-2", "q-1", "autor-1", 1, true, List.of(
+                new ObservacionDeRevisor("rev-1", "APROBAR", "Bien"), new ObservacionDeRevisor("rev-2", "APROBAR", null)));
+
+        assertThat(notificaciones.todas()).extracting(Notificacion::destinatarioId, Notificacion::tipo).containsExactlyInAnyOrder(
+                org.assertj.core.groups.Tuple.tuple("autor-1", TipoNotificacion.REVISION_APROBADA),
+                org.assertj.core.groups.Tuple.tuple("admin-1", TipoNotificacion.RESULTADO_DE_REVISION),
+                org.assertj.core.groups.Tuple.tuple("rev-1", TipoNotificacion.RESULTADO_DE_REVISION),
+                org.assertj.core.groups.Tuple.tuple("rev-2", TipoNotificacion.RESULTADO_DE_REVISION));
+    }
+
+    @Test
+    @DisplayName("una reasignación automática no cambia al administrador que ya se conocía")
+    void reasignacionNoCambiaAdministrador() {
+        preguntaEnviada();
+        servicio.alAsignarseRevisores("e-1", "q-1", "autor-1", 1, List.of("rev-1"), false, "admin-1");
+
+        servicio.alAsignarseRevisores("e-2", "q-1", "autor-1", 2, List.of("rev-1"), true, "system");
+        servicio.alEnviarseUnaPregunta("e-sub-2", "q-1", "autor-1", "Otro título");
+
+        assertThat(preguntas.buscar("q-1").orElseThrow().administradorId()).isEqualTo("admin-1");
     }
 
     @Test
@@ -89,7 +142,7 @@ class NotificationApplicationServiceTest {
     void reasignacionAutomatica() {
         preguntaEnviada();
 
-        servicio.alAsignarseRevisores("e-1", "q-1", 2, List.of("rev-1"), true);
+        servicio.alAsignarseRevisores("e-1", "q-1", null, 2, List.of("rev-1"), true, null);
 
         assertThat(notificaciones.todas().get(0).mensaje()).contains("quedas asignado otra vez");
     }
@@ -97,7 +150,7 @@ class NotificationApplicationServiceTest {
     @Test
     @DisplayName("sin conocer la pregunta igual se avisa, nombrándola por su identificador")
     void preguntaDesconocida() {
-        servicio.alAsignarseRevisores("e-1", "q-9", 1, List.of("rev-1"), false);
+        servicio.alAsignarseRevisores("e-1", "q-9", null, 1, List.of("rev-1"), false, null);
 
         assertThat(notificaciones.todas().get(0).asunto()).contains("la pregunta q-9");
     }
@@ -169,8 +222,8 @@ class NotificationApplicationServiceTest {
     void idempotente() {
         preguntaEnviada();
 
-        servicio.alAsignarseRevisores("e-1", "q-1", 1, List.of("rev-1"), false);
-        servicio.alAsignarseRevisores("e-1", "q-1", 1, List.of("rev-1"), false);
+        servicio.alAsignarseRevisores("e-1", "q-1", null, 1, List.of("rev-1"), false, null);
+        servicio.alAsignarseRevisores("e-1", "q-1", null, 1, List.of("rev-1"), false, null);
         servicio.alCompletarseUnaRevision("e-2", "q-1", "autor-1", 1, true, List.of());
         servicio.alCompletarseUnaRevision("e-2", "q-1", "autor-1", 1, true, List.of());
 
@@ -200,7 +253,7 @@ class NotificationApplicationServiceTest {
         servicio.alCompletarseUnaRevision("e-b", "q-1", "autor-1", 2, true, List.of());
         reloj.avanzar(Duration.ofMinutes(1));
         servicio.alPublicarseUnaPregunta("e-c", "q-1");
-        servicio.alAsignarseRevisores("e-d", "q-1", 1, List.of("rev-1"), false);
+        servicio.alAsignarseRevisores("e-d", "q-1", null, 1, List.of("rev-1"), false, null);
     }
 
     @Test

@@ -20,6 +20,9 @@ public class QuestionInfoEntity {
     @Column(name = "author_id", nullable = false)
     private String authorId;
 
+    @Column(name = "admin_id")
+    private String adminId;
+
     protected QuestionInfoEntity() {
         // requerido por JPA
     }
@@ -35,4 +38,6 @@ public class QuestionInfoEntity {
     public void setTitle(String title) { this.title = title; }
     public String getAuthorId() { return authorId; }
     public void setAuthorId(String authorId) { this.authorId = authorId; }
+    public String getAdminId() { return adminId; }
+    public void setAdminId(String adminId) { this.adminId = adminId; }
 }
