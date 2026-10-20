@@ -55,6 +55,8 @@ springdoc:
 notification:
   # Dominio de las direcciones simuladas (id-del-usuario@dominio) mientras no exista un directorio de usuarios.
   email-domain: ${NOTIFICATION_EMAIL_DOMAIN:bancopreguntas.local}
+  # Cuántas veces se intenta enviar un correo antes de darlo por fallido.
+  email-attempts: ${NOTIFICATION_EMAIL_ATTEMPTS:3}
 
 eureka:
   client:
