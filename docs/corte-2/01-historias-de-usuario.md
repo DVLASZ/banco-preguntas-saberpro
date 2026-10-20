@@ -1,8 +1,8 @@
 # 01 · Historias de usuario de la segunda iteración
 
-La iteración mantiene HU-01 a HU-03 del primer corte, ajusta HU-04 y agrega HU-05. Las épicas son las
-de Jira: HE-01 (gestión del banco), HE-02 (administración del proceso de revisión) y HE-04
-(evaluación por revisores).
+La iteración mantiene HU-01 a HU-03 del primer corte, ajusta HU-04 y agrega HU-05. Además se adelantó HU-06, la
+historia nueva del tercer corte (el autor consulta el historial de revisiones). Las épicas son las de Jira: HE-01
+(gestión del banco), HE-02 (administración del proceso de revisión) y HE-04 (evaluación por revisores).
 
 ## Resumen
 
@@ -13,6 +13,7 @@ de Jira: HE-01 (gestión del banco), HE-02 (administración del proceso de revis
 | HU-03 Listar preguntas | Autor | HE-01 | Se migra; mantiene filtros y paginación |
 | HU-04 Asignar revisores | Administrador | HE-02 | **Ajuste:** entre 1 y 3 revisores, con notificación por correo |
 | HU-05 Evaluar preguntas | Revisor | HE-04 | **Nueva** |
+| HU-06 Historial de revisiones | Autor | HE-04 | **Adelantada** del tercer corte |
 
 ## HU-01 · Crear pregunta de selección múltiple
 
@@ -35,9 +36,10 @@ Como autor quiero cambiar el estado de mis preguntas de "Borrador" a "Pendiente 
 administrador les asigne revisores. Los estados se muestran con colores.
 
 1. Solo las preguntas en Borrador pueden enviarse.
-2. El envío pide confirmación y deja la pregunta en "Pendiente de revisión".
+2. El envío pide confirmación («¿Enviar la pregunta a revisión? Después de enviarla no podrás editarla.») y deja
+   la pregunta en "Pendiente de revisión".
 3. El cambio queda registrado en el historial de estados.
-4. **Nuevo:** el servicio publica el evento `question.submitted` para que `review-service` la tenga disponible.
+4. **Nuevo:** `lifecycle-service` publica el evento `question.submitted` para que `assignment-service` y `evaluation-service` la tengan disponible.
 
 ## HU-03 · Listar preguntas creadas
 
@@ -57,7 +59,8 @@ para que otros docentes las revisen.
 2. Se pueden asignar mínimo 1 y máximo 3 revisores; con 0 o más de 3 no se guarda y se muestra el motivo.
 3. El autor de la pregunta nunca aparece entre los revisores disponibles y no se repite un revisor.
 4. Al asignar, la pregunta pasa automáticamente a "En revisión".
-5. Cada revisor asignado recibe un correo de notificación.
+5. Cada revisor asignado recibe una notificación en su bandeja y un correo (simulado), y el autor recibe el
+   aviso de que su pregunta entró en revisión.
 
 ## HU-05 · Evaluar preguntas asignadas (nueva)
 
@@ -70,9 +73,23 @@ y cambiar el estado a Aprobada o Rechazada.
 3. Las observaciones de todos los revisores de la misma pregunta son visibles entre ellos, para llegar a
    un consenso. No hay puntaje rígido; se aplica el criterio libre del comité.
 4. La pregunta se aprueba solo si **todos** los revisores asignados aprueban (unanimidad). Con un solo
-   rechazo, la pregunta es devuelta y queda en estado Rechazada. *Pendiente: confirmar si el primer
-   rechazo cierra la revisión o se espera a que todos evalúen.*
+   rechazo la ronda se cierra y la pregunta queda en estado Rechazada (decisión de los docentes, consulta 29); las
+   observaciones que lleguen después se guardan marcadas como tardías.
 5. El autor puede leer las observaciones de los revisores en el detalle de su pregunta.
-6. Se notifica por correo al administrador, a los revisores y al autor: asignación, evaluación recibida y
-   resultado final.
+6. Se notifica a los implicados (bandeja y correo simulado): al revisor, su asignación; al administrador que
+   asignó, cada evaluación recibida; al autor, el resultado con las observaciones; y al administrador y a los
+   revisores que evaluaron, el resultado de la revisión. Detalle en
+   [notificaciones y correos](anexos/notificaciones-y-correos.md).
 7. Una vez enviada, la evaluación queda en el historial y no se borra físicamente.
+
+## HU-06 · Historial de revisiones (adelantada del tercer corte)
+
+Como autor quiero listar y ver el historial de revisiones y observaciones de mis preguntas, para sacar una versión
+mejorada de la pregunta y cambiar su estado.
+
+1. El autor ve las rondas de revisión de su pregunta con la decisión y las observaciones de cada revisor.
+2. Ve la línea de tiempo de la pregunta: envíos, reaperturas, asignaciones, evaluaciones, resultados y publicación.
+3. Una pregunta rechazada se puede reabrir: vuelve a Borrador con una versión nueva, se corrige y se envía de nuevo,
+   lo que abre una ronda nueva con los mismos revisores.
+4. Recibe una notificación por cada cambio relevante (resultado, observación tardía, publicación).
+5. Nada se borra físicamente: cada ronda y cada evaluación quedan en el historial.
