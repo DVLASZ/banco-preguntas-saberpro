@@ -1,8 +1,5 @@
 package co.unicauca.bancopreguntas.question.domain.validation;
 
-import co.unicauca.bancopreguntas.question.domain.ContenidoPregunta;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,33 +7,24 @@ import java.util.List;
  * entre {@value #MINIMO} y {@value #MAXIMO} caracteres, comienzan con
  * mayúscula o dígito y no tienen espacios repetidos.
  */
-public class LongitudYEstructuraOpcionesRule implements ValidationRule {
+public class LongitudYEstructuraOpcionesRule extends ReglaPorOpcion {
 
     static final int MINIMO = 3;
     static final int MAXIMO = 250;
 
     @Override
-    public List<Violacion> validar(ContenidoPregunta contenido) {
-        List<String> opciones = Texto.opciones(contenido);
-        List<Violacion> violaciones = new ArrayList<>();
-        for (int i = 0; i < opciones.size(); i++) {
-            String opcion = opciones.get(i).trim();
-            if (opcion.isEmpty()) {
-                continue;
-            }
-            String etiqueta = "La opción " + Texto.letra(i);
-            if (opcion.length() < MINIMO || opcion.length() > MAXIMO) {
-                violaciones.add(new Violacion(Texto.campoOpcion(i), etiqueta
-                        + " debe tener entre " + MINIMO + " y " + MAXIMO + " caracteres"));
-            }
-            char primera = opcion.charAt(0);
-            if (!Character.isUpperCase(primera) && !Character.isDigit(primera)) {
-                violaciones.add(new Violacion(Texto.campoOpcion(i), etiqueta + " debe comenzar con mayúscula"));
-            }
-            if (opcion.contains("  ")) {
-                violaciones.add(new Violacion(Texto.campoOpcion(i), etiqueta + " tiene espacios repetidos"));
-            }
+    protected void evaluar(int indice, String texto, List<Violacion> violaciones) {
+        String opcion = texto.trim();
+        if (opcion.length() < MINIMO || opcion.length() > MAXIMO) {
+            violaciones.add(enOpcion(indice,
+                    etiqueta(indice) + " debe tener entre " + MINIMO + " y " + MAXIMO + " caracteres"));
         }
-        return violaciones;
+        char primera = opcion.charAt(0);
+        if (!Character.isUpperCase(primera) && !Character.isDigit(primera)) {
+            violaciones.add(enOpcion(indice, etiqueta(indice) + " debe comenzar con mayúscula"));
+        }
+        if (opcion.contains("  ")) {
+            violaciones.add(enOpcion(indice, etiqueta(indice) + " tiene espacios repetidos"));
+        }
     }
 }
