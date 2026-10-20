@@ -3,6 +3,23 @@
 Segunda iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
 corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../docs/corte-2/README.md).
 
+## Estado: 7 servicios publicados, 14 en implementación
+
+Esta documentación describe la arquitectura de **14 microservicios** que se está
+implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**; la nueva
+distribución divide varios de ellos para que cada uno tenga una sola responsabilidad (ver la tabla del [README de los servicios](servicios/README.md)). Ya está implementada y verificada de punta a punta en local y el código se irá publicando por
+partes; mientras tanto, lo que no está en el repositorio aparece en esta documentación como texto, sin enlace.
+
+| Servicio publicado hoy (primera distribución, 7) | En la nueva distribución (14) |
+|---|---|
+| `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad) y `lifecycle-service` (estados y su historial) |
+| `review-service` | `assignment-service` (asignación de revisores) y `evaluation-service` (evaluación y unanimidad) |
+| `notification-service` | `notification-service` (bandeja) y `email-service` (correo) |
+| `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión) |
+| `user-service` | `user-service` |
+| `simulation-service` | `catalog-service` (preguntas publicadas y selección) y `simulation-service` (simulacros) |
+| `tracking-service` | `statistics-service` (historial y estadísticas) y `report-service` (reporte del grupo) |
+
 ## Organización de la carpeta
 
 ```
@@ -17,6 +34,8 @@ microservicios/
 │   ├── review-service/           Asignación de revisores, rondas, unanimidad y reasignación automática
 │   ├── notification-service/     Bandeja de notificaciones y correo simulado
 │   ├── history-service/          Historial por pregunta y auditoría de accesos
+│   ├── simulation-service/       Catálogo de preguntas publicadas y simulacros con tiempo y calificación
+│   ├── tracking-service/         Historial de simulacros, estadísticas, fortalezas y debilidades y reporte del grupo
 │   └── user-service/             Usuarios de Keycloak y eventos de acceso
 ├── infraestructura/              Piezas que sostienen a los servicios
 │   ├── api-gateway/              Entrada única, autorización, circuit breaker
@@ -26,15 +45,20 @@ microservicios/
 └── pruebas-de-carga/             Script k6 de escalabilidad
 ```
 
+Pruebas de lo publicado hoy (`./mvnw test`, 5 min 55 s; no necesitan Docker):
+
 | Módulo | Pruebas |
 |---|---|
 | [bp-platform](plataforma/bp-platform/) | 65 |
-| [question-service](servicios/question-service/) | 210 |
-| [review-service](servicios/review-service/) | 145 |
+| [question-service](servicios/question-service/) | 174 |
+| [review-service](servicios/review-service/) | 102 |
 | [notification-service](servicios/notification-service/) | 74 |
-| [history-service](servicios/history-service/) | 62 |
-| [user-service](servicios/user-service/) | 63 |
+| [history-service](servicios/history-service/) | 63 |
+| [simulation-service](servicios/simulation-service/) | 88 |
+| [tracking-service](servicios/tracking-service/) | 61 |
+| [user-service](servicios/user-service/) | 62 |
 | [api-gateway](infraestructura/api-gateway/) | 22 |
+| [discovery-server](infraestructura/discovery-server/) | 3 |
 | [../frontend](../frontend/) (Angular) | 162 |
 
 Infraestructura externa: PostgreSQL 16 por servicio, RabbitMQ (panel http://localhost:15672), Keycloak
