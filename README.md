@@ -4,7 +4,9 @@ Esta rama (`corte-1`) conserva congelado el **primer corte** del proyecto: un mo
 Java Swing para gestionar y revisar preguntas del banco de preguntas Saber Pro. Proyecto de curso de Ingeniería de
 Software II, Universidad del Cauca, periodo 2026.2.
 
-El proyecto continúa en las ramas `main` y `corte-2`, con la solución distribuida (microservicios) del segundo corte.
+El proyecto continúa en las ramas `main` y `corte-2`, con la solución distribuida (microservicios) del segundo corte: una
+arquitectura de **14 microservicios** orientados a eventos que se publica por partes (hoy el repositorio contiene la primera
+distribución, de 7 servicios). Esta rama no cambia: el monolito y su documentación quedan tal como se entregaron.
 
 ## Estructura
 
