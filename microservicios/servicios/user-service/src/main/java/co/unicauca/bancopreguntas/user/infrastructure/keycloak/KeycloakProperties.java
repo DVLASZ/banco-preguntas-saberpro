@@ -20,7 +20,7 @@ public record KeycloakProperties(String baseUrl, String realm, String clientId, 
     public KeycloakProperties {
         baseUrl = baseUrl == null ? "http://localhost:8180" : baseUrl.replaceAll("/+$", "");
         realm = realm == null || realm.isBlank() ? "bancopreguntas" : realm;
-        roles = roles == null || roles.isEmpty() ? List.of("ADMIN", "AUTHOR", "REVIEWER") : List.copyOf(roles);
+        roles = roles == null || roles.isEmpty() ? List.of("ADMIN", "AUTHOR", "REVIEWER", "TEACHER", "STUDENT") : List.copyOf(roles);
         maxUsuarios = maxUsuarios <= 0 ? 2000 : maxUsuarios;
     }
 }

@@ -54,9 +54,9 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Quién soy: mi usuario, roles y perfil. ADMIN, AUTHOR o REVIEWER.")
+    @Operation(summary = "Quién soy: mi usuario, roles y perfil. Cualquier rol del sistema.")
     public MeResponse yo(AuthenticatedUser usuario) {
-        usuario.requireAnyRole(Roles.ADMIN, Roles.AUTHOR, Roles.REVIEWER);
+        usuario.requireAnyRole(Roles.ADMIN, Roles.AUTHOR, Roles.REVIEWER, Roles.TEACHER, Roles.STUDENT);
         List<String> roles = List.copyOf(new TreeSet<>(usuario.roles()));
         return usuarios.perfil(usuario.id())
                 .map(u -> new MeResponse(u.id(), u.nombre(), u.correo(), roles, true, u.ultimoInicioDeSesion()))

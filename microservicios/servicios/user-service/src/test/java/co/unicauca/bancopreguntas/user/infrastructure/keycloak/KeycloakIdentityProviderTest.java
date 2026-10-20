@@ -199,7 +199,7 @@ class KeycloakIdentityProviderTest {
 
         assertThat(p.baseUrl()).isEqualTo("http://localhost:8180");
         assertThat(p.realm()).isEqualTo("bancopreguntas");
-        assertThat(p.roles()).containsExactly("ADMIN", "AUTHOR", "REVIEWER");
+        assertThat(p.roles()).containsExactly("ADMIN", "AUTHOR", "REVIEWER", "TEACHER", "STUDENT");
         assertThat(p.maxUsuarios()).isEqualTo(2000);
         assertThat(new KeycloakProperties("http://kc:8080//", "r", "c", "s", List.of("X"), 5).baseUrl())
                 .isEqualTo("http://kc:8080");

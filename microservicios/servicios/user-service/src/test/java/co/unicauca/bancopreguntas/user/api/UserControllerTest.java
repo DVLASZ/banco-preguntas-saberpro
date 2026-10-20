@@ -129,7 +129,7 @@ class UserControllerTest {
     @Test
     @DisplayName("GET /me exige un rol de la plataforma")
     void yoSinRol() throws Exception {
-        mvc.perform(como(get("/api/users/me"), "est-1", "STUDENT")).andExpect(status().isForbidden());
+        mvc.perform(como(get("/api/users/me"), "raro-1", "VISITANTE")).andExpect(status().isForbidden());
         mvc.perform(get("/api/users/me")).andExpect(status().isUnauthorized());
     }
 
