@@ -22,7 +22,9 @@
     "realm": [
       { "name": "ADMIN", "description": "Administra el banco: asigna revisores y publica preguntas" },
       { "name": "AUTHOR", "description": "Crea, corrige y envía preguntas a revisión" },
-      { "name": "REVIEWER", "description": "Evalúa las preguntas que se le asignan" }
+      { "name": "REVIEWER", "description": "Evalúa las preguntas que se le asignan" },
+      { "name": "TEACHER", "description": "Docente: consulta simulacros, el seguimiento de los estudiantes y los reportes del grupo" },
+      { "name": "STUDENT", "description": "Estudiante: genera y presenta simulacros y consulta su propio seguimiento" }
     ]
   },
   "clients": [
@@ -147,6 +149,46 @@
       "email": "revisor5@bancopreguntas.local",
       "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
       "realmRoles": ["REVIEWER"]
+    },
+    {
+      "username": "docente1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Diana",
+      "lastName": "Docente Uno",
+      "email": "docente1@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["TEACHER"]
+    },
+    {
+      "username": "estudiante1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Esteban",
+      "lastName": "Estudiante Uno",
+      "email": "estudiante1@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "estudiante2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Elena",
+      "lastName": "Estudiante Dos",
+      "email": "estudiante2@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "estudiante3",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Emilio",
+      "lastName": "Estudiante Tres",
+      "email": "estudiante3@bancopreguntas.local",
+      "credentials": [{ "type": "password", "value": "Banco2026*", "temporary": false }],
+      "realmRoles": ["STUDENT"]
     }
   ]
 }
