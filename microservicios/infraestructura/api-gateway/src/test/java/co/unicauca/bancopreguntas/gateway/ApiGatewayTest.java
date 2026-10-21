@@ -105,6 +105,8 @@ class ApiGatewayTest {
         registro.add("gateway.uris.review-service", () -> destino);
         registro.add("gateway.uris.notification-service", () -> destino);
         registro.add("gateway.uris.history-service", () -> destino);
+        registro.add("gateway.uris.simulation-service", () -> destino);
+        registro.add("gateway.uris.tracking-service", () -> destino);
         registro.add("gateway.uris.user-service", () -> "http://127.0.0.1:1"); // nadie escucha: el servicio está caído
     }
 
@@ -259,11 +261,60 @@ class ApiGatewayTest {
     @Test
     @DisplayName("un usuario con un rol ajeno al banco no pasa a ninguna ruta de la API")
     void rolAjeno() {
+        String ajeno = "Bearer " + token("raro-1", "VISITANTE");
+
+        cliente.get().uri("/api/questions/q-1").header("Authorization", ajeno).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/users/me").header("Authorization", ajeno).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/notifications").header("Authorization", ajeno).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/simulations").header("Authorization", ajeno).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/tracking/me/stats").header("Authorization", ajeno).exchange().expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("el estudiante solo llega a sus simulacros, su seguimiento y su perfil; no al banco de preguntas")
+    void estudiante() {
         String estudiante = "Bearer " + token("est-1", "STUDENT");
 
-        cliente.get().uri("/api/questions/q-1").header("Authorization", estudiante).exchange().expectStatus().isForbidden();
-        cliente.get().uri("/api/users/me").header("Authorization", estudiante).exchange().expectStatus().isForbidden();
-        cliente.get().uri("/api/notifications").header("Authorization", estudiante).exchange().expectStatus().isForbidden();
+        for (String camino : List.of("/api/simulations", "/api/simulations/catalog/summary",
+                "/api/simulations/s-1", "/api/tracking/me/stats", "/api/tracking/me/history", "/api/tracking/me/competencies")) {
+            cliente.get().uri(camino).header("Authorization", estudiante).exchange().expectStatus().isOk();
+        }
+        // el perfil sí pasa la autorización; responde 503 porque en esta prueba user-service está caído
+        cliente.get().uri("/api/users/me").header("Authorization", estudiante).exchange().expectStatus().isEqualTo(503);
+        cliente.post().uri("/api/simulations").header("Authorization", estudiante).exchange().expectStatus().isOk();
+        cliente.post().uri("/api/simulations/s-1/answers").header("Authorization", estudiante).exchange().expectStatus().isOk();
+        cliente.post().uri("/api/simulations/s-1/finish").header("Authorization", estudiante).exchange().expectStatus().isOk();
+
+        for (String camino : List.of("/api/questions/q-1", "/api/reviews/config", "/api/notifications", "/api/history/me",
+                "/api/tracking/reports/group", "/api/tracking/students/est-2/stats", "/api/users")) {
+            cliente.get().uri(camino).header("Authorization", estudiante).exchange().expectStatus().isForbidden();
+        }
+    }
+
+    @Test
+    @DisplayName("el docente consulta simulacros, el seguimiento de cualquier estudiante y los reportes, pero no genera simulacros")
+    void docente() {
+        String docente = "Bearer " + token("doc-1", "TEACHER");
+
+        for (String camino : List.of("/api/simulations/s-1", "/api/simulations/catalog/summary",
+                "/api/tracking/students/est-2/stats", "/api/tracking/reports/group", "/api/tracking/reports/group.csv")) {
+            cliente.get().uri(camino).header("Authorization", docente).exchange().expectStatus().isOk();
+        }
+        cliente.get().uri("/api/users/me").header("Authorization", docente).exchange().expectStatus().isEqualTo(503);
+        cliente.post().uri("/api/simulations").header("Authorization", docente).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/tracking/me/stats").header("Authorization", docente).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/questions/all").header("Authorization", docente).exchange().expectStatus().isForbidden();
+    }
+
+    @Test
+    @DisplayName("el administrador también ve simulacros y reportes de seguimiento")
+    void administradorVeSimulacrosYSeguimiento() {
+        String admin = "Bearer " + token("admin-1", "ADMIN");
+
+        for (String camino : List.of("/api/simulations/s-1", "/api/tracking/reports/group", "/api/tracking/students/est-2/history")) {
+            cliente.get().uri(camino).header("Authorization", admin).exchange().expectStatus().isOk();
+        }
+        cliente.post().uri("/api/simulations").header("Authorization", admin).exchange().expectStatus().isForbidden();
     }
 
     @Test

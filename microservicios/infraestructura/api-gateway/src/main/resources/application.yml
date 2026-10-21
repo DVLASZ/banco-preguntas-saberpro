@@ -56,4 +56,8 @@ springdoc:
         url: /docs/history-service/v3/api-docs
       - name: user-service
         url: /docs/user-service/v3/api-docs
+      - name: simulation-service
+        url: /docs/simulation-service/v3/api-docs
+      - name: tracking-service
+        url: /docs/tracking-service/v3/api-docs
     persist-authorization: true

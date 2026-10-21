@@ -39,6 +39,8 @@ public record GatewayProperties(Map<String, String> uris, Cors cors, Duration ti
         servicios.put("notification-service", List.of("/api/notifications/**"));
         servicios.put("history-service", List.of("/api/history/**"));
         servicios.put("user-service", List.of("/api/users/**"));
+        servicios.put("simulation-service", List.of("/api/simulations/**"));
+        servicios.put("tracking-service", List.of("/api/tracking/**"));
         return Map.copyOf(servicios);
     }
 
