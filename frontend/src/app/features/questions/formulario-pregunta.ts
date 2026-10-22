@@ -37,6 +37,8 @@ export class FormularioPregunta implements OnInit {
   protected readonly guardada = signal<Pregunta | null>(null);
   protected readonly cargando = signal(false);
   protected readonly trabajando = signal<'guardar' | 'enviar' | null>(null);
+  /** El envío a revisión pide confirmación (HU-02): una vez enviada, la pregunta ya no se edita. */
+  protected readonly confirmandoEnvio = signal(false);
   protected readonly intento = signal(false);
   protected readonly tocados = signal<ReadonlySet<Campo>>(new Set());
   protected readonly erroresDelServidor = signal<string[]>([]);
@@ -102,6 +104,16 @@ export class FormularioPregunta implements OnInit {
   }
 
   protected enviarARevision(): void {
+    this.intento.set(true);
+    if (Object.keys(this.errores()).length > 0) {
+      this.avisos.error('Revisa los campos marcados antes de continuar.');
+      return;
+    }
+    this.confirmandoEnvio.set(true);
+  }
+
+  protected confirmarEnvio(): void {
+    this.confirmandoEnvio.set(false);
     this.ejecutar('enviar', true);
   }
 

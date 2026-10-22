@@ -149,13 +149,23 @@
           <bp-icono nombre="nube" [tamano]="16" /> Borrador guardado · {{ fechaHora(g.actualizadaEn) }}
         }
       </span>
-      <a class="boton fantasma" routerLink="/mis-preguntas">Cancelar</a>
-      <button type="button" class="boton" [disabled]="trabajando() !== null" (click)="guardarBorrador()">
-        <bp-icono nombre="guardar" /> {{ trabajando() === 'guardar' ? 'Guardando…' : 'Guardar borrador' }}
-      </button>
-      <button type="button" class="boton primario" [disabled]="trabajando() !== null" (click)="enviarARevision()">
-        <bp-icono nombre="enviar" /> {{ trabajando() === 'enviar' ? 'Enviando…' : 'Enviar a revisión' }}
-      </button>
+      @if (confirmandoEnvio()) {
+        <span role="alertdialog" aria-label="Confirmar envío a revisión">
+          <bp-icono nombre="alerta" [tamano]="16" /> ¿Enviar la pregunta a revisión? Después de enviarla no podrás editarla.
+        </span>
+        <button type="button" class="boton" (click)="confirmandoEnvio.set(false)">Seguir editando</button>
+        <button type="button" class="boton primario" (click)="confirmarEnvio()">
+          <bp-icono nombre="enviar" /> Confirmar envío
+        </button>
+      } @else {
+        <a class="boton fantasma" routerLink="/mis-preguntas">Cancelar</a>
+        <button type="button" class="boton" [disabled]="trabajando() !== null" (click)="guardarBorrador()">
+          <bp-icono nombre="guardar" /> {{ trabajando() === 'guardar' ? 'Guardando…' : 'Guardar borrador' }}
+        </button>
+        <button type="button" class="boton primario" [disabled]="trabajando() !== null" (click)="enviarARevision()">
+          <bp-icono nombre="enviar" /> {{ trabajando() === 'enviar' ? 'Enviando…' : 'Enviar a revisión' }}
+        </button>
+      }
     </footer>
   }
 </div>
