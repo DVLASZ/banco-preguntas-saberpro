@@ -94,6 +94,30 @@ services:
     volumes:
       - history-data:/var/lib/postgresql/data
 
+  postgres-simulation:
+    <<: *postgres
+    container_name: bp-postgres-simulation
+    environment:
+      POSTGRES_DB: simulation_db
+      POSTGRES_USER: ${SIMULATION_DB_USER:-simulation}
+      POSTGRES_PASSWORD: ${SIMULATION_DB_PASSWORD:-simulation}
+    ports:
+      - "5438:5432"
+    volumes:
+      - simulation-data:/var/lib/postgresql/data
+
+  postgres-tracking:
+    <<: *postgres
+    container_name: bp-postgres-tracking
+    environment:
+      POSTGRES_DB: tracking_db
+      POSTGRES_USER: ${TRACKING_DB_USER:-tracking}
+      POSTGRES_PASSWORD: ${TRACKING_DB_PASSWORD:-tracking}
+    ports:
+      - "5439:5432"
+    volumes:
+      - tracking-data:/var/lib/postgresql/data
+
   # ------------------------------------------------------------------ infraestructura
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
@@ -228,7 +252,7 @@ services:
       REVIEW_DB_URL: jdbc:postgresql://postgres-review:5432/review_db
       REVIEW_DB_USER: ${REVIEW_DB_USER:-review}
       REVIEW_DB_PASSWORD: ${REVIEW_DB_PASSWORD:-review}
-      REVIEW_MAX_REVIEWERS: ${REVIEW_MAX_REVIEWERS:-5}
+      REVIEW_MAX_REVIEWERS: ${REVIEW_MAX_REVIEWERS:-3}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health/readiness | grep -q UP"]
       interval: 10s
@@ -282,6 +306,60 @@ services:
       HISTORY_DB_PASSWORD: ${HISTORY_DB_PASSWORD:-history}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8085/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  simulation-service:
+    build:
+      context: .
+      dockerfile: servicios/simulation-service/Dockerfile
+    image: bancopreguntas/simulation-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-simulation:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      SIMULATION_DB_URL: jdbc:postgresql://postgres-simulation:5432/simulation_db
+      SIMULATION_DB_USER: ${SIMULATION_DB_USER:-simulation}
+      SIMULATION_DB_PASSWORD: ${SIMULATION_DB_PASSWORD:-simulation}
+      SIMULATION_MAX_QUESTIONS: ${SIMULATION_MAX_QUESTIONS:-50}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8086/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  tracking-service:
+    build:
+      context: .
+      dockerfile: servicios/tracking-service/Dockerfile
+    image: bancopreguntas/tracking-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-tracking:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      TRACKING_DB_URL: jdbc:postgresql://postgres-tracking:5432/tracking_db
+      TRACKING_DB_USER: ${TRACKING_DB_USER:-tracking}
+      TRACKING_DB_PASSWORD: ${TRACKING_DB_PASSWORD:-tracking}
+      TRACKING_STRENGTH_THRESHOLD: ${TRACKING_STRENGTH_THRESHOLD:-70}
+      TRACKING_WEAKNESS_THRESHOLD: ${TRACKING_WEAKNESS_THRESHOLD:-50}
+      TRACKING_MIN_ANSWERED: ${TRACKING_MIN_ANSWERED:-5}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8087/actuator/health/readiness | grep -q UP"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -372,4 +450,6 @@ volumes:
   review-data:
   notification-data:
   history-data:
+  simulation-data:
+  tracking-data:
   rabbitmq-data:

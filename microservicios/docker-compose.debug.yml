@@ -12,3 +12,7 @@ services:
     ports: ["8084:8084"]
   history-service:
     ports: ["8085:8085"]
+  simulation-service:
+    ports: ["8086:8086"]
+  tracking-service:
+    ports: ["8087:8087"]
