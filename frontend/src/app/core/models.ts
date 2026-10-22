@@ -184,7 +184,10 @@ export type TipoNotificacion =
   | 'REVISION_APROBADA'
   | 'REVISION_RECHAZADA'
   | 'OBSERVACION_TARDIA'
-  | 'PREGUNTA_PUBLICADA';
+  | 'PREGUNTA_PUBLICADA'
+  | 'PREGUNTA_EN_REVISION'
+  | 'EVALUACION_RECIBIDA'
+  | 'RESULTADO_DE_REVISION';
 
 export interface Notificacion {
   id: string;

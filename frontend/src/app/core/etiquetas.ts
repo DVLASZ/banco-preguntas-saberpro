@@ -64,6 +64,9 @@ export const NOTIFICACIONES: Record<TipoNotificacion, { icono: string; tono: Ton
   REVISION_RECHAZADA: { icono: 'alerta', tono: 'rojo', grupo: 'revision', titulo: 'Pregunta rechazada' },
   OBSERVACION_TARDIA: { icono: 'mensaje', tono: 'ambar', grupo: 'revision', titulo: 'Nueva observación' },
   PREGUNTA_PUBLICADA: { icono: 'publicar', tono: 'turquesa', grupo: 'sistema', titulo: 'Pregunta publicada' },
+  PREGUNTA_EN_REVISION: { icono: 'usuarios', tono: 'azul', grupo: 'revision', titulo: 'Pregunta en revisión' },
+  EVALUACION_RECIBIDA: { icono: 'clip', tono: 'azul', grupo: 'revision', titulo: 'Evaluación recibida' },
+  RESULTADO_DE_REVISION: { icono: 'escudo-ok', tono: 'verde', grupo: 'revision', titulo: 'Revisión terminada' },
 };
 
 // ---------------------------------------------------------------- historial

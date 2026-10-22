@@ -19,7 +19,8 @@ describe('etiquetas', () => {
   });
 
   it('cada tipo de notificación y de entrada del historial tiene su icono y texto', () => {
-    const notificaciones: TipoNotificacion[] = ['REVISORES_ASIGNADOS', 'REVISION_APROBADA', 'REVISION_RECHAZADA', 'OBSERVACION_TARDIA', 'PREGUNTA_PUBLICADA'];
+    const notificaciones: TipoNotificacion[] = ['REVISORES_ASIGNADOS', 'REVISION_APROBADA', 'REVISION_RECHAZADA', 'OBSERVACION_TARDIA', 'PREGUNTA_PUBLICADA',
+      'PREGUNTA_EN_REVISION', 'EVALUACION_RECIBIDA', 'RESULTADO_DE_REVISION'];
     notificaciones.forEach((t) => expect(NOTIFICACIONES[t].icono).toBeTruthy());
     const entradas: TipoEntrada[] = [
       'PREGUNTA_ENVIADA', 'PREGUNTA_REABIERTA', 'PREGUNTA_PUBLICADA', 'CAMBIO_DE_ESTADO', 'REVISORES_ASIGNADOS',
