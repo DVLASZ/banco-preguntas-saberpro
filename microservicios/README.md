@@ -118,6 +118,17 @@ dominio, aplicación, API (`MockMvc`), persistencia (Flyway sobre PostgreSQL rea
 Outbox), seguridad JWT, concurrencia (dos revisores a la vez, `FOR UPDATE SKIP LOCKED`) y reglas de arquitectura
 (ArchUnit: el dominio no depende de Spring).
 
+### Prueba de carga
+
+```bash
+docker run --rm -i -e PW=<clave de prueba> -e VUS=600 -e HOLD=1m \
+  -e BASE=http://host.docker.internal:8080 -e KC=http://host.docker.internal:8180 \
+  grafana/k6 run - < pruebas-de-carga/escalabilidad.js
+```
+
+Resultados y análisis en [`04 · Escalabilidad`](../docs/corte-2/04-escalabilidad.md): 600 usuarios,
+0 % de error, p95 de 18 ms a ritmo humano y 692 ms en estrés (1 128 peticiones/s).
+
 ## Probar el API a mano
 
 Se necesita un token de Keycloak (flujo de contraseña del cliente `bancopreguntas-web`, habilitado solo en local):
