@@ -1,6 +1,6 @@
 package co.unicauca.bancopreguntas.platform.security;
 
-/** Roles del sistema. Docente y Estudiante existen como roles pero aún no tienen funcionalidades. */
+/** Roles del sistema: administrador, autor y revisor (banco de preguntas), y docente y estudiante (simulacros y seguimiento). */
 public final class Roles {
 
     public static final String ADMIN = "ADMIN";
