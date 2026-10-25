@@ -16,18 +16,17 @@ class NotificacionTest {
     private static final Instant T1 = T0.plusSeconds(60);
 
     private static Notificacion nueva() {
-        return Notificacion.nueva("n-1", "autor-1", "autor-1@correo.test", TipoNotificacion.REVISION_APROBADA, "q-1",
+        return Notificacion.nueva("n-1", "autor-1", TipoNotificacion.REVISION_APROBADA, "q-1",
                 new Mensaje("Asunto", "Cuerpo"), T0);
     }
 
     @Test
-    @DisplayName("una notificación nueva está sin leer y sin correo enviado")
+    @DisplayName("una notificación nueva está sin leer")
     void nuevaSinLeer() {
         Notificacion n = nueva();
 
         assertThat(n.leida()).isFalse();
         assertThat(n.leidaEn()).isNull();
-        assertThat(n.correoEnviadoEn()).isNull();
         assertThat(n.asunto()).isEqualTo("Asunto");
         assertThat(n.mensaje()).isEqualTo("Cuerpo");
     }
@@ -43,43 +42,30 @@ class NotificacionTest {
     }
 
     @Test
-    @DisplayName("registrar el correo enviado conserva el resto de los datos")
-    void correoEnviado() {
-        Notificacion n = nueva().conCorreoEnviado(T1);
+    @DisplayName("marcarla como leída conserva el resto de los datos")
+    void leidaConservaLosDatos() {
+        Notificacion n = nueva().marcadaComoLeida(T1);
 
-        assertThat(n.correoEnviadoEn()).isEqualTo(T1);
         assertThat(n.id()).isEqualTo("n-1");
-        assertThat(n.leidaEn()).isNull();
-    }
-
-    @Test
-    @DisplayName("se convierte en el correo con su destinatario, asunto y cuerpo")
-    void comoCorreo() {
-        Correo c = nueva().comoCorreo();
-
-        assertThat(c).isEqualTo(new Correo("autor-1@correo.test", "Asunto", "Cuerpo"));
+        assertThat(n.destinatarioId()).isEqualTo("autor-1");
+        assertThat(n.tipo()).isEqualTo(TipoNotificacion.REVISION_APROBADA);
+        assertThat(n.asunto()).isEqualTo("Asunto");
     }
 
     @Test
     @DisplayName("exige identificador, destinatario, tipo, texto y fecha")
     void obligatorios() {
         Mensaje m = new Mensaje("a", "b");
-        assertThatThrownBy(() -> Notificacion.nueva(" ", "u", null, TipoNotificacion.REVISION_APROBADA, "q", m, T0))
+        assertThatThrownBy(() -> Notificacion.nueva(" ", "u", TipoNotificacion.REVISION_APROBADA, "q", m, T0))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> Notificacion.nueva("n", null, null, TipoNotificacion.REVISION_APROBADA, "q", m, T0))
+        assertThatThrownBy(() -> Notificacion.nueva("n", null, TipoNotificacion.REVISION_APROBADA, "q", m, T0))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> Notificacion.nueva("n", "u", null, null, "q", m, T0))
+        assertThatThrownBy(() -> Notificacion.nueva("n", "u", null, "q", m, T0))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> Notificacion.nueva("n", "u", null, TipoNotificacion.REVISION_APROBADA, "q",
+        assertThatThrownBy(() -> Notificacion.nueva("n", "u", TipoNotificacion.REVISION_APROBADA, "q",
                 new Mensaje("", "b"), T0)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> Notificacion.nueva("n", "u", null, TipoNotificacion.REVISION_APROBADA, "q", m, null))
+        assertThatThrownBy(() -> Notificacion.nueva("n", "u", TipoNotificacion.REVISION_APROBADA, "q", m, null))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("un correo exige destinatario")
-    void correoSinDestinatario() {
-        assertThatThrownBy(() -> new Correo(" ", "a", "b")).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

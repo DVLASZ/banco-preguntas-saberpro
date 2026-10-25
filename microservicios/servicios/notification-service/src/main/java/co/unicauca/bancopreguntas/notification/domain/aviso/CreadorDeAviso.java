@@ -23,10 +23,8 @@ public abstract class CreadorDeAviso {
     protected abstract Mensaje crearMensaje(ContextoDeAviso contexto);
 
     /** Crea la notificación completa, con el mensaje que fabrica la subclase. */
-    public final Notificacion crear(String id, String destinatarioId, String destinatarioCorreo,
-                                    ContextoDeAviso contexto, Instant ahora) {
-        return Notificacion.nueva(id, destinatarioId, destinatarioCorreo, tipo(), contexto.preguntaId(),
-                crearMensaje(contexto), ahora);
+    public final Notificacion crear(String id, String destinatarioId, ContextoDeAviso contexto, Instant ahora) {
+        return Notificacion.nueva(id, destinatarioId, tipo(), contexto.preguntaId(), crearMensaje(contexto), ahora);
     }
 
     /** Agrega al cuerpo la lista de observaciones con texto; si no hay ninguna no agrega nada. */

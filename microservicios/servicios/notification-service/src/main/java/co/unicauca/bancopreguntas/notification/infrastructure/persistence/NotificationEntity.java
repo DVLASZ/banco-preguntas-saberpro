@@ -21,9 +21,6 @@ public class NotificationEntity {
     @Column(name = "recipient_id", nullable = false)
     private String recipientId;
 
-    @Column(name = "recipient_email")
-    private String recipientEmail;
-
     @Column(nullable = false)
     private String type;
 
@@ -42,9 +39,6 @@ public class NotificationEntity {
     @Column(name = "read_at")
     private Instant readAt;
 
-    @Column(name = "email_sent_at")
-    private Instant emailSentAt;
-
     protected NotificationEntity() {
         // requerido por JPA
     }
@@ -53,8 +47,6 @@ public class NotificationEntity {
     public void setId(String id) { this.id = id; }
     public String getRecipientId() { return recipientId; }
     public void setRecipientId(String recipientId) { this.recipientId = recipientId; }
-    public String getRecipientEmail() { return recipientEmail; }
-    public void setRecipientEmail(String recipientEmail) { this.recipientEmail = recipientEmail; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
     public String getQuestionId() { return questionId; }
@@ -67,8 +59,6 @@ public class NotificationEntity {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getReadAt() { return readAt; }
     public void setReadAt(Instant readAt) { this.readAt = readAt; }
-    public Instant getEmailSentAt() { return emailSentAt; }
-    public void setEmailSentAt(Instant emailSentAt) { this.emailSentAt = emailSentAt; }
 
     static NotificationEntity de(Notificacion n) {
         NotificationEntity e = new NotificationEntity();
@@ -79,18 +69,16 @@ public class NotificationEntity {
     void copiar(Notificacion n) {
         id = n.id();
         recipientId = n.destinatarioId();
-        recipientEmail = n.destinatarioCorreo();
         type = n.tipo().name();
         questionId = n.preguntaId();
         subject = n.asunto();
         message = n.mensaje();
         createdAt = n.creadaEn();
         readAt = n.leidaEn();
-        emailSentAt = n.correoEnviadoEn();
     }
 
     Notificacion aDominio() {
-        return new Notificacion(id, recipientId, recipientEmail, TipoNotificacion.valueOf(type), questionId, subject,
-                message, createdAt, readAt, emailSentAt);
+        return new Notificacion(id, recipientId, TipoNotificacion.valueOf(type), questionId, subject, message,
+                createdAt, readAt);
     }
 }

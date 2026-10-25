@@ -49,8 +49,8 @@ class NotificationControllerTest {
     }
 
     private static Notificacion notificacion() {
-        return Notificacion.nueva("n-1", "autor-1", "autor-1@correo.test", TipoNotificacion.REVISION_RECHAZADA, "q-1",
-                new Mensaje("Pregunta rechazada", "Cuerpo"), T0).conCorreoEnviado(T0);
+        return Notificacion.nueva("n-1", "autor-1", TipoNotificacion.REVISION_RECHAZADA, "q-1",
+                new Mensaje("Pregunta rechazada", "Cuerpo"), T0);
     }
 
     @Test
@@ -64,7 +64,6 @@ class NotificationControllerTest {
                 .andExpect(jsonPath("$.contenido[0].tipo").value("REVISION_RECHAZADA"))
                 .andExpect(jsonPath("$.contenido[0].asunto").value("Pregunta rechazada"))
                 .andExpect(jsonPath("$.contenido[0].leida").value(false))
-                .andExpect(jsonPath("$.contenido[0].correoEnviadoEn").exists())
                 .andExpect(jsonPath("$.pagina").value(0))
                 .andExpect(jsonPath("$.totalElementos").value(1));
     }
@@ -144,19 +143,5 @@ class NotificationControllerTest {
         mvc.perform(comoAutor(post("/api/notifications/read-all")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.marcadas").value(3));
-    }
-
-    @Test
-    @DisplayName("GET /emails lista los correos simulados y es solo del administrador")
-    void correos() throws Exception {
-        when(servicio.correosEnviados(1, 10)).thenReturn(new Pagina<>(List.of(notificacion()), 1, 10, 1));
-
-        mvc.perform(como(get("/api/notifications/emails"), "admin-1", "ADMIN"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.contenido[0].para").value("autor-1@correo.test"))
-                .andExpect(jsonPath("$.contenido[0].asunto").value("Pregunta rechazada"))
-                .andExpect(jsonPath("$.contenido[0].cuerpo").value("Cuerpo"));
-
-        mvc.perform(comoAutor(get("/api/notifications/emails"))).andExpect(status().isForbidden());
     }
 }

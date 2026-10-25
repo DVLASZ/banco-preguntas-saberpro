@@ -23,7 +23,7 @@ class NotificationApplicationServiceTest {
 
     private InMemoryNotificationRepository notificaciones;
     private InMemoryQuestionInfoRepository preguntas;
-    private RecordingEmailSender correo;
+    private RecordingEventPublisher eventos;
     private RelojManual reloj;
     private NotificationApplicationService servicio;
 
@@ -31,11 +31,11 @@ class NotificationApplicationServiceTest {
     void preparar() {
         notificaciones = new InMemoryNotificationRepository();
         preguntas = new InMemoryQuestionInfoRepository();
-        correo = new RecordingEmailSender();
+        eventos = new RecordingEventPublisher();
         reloj = new RelojManual(T0);
         AtomicInteger ids = new AtomicInteger();
-        servicio = new NotificationApplicationService(notificaciones, preguntas, correo, new InMemoryProcessedEvents(),
-                reloj, () -> "n-" + ids.incrementAndGet(), usuario -> usuario + "@correo.test");
+        servicio = new NotificationApplicationService(notificaciones, preguntas, eventos, new InMemoryProcessedEvents(),
+                reloj, () -> "n-" + ids.incrementAndGet());
     }
 
     private void preguntaEnviada() {
@@ -48,7 +48,7 @@ class NotificationApplicationServiceTest {
         preguntaEnviada();
 
         assertThat(notificaciones.todas()).isEmpty();
-        assertThat(correo.enviados()).isEmpty();
+        assertThat(eventos.publicados()).isEmpty();
         assertThat(preguntas.buscar("q-1")).get().satisfies(i -> {
             assertThat(i.titulo()).isEqualTo("Patrón Observer");
             assertThat(i.autorId()).isEqualTo("autor-1");
@@ -66,7 +66,7 @@ class NotificationApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("asignar revisores avisa a cada uno, con su correo, y deja constancia del envío")
+    @DisplayName("asignar revisores avisa a cada uno y publica notification.created de cada aviso")
     void asignacion() {
         preguntaEnviada();
 
@@ -77,13 +77,14 @@ class NotificationApplicationServiceTest {
                     assertThat(n.tipo()).isEqualTo(TipoNotificacion.REVISORES_ASIGNADOS);
                     assertThat(n.preguntaId()).isEqualTo("q-1");
                     assertThat(n.asunto()).contains("Patrón Observer");
-                    assertThat(n.correoEnviadoEn()).isEqualTo(T0);
                     assertThat(n.leida()).isFalse();
                 });
         assertThat(notificaciones.todas()).extracting(Notificacion::destinatarioId)
                 .containsExactly("rev-1", "rev-2", "autor-1");
-        assertThat(correo.enviados()).extracting(c -> c.para())
-                .containsExactly("rev-1@correo.test", "rev-2@correo.test", "autor-1@correo.test");
+        assertThat(eventos.notificaciones()).extracting(e -> e.recipientId())
+                .containsExactly("rev-1", "rev-2", "autor-1");
+        assertThat(eventos.notificaciones()).extracting(e -> e.kind())
+                .containsExactly("REVISORES_ASIGNADOS", "REVISORES_ASIGNADOS", "PREGUNTA_EN_REVISION");
     }
 
     @Test
@@ -228,20 +229,29 @@ class NotificationApplicationServiceTest {
         servicio.alCompletarseUnaRevision("e-2", "q-1", "autor-1", 1, true, List.of());
 
         assertThat(notificaciones.todas()).hasSize(2);
-        assertThat(correo.enviados()).hasSize(2);
+        assertThat(eventos.publicados()).hasSize(2);
     }
 
     @Test
-    @DisplayName("si el correo falla, la notificación igual queda en la bandeja, sin marca de envío")
-    void correoCaido() {
+    @DisplayName("el evento notification.created lleva el contenido de la notificación guardada")
+    void eventoDeNotificacionCreada() {
         preguntaEnviada();
-        correo.fallar = true;
 
         servicio.alCompletarseUnaRevision("e-2", "q-1", "autor-1", 1, true, List.of());
 
-        assertThat(notificaciones.todas()).singleElement().satisfies(n -> assertThat(n.correoEnviadoEn()).isNull());
+        assertThat(notificaciones.todas()).singleElement().satisfies(n -> {
+            assertThat(eventos.notificaciones()).singleElement().satisfies(e -> {
+                assertThat(e.notificationId()).isEqualTo(n.id());
+                assertThat(e.recipientId()).isEqualTo("autor-1");
+                assertThat(e.kind()).isEqualTo("REVISION_APROBADA");
+                assertThat(e.questionId()).isEqualTo("q-1");
+                assertThat(e.subject()).isEqualTo(n.asunto());
+                assertThat(e.message()).isEqualTo(n.mensaje());
+                assertThat(e.createdAt()).isEqualTo(T0);
+                assertThat(e.type()).isEqualTo("notification.created");
+            });
+        });
         assertThat(servicio.noLeidas("autor-1")).isEqualTo(1);
-        assertThat(servicio.correosEnviados(1, 10).elementos()).isEmpty();
     }
 
     // ---------------------------------------------------------------- bandeja
@@ -336,17 +346,5 @@ class NotificationApplicationServiceTest {
     void validaPaginacion() {
         assertThatThrownBy(() -> servicio.bandeja("u", false, 0, 10)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> servicio.bandeja("u", false, 1, 0)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> servicio.correosEnviados(1, 0)).isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("los correos enviados se listan del más reciente al más antiguo")
-    void correosEnviados() {
-        variasNotificaciones();
-
-        var correos = servicio.correosEnviados(1, 10);
-
-        assertThat(correos.totalElementos()).isEqualTo(4);
-        assertThat(correos.elementos().get(0).correoEnviadoEn()).isAfterOrEqualTo(correos.elementos().get(3).correoEnviadoEn());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,14 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Prueba de extremo a extremo del servicio: la aplicación Spring completa sobre un PostgreSQL real
  * embebido y el broker simulado. Reproduce la secuencia de eventos de una pregunta y comprueba lo que cada
- * usuario encuentra en su bandeja y lo que el administrador ve en los correos simulados.
+ * usuario encuentra en su bandeja y los eventos {@code notification.created} que quedan en la bandeja de salida.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "spring.rabbitmq.listener.simple.auto-startup=false",
-                "management.health.rabbit.enabled=false",
-                "notification.email-domain=correo.test"
+                "management.health.rabbit.enabled=false"
         })
 @Import(EmbeddedPostgresConfig.class)
 @DisplayName("notification-service de extremo a extremo")
@@ -44,6 +44,9 @@ class NotificationServiceFlowTest {
 
     @Autowired
     private EventsListener escucha;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @MockitoBean
     private RabbitTemplate rabbit;
@@ -76,7 +79,7 @@ class NotificationServiceFlowTest {
     }
 
     @Test
-    @DisplayName("la vida de una pregunta genera los avisos de cada usuario y sus correos simulados")
+    @DisplayName("la vida de una pregunta genera los avisos de cada usuario y un notification.created por cada uno")
     void cicloDeVida() {
         String q = uuid();
         String autor = "autor-" + uuid();
@@ -122,10 +125,12 @@ class NotificationServiceFlowTest {
         assertThat(llamar(HttpMethod.POST, "/api/notifications/read-all", autor).getBody().get("marcadas").asInt()).isEqualTo(2);
         assertThat(llamar(HttpMethod.GET, "/api/notifications/unread-count", autor).getBody().get("noLeidas").asInt()).isZero();
 
-        // los correos simulados salieron a las direcciones derivadas del usuario
-        JsonNode correos = llamar(HttpMethod.GET, "/api/notifications/emails?size=100", "admin-1").getBody();
-        assertThat(correos.get("contenido").findValuesAsText("para")).contains(r1 + "@correo.test", r2 + "@correo.test",
-                autor + "@correo.test");
+        // cada aviso dejó su evento en la bandeja de salida, para que el email-service envíe el correo
+        for (String usuario : new String[] {r1, r2, autor}) {
+            assertThat(jdbc.queryForObject(
+                    "SELECT count(*) FROM outbox_event WHERE routing_key = 'notification.created' AND payload LIKE ?",
+                    Integer.class, "%\"recipientId\":\"" + usuario + "\"%")).isPositive();
+        }
     }
 
     @Test
@@ -171,9 +176,8 @@ class NotificationServiceFlowTest {
     }
 
     @Test
-    @DisplayName("los correos simulados son solo del administrador y sin identidad responde 401")
+    @DisplayName("sin identidad responde 401")
     void seguridad() {
-        assertThat(llamar(HttpMethod.GET, "/api/notifications/emails", "autor-1").getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(llamar(HttpMethod.GET, "/api/notifications", null).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 

@@ -21,7 +21,4 @@ public interface NotificationRepository {
 
     /** Marca como leídas todas las del usuario y devuelve cuántas cambiaron. */
     int marcarTodasComoLeidas(String usuarioId, Instant ahora);
-
-    /** Los correos ya enviados (simulados), el más reciente primero. */
-    Pagina<Notificacion> conCorreoEnviado(int pagina, int tamano);
 }

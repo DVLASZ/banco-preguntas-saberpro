@@ -52,12 +52,6 @@ springdoc:
     path: /swagger-ui.html
     operations-sorter: method
 
-notification:
-  # Dominio de las direcciones simuladas (id-del-usuario@dominio) mientras no exista un directorio de usuarios.
-  email-domain: ${NOTIFICATION_EMAIL_DOMAIN:bancopreguntas.local}
-  # Cuántas veces se intenta enviar un correo antes de darlo por fallido.
-  email-attempts: ${NOTIFICATION_EMAIL_ATTEMPTS:3}
-
 eureka:
   client:
     enabled: ${EUREKA_ENABLED:true}
@@ -72,9 +66,3 @@ eureka:
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 15
-
-bancopreguntas:
-  events:
-    outbox:
-      # Este servicio solo escucha eventos: no publica ninguno, así que no tiene bandeja de salida (ni el relevo que la lee).
-      enabled: false

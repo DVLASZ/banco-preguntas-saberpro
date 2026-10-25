@@ -19,7 +19,7 @@ class CreadoresDeAvisoTest {
     private static final Instant AHORA = Instant.parse("2026-10-16T10:00:00Z");
 
     private static Notificacion crear(TipoNotificacion tipo, ContextoDeAviso contexto) {
-        return CreadoresDeAviso.para(tipo).crear("n-1", "u-1", "u-1@correo.test", contexto, AHORA);
+        return CreadoresDeAviso.para(tipo).crear("n-1", "u-1", contexto, AHORA);
     }
 
     @ParameterizedTest

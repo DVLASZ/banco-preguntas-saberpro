@@ -61,14 +61,6 @@ class InMemoryNotificationRepository implements NotificationRepository {
         return cambiadas[0];
     }
 
-    @Override
-    public Pagina<Notificacion> conCorreoEnviado(int pagina, int tamano) {
-        return paginar(todas.values().stream()
-                .filter(n -> n.correoEnviadoEn() != null)
-                .sorted(Comparator.comparing(Notificacion::correoEnviadoEn).reversed())
-                .toList(), pagina, tamano);
-    }
-
     private static Pagina<Notificacion> paginar(List<Notificacion> lista, int pagina, int tamano) {
         int desde = Math.min((pagina - 1) * tamano, lista.size());
         int hasta = Math.min(desde + tamano, lista.size());

@@ -51,12 +51,6 @@ public class JpaNotificationRepository implements NotificationRepository {
         return repositorio.marcarTodasComoLeidas(usuarioId, ahora);
     }
 
-    @Override
-    public Pagina<Notificacion> conCorreoEnviado(int pagina, int tamano) {
-        return aPagina(repositorio.findByEmailSentAtIsNotNullOrderByEmailSentAtDescIdAsc(PageRequest.of(pagina - 1, tamano)),
-                pagina, tamano);
-    }
-
     private static Pagina<Notificacion> aPagina(Page<NotificationEntity> resultado, int pagina, int tamano) {
         return new Pagina<>(resultado.getContent().stream().map(NotificationEntity::aDominio).toList(), pagina, tamano,
                 (int) resultado.getTotalElements());

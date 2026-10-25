@@ -17,8 +17,6 @@ public interface NotificationJpaRepository extends JpaRepository<NotificationEnt
 
     long countByRecipientIdAndReadAtIsNull(String recipientId);
 
-    Page<NotificationEntity> findByEmailSentAtIsNotNullOrderByEmailSentAtDescIdAsc(Pageable pageable);
-
     @Modifying(clearAutomatically = true)
     @Query("update NotificationEntity n set n.readAt = :ahora where n.recipientId = :usuario and n.readAt is null")
     int marcarTodasComoLeidas(@Param("usuario") String usuario, @Param("ahora") Instant ahora);

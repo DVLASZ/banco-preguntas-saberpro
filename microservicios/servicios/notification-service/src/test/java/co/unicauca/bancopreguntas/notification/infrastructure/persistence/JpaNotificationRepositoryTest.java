@@ -59,12 +59,9 @@ class JpaNotificationRepositoryTest {
         return UUID.randomUUID().toString();
     }
 
-    private Notificacion guardar(String usuario, Instant creada, boolean conCorreo) {
-        Notificacion n = Notificacion.nueva(id(), usuario, usuario + "@correo.test", TipoNotificacion.REVISION_APROBADA,
+    private Notificacion guardar(String usuario, Instant creada) {
+        Notificacion n = Notificacion.nueva(id(), usuario, TipoNotificacion.REVISION_APROBADA,
                 id(), new Mensaje("Asunto de prueba", "Cuerpo de prueba con tildes: revisión"), creada);
-        if (conCorreo) {
-            n = n.conCorreoEnviado(creada.plusSeconds(1));
-        }
         repositorio.guardar(n);
         em.clear();
         return n;
@@ -73,7 +70,7 @@ class JpaNotificationRepositoryTest {
     @Test
     @DisplayName("guarda y recupera una notificación con todos sus campos")
     void guardaYRecupera() {
-        Notificacion original = guardar("autor-" + id(), T0, true);
+        Notificacion original = guardar("autor-" + id(), T0);
 
         Notificacion leida = repositorio.buscarPorId(original.id()).orElseThrow();
 
@@ -90,7 +87,7 @@ class JpaNotificationRepositoryTest {
     @Test
     @DisplayName("guardar de nuevo actualiza la misma fila (marcar como leída)")
     void actualiza() {
-        Notificacion original = guardar("autor-" + id(), T0, false);
+        Notificacion original = guardar("autor-" + id(), T0);
 
         repositorio.guardar(original.marcadaComoLeida(T0.plusSeconds(30)));
         em.clear();
@@ -103,10 +100,10 @@ class JpaNotificationRepositoryTest {
     @DisplayName("la bandeja es del usuario, la más reciente primero, con total y paginación")
     void bandeja() {
         String usuario = "autor-" + id();
-        Notificacion vieja = guardar(usuario, T0, false);
-        Notificacion media = guardar(usuario, T0.plusSeconds(10), false);
-        Notificacion nueva = guardar(usuario, T0.plusSeconds(20), false);
-        guardar("otro-" + id(), T0.plusSeconds(30), false);
+        Notificacion vieja = guardar(usuario, T0);
+        Notificacion media = guardar(usuario, T0.plusSeconds(10));
+        Notificacion nueva = guardar(usuario, T0.plusSeconds(20));
+        guardar("otro-" + id(), T0.plusSeconds(30));
 
         var primera = repositorio.delUsuario(usuario, false, 1, 2);
         var segunda = repositorio.delUsuario(usuario, false, 2, 2);
@@ -121,8 +118,8 @@ class JpaNotificationRepositoryTest {
     @DisplayName("se filtran y cuentan las no leídas")
     void noLeidas() {
         String usuario = "autor-" + id();
-        Notificacion a = guardar(usuario, T0, false);
-        guardar(usuario, T0.plusSeconds(1), false);
+        Notificacion a = guardar(usuario, T0);
+        guardar(usuario, T0.plusSeconds(1));
         repositorio.guardar(a.marcadaComoLeida(T0.plusSeconds(5)));
         em.clear();
 
@@ -138,9 +135,9 @@ class JpaNotificationRepositoryTest {
     void marcarTodas() {
         String usuario = "autor-" + id();
         String otro = "otro-" + id();
-        guardar(usuario, T0, false);
-        guardar(usuario, T0.plusSeconds(1), false);
-        guardar(otro, T0, false);
+        guardar(usuario, T0);
+        guardar(usuario, T0.plusSeconds(1));
+        guardar(otro, T0);
 
         int cambiadas = repositorio.marcarTodasComoLeidas(usuario, T0.plusSeconds(60));
 
@@ -150,21 +147,6 @@ class JpaNotificationRepositoryTest {
         assertThat(repositorio.delUsuario(usuario, false, 1, 10).elementos())
                 .allSatisfy(n -> assertThat(n.leidaEn()).isEqualTo(T0.plusSeconds(60)));
         assertThat(repositorio.marcarTodasComoLeidas(usuario, T0.plusSeconds(90))).isZero();
-    }
-
-    @Test
-    @DisplayName("lista solo las notificaciones con correo enviado, la más reciente primero")
-    void conCorreo() {
-        String usuario = "autor-" + id();
-        Notificacion sinCorreo = guardar(usuario, T0, false);
-        Notificacion vieja = guardar(usuario, T0.plusSeconds(100), true);
-        Notificacion nueva = guardar(usuario, T0.plusSeconds(200), true);
-
-        var correos = repositorio.conCorreoEnviado(1, 1000);
-
-        var ids = correos.elementos().stream().map(Notificacion::id).toList();
-        assertThat(ids).contains(vieja.id(), nueva.id()).doesNotContain(sinCorreo.id());
-        assertThat(ids.indexOf(nueva.id())).isLessThan(ids.indexOf(vieja.id()));
     }
 
     @Test

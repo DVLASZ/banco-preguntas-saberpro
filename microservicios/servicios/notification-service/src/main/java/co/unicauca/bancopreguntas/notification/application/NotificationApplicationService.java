@@ -1,6 +1,6 @@
 package co.unicauca.bancopreguntas.notification.application;
 
-import co.unicauca.bancopreguntas.notification.application.port.EmailSender;
+import co.unicauca.bancopreguntas.notification.application.port.DomainEventPublisher;
 import co.unicauca.bancopreguntas.notification.application.port.NotificationRepository;
 import co.unicauca.bancopreguntas.notification.application.port.ProcessedEvents;
 import co.unicauca.bancopreguntas.notification.application.port.QuestionInfoRepository;
@@ -12,6 +12,7 @@ import co.unicauca.bancopreguntas.notification.domain.Pagina;
 import co.unicauca.bancopreguntas.notification.domain.TipoNotificacion;
 import co.unicauca.bancopreguntas.notification.domain.aviso.ContextoDeAviso;
 import co.unicauca.bancopreguntas.notification.domain.aviso.CreadoresDeAviso;
+import co.unicauca.bancopreguntas.notification.domain.event.NotificationCreated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +23,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * Casos de uso del servicio de notificaciones. Reacciona a los eventos del servicio de preguntas y del de
- * revisión creando avisos para los usuarios, los envía por correo (simulado) y atiende la bandeja de cada uno.
- * Todos los manejadores de eventos son idempotentes.
+ * revisión creando avisos en la bandeja de los usuarios y publica {@code notification.created} para que el
+ * {@code email-service} envíe el correo. Todos los manejadores de eventos son idempotentes.
  */
 @Transactional
 public class NotificationApplicationService {
@@ -37,25 +37,20 @@ public class NotificationApplicationService {
 
     private final NotificationRepository notificaciones;
     private final QuestionInfoRepository preguntas;
-    private final EmailSender correo;
+    private final DomainEventPublisher eventos;
     private final ProcessedEvents procesados;
     private final Clock reloj;
     private final Supplier<String> generadorDeId;
-    private final Function<String, String> correoDe;
 
-    /**
-     * @param correoDe obtiene la dirección de correo de un usuario a partir de su identificador
-     */
     public NotificationApplicationService(NotificationRepository notificaciones, QuestionInfoRepository preguntas,
-                                          EmailSender correo, ProcessedEvents procesados, Clock reloj,
-                                          Supplier<String> generadorDeId, Function<String, String> correoDe) {
+                                          DomainEventPublisher eventos, ProcessedEvents procesados, Clock reloj,
+                                          Supplier<String> generadorDeId) {
         this.notificaciones = notificaciones;
         this.preguntas = preguntas;
-        this.correo = correo;
+        this.eventos = eventos;
         this.procesados = procesados;
         this.reloj = reloj;
         this.generadorDeId = generadorDeId;
-        this.correoDe = correoDe;
     }
 
     // ------------------------------------------------------------------ reacción a eventos
@@ -177,14 +172,6 @@ public class NotificationApplicationService {
         return notificaciones.marcarTodasComoLeidas(usuarioId, reloj.instant());
     }
 
-    /** Los correos enviados (simulados), para que el administrador compruebe qué salió. */
-    @Transactional(readOnly = true)
-    public Pagina<Notificacion> correosEnviados(int pagina, int tamano) {
-        validarPagina(pagina, tamano);
-        Pagina<Notificacion> resultado = notificaciones.conCorreoEnviado(pagina, tamano);
-        return corregir(pagina, resultado, p -> notificaciones.conCorreoEnviado(p, tamano));
-    }
-
     // ------------------------------------------------------------------ auxiliares
 
     private Optional<String> administradorDe(String preguntaId) {
@@ -196,21 +183,15 @@ public class NotificationApplicationService {
     }
 
     /**
-     * Crea la notificación con el creador (Factory Method) que corresponde al tipo y envía el correo. Si el envío
-     * falla, la notificación queda en la bandeja sin marca de envío.
+     * Crea la notificación con el creador (Factory Method) que corresponde al tipo, la deja en la bandeja y publica
+     * {@code notification.created}; el envío del correo es cosa del {@code email-service} y no bloquea este flujo.
      */
     private void notificar(String destinatarioId, TipoNotificacion tipo, ContextoDeAviso contexto) {
-        Instant ahora = reloj.instant();
-        Notificacion notificacion = CreadoresDeAviso.para(tipo).crear(generadorDeId.get(), destinatarioId,
-                correoDe.apply(destinatarioId), contexto, ahora);
-        try {
-            correo.enviar(notificacion.comoCorreo());
-            notificacion = notificacion.conCorreoEnviado(reloj.instant());
-        } catch (RuntimeException e) {
-            LOG.warn("No se pudo enviar el correo de la notificación {} a {}: {}", notificacion.id(),
-                    notificacion.destinatarioCorreo(), e.getMessage());
-        }
+        Notificacion notificacion = CreadoresDeAviso.para(tipo).crear(generadorDeId.get(), destinatarioId, contexto,
+                reloj.instant());
         notificaciones.guardar(notificacion);
+        eventos.publicar(new NotificationCreated(notificacion.id(), notificacion.destinatarioId(), tipo.name(),
+                notificacion.preguntaId(), notificacion.asunto(), notificacion.mensaje(), notificacion.creadaEn()));
     }
 
     private static void validarPagina(int pagina, int tamano) {
