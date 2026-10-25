@@ -1,6 +1,11 @@
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      httpclient:
+        # Un servicio que no acepta conexiones se da por caído en 2 s, sin esperar el tiempo por defecto (30 s).
+        connect-timeout: ${GATEWAY_CONNECT_TIMEOUT_MS:2000}
   security:
     oauth2:
       resourceserver:
