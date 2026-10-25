@@ -1,8 +1,10 @@
 package co.unicauca.bancopreguntas.notification.api;
 
 import co.unicauca.bancopreguntas.notification.api.dto.EmailResponse;
+import co.unicauca.bancopreguntas.notification.api.dto.MarkedReadResponse;
 import co.unicauca.bancopreguntas.notification.api.dto.NotificationResponse;
 import co.unicauca.bancopreguntas.notification.api.dto.PageResponse;
+import co.unicauca.bancopreguntas.notification.api.dto.UnreadCountResponse;
 import co.unicauca.bancopreguntas.notification.application.NotificationApplicationService;
 import co.unicauca.bancopreguntas.platform.security.AuthenticatedUser;
 import co.unicauca.bancopreguntas.platform.security.Roles;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 /**
  * Adaptador de entrada REST de las notificaciones. Cada usuario ve solo las suyas; los correos simulados los
@@ -51,9 +51,9 @@ public class NotificationController {
 
     @GetMapping("/unread-count")
     @Operation(summary = "Cuántas notificaciones tengo sin leer.")
-    public Map<String, Long> sinLeer(AuthenticatedUser usuario) {
+    public UnreadCountResponse sinLeer(AuthenticatedUser usuario) {
         usuario.requireAnyRole(Roles.ADMIN, Roles.AUTHOR, Roles.REVIEWER);
-        return Map.of("noLeidas", notificaciones.noLeidas(usuario.id()));
+        return new UnreadCountResponse(notificaciones.noLeidas(usuario.id()));
     }
 
     @PostMapping("/{id}/read")
@@ -65,9 +65,9 @@ public class NotificationController {
 
     @PostMapping("/read-all")
     @Operation(summary = "Marcar todas mis notificaciones como leídas.")
-    public Map<String, Integer> marcarTodasLeidas(AuthenticatedUser usuario) {
+    public MarkedReadResponse marcarTodasLeidas(AuthenticatedUser usuario) {
         usuario.requireAnyRole(Roles.ADMIN, Roles.AUTHOR, Roles.REVIEWER);
-        return Map.of("marcadas", notificaciones.marcarTodasComoLeidas(usuario.id()));
+        return new MarkedReadResponse(notificaciones.marcarTodasComoLeidas(usuario.id()));
     }
 
     @GetMapping("/emails")
