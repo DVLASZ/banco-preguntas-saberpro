@@ -3,10 +3,11 @@
 Segunda iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
 corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../docs/corte-2/README.md).
 
-## Estado: 7 servicios publicados, 14 en implementación
+## Estado: 8 servicios publicados, 14 en implementación
 
 Esta documentación describe la arquitectura de **14 microservicios** que se está
-implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**; la nueva
+implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**, más el `email-service` (el correo ya
+salió de `notification-service`, que publica `notification.created`); la nueva
 distribución divide varios de ellos para que cada uno tenga una sola responsabilidad (ver la tabla del [README de los servicios](servicios/README.md)). Ya está implementada y verificada de punta a punta en local y el código se irá publicando por
 partes; mientras tanto, lo que no está en el repositorio aparece en esta documentación como texto, sin enlace.
 
@@ -14,7 +15,7 @@ partes; mientras tanto, lo que no está en el repositorio aparece en esta docume
 |---|---|
 | `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad) y `lifecycle-service` (estados y su historial) |
 | `review-service` | `assignment-service` (asignación de revisores) y `evaluation-service` (evaluación y unanimidad) |
-| `notification-service` | `notification-service` (bandeja) y `email-service` (correo) |
+| `notification-service` | `notification-service` (bandeja) y `email-service` (correo, ya publicado) |
 | `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión) |
 | `user-service` | `user-service` |
 | `simulation-service` | `catalog-service` (preguntas publicadas y selección) y `simulation-service` (simulacros) |
@@ -32,7 +33,8 @@ microservicios/
 ├── servicios/                    Servicios de negocio (cada uno con su base de datos)
 │   ├── question-service/         Preguntas, validación estructural y ciclo de vida
 │   ├── review-service/           Asignación de revisores, rondas, unanimidad y reasignación automática
-│   ├── notification-service/     Bandeja de notificaciones y correo simulado
+│   ├── notification-service/     Bandeja de notificaciones
+│   ├── email-service/            Correo simulado de cada notificación
 │   ├── history-service/          Historial por pregunta y auditoría de accesos
 │   ├── simulation-service/       Catálogo de preguntas publicadas y simulacros con tiempo y calificación
 │   ├── tracking-service/         Historial de simulacros, estadísticas, fortalezas y debilidades y reporte del grupo
@@ -49,10 +51,11 @@ Pruebas de lo publicado hoy (`./mvnw test`, 5 min 55 s; no necesitan Docker):
 
 | Módulo | Pruebas |
 |---|---|
-| [bp-platform](plataforma/bp-platform/) | 65 |
+| [bp-platform](plataforma/bp-platform/) | 70 |
 | [question-service](servicios/question-service/) | 174 |
 | [review-service](servicios/review-service/) | 102 |
-| [notification-service](servicios/notification-service/) | 74 |
+| [notification-service](servicios/notification-service/) | 91 |
+| [email-service](servicios/email-service/) | 38 |
 | [history-service](servicios/history-service/) | 63 |
 | [simulation-service](servicios/simulation-service/) | 88 |
 | [tracking-service](servicios/tracking-service/) | 61 |
