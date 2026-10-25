@@ -1,0 +1,21 @@
+package co.unicauca.bancopreguntas.email.infrastructure.messaging;
+
+import co.unicauca.bancopreguntas.email.application.port.EmailSender;
+import co.unicauca.bancopreguntas.email.domain.Correo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Adaptador de correo que simula el envío: lo deja en el registro del servicio. Por el diseño del puerto,
+ * sustituirlo por un servidor SMTP real no toca la aplicación.
+ */
+public class SimulatedEmailSender implements EmailSender {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SimulatedEmailSender.class);
+
+    @Override
+    public void enviar(Correo correo) {
+        LOG.info("[correo simulado] Para: {} | Asunto: {}", correo.para(), correo.asunto());
+        LOG.debug("[correo simulado] Cuerpo:\n{}", correo.cuerpo());
+    }
+}
