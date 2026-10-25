@@ -25,7 +25,7 @@ routing key es el tipo del evento.
   aunque RabbitMQ esté caído en ese momento. Con varias réplicas cada lote se toma con `FOR UPDATE SKIP LOCKED`, así que dos réplicas
   nunca publican el mismo evento. La entrega es *al menos una vez*: los consumidores son idempotentes.
 - **Publicar directo** (`bancopreguntas.events.outbox.enabled=false`): se envía después del commit; lo usan los servicios que solo
-  consumen (`notification`, `history`, `tracking`).
+  consumen (`history`, `tracking`).
 - **Leer:** `IncomingEvent` entrega el cuerpo como JSON genérico, de modo que un consumidor no depende de las clases del productor. Un
   mensaje malformado se descarta sin reencolarlo, porque reintentarlo no lo arregla.
 
@@ -41,6 +41,10 @@ routing key es el tipo del evento.
 En el modo `jwt` las cabeceras se **ignoran**: nadie puede hacerse pasar por otro enviándolas. Los controladores reciben un
 `AuthenticatedUser` como parámetro y no saben de dónde sale.
 
+Cuando un servicio llama a otro por REST mientras atiende una petición, `IdentityPropagationInterceptor` copia el token y las
+cabeceras de identidad a la llamada, así el servicio llamado vuelve a validar y a exigir el rol. Solo lo hace hacia servicios internos
+(nombres sin puntos, como los de la red de Docker y Eureka): a un servidor externo nunca se envía el token.
+
 ## Errores
 
 Todos los servicios responden los errores con el mismo formato `ApiError` (`código`, `mensaje` y `detalles`). Los errores de entrada
@@ -50,5 +54,5 @@ que conserva el código HTTP que Spring ya había decidido (404, 405, 415...) y 
 
 ## Pruebas
 
-65 pruebas: publicación directa y con Outbox, lectura de eventos, resolución del usuario por cabeceras y por JWT, formato de errores
+70 pruebas: publicación directa y con Outbox, lectura de eventos, resolución del usuario por cabeceras y por JWT, formato de errores
 y autoconfiguración. Se ejecutan con `./mvnw -pl plataforma/bp-platform test` desde `microservicios/`.
