@@ -24,6 +24,7 @@
         <module>servicios/review-service</module>
         <module>servicios/notification-service</module>
         <module>servicios/email-service</module>
+        <module>servicios/audit-service</module>
         <module>servicios/user-service</module>
         <module>servicios/simulation-service</module>
         <module>servicios/tracking-service</module>
