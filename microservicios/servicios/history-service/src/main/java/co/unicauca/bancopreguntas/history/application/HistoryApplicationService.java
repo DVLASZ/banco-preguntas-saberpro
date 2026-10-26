@@ -5,7 +5,6 @@ import co.unicauca.bancopreguntas.history.application.port.ProcessedEvents;
 import co.unicauca.bancopreguntas.history.application.port.QuestionRegistry;
 import co.unicauca.bancopreguntas.history.domain.EntradaDeHistorial;
 import co.unicauca.bancopreguntas.history.domain.EventoRecibido;
-import co.unicauca.bancopreguntas.history.domain.FiltroAuditoria;
 import co.unicauca.bancopreguntas.history.domain.HistorialNoEncontradoException;
 import co.unicauca.bancopreguntas.history.domain.InfoPregunta;
 import co.unicauca.bancopreguntas.history.domain.Observador;
@@ -103,12 +102,6 @@ public class HistoryApplicationService {
                 Resumenes.revisionCompletada(ronda, aprobada), null);
     }
 
-    /** Un inicio de sesión (exitoso o fallido), para la auditoría de seguridad. */
-    public void alIniciarSesion(EventoRecibido evento, String usuarioId, boolean exitoso) {
-        registrar(evento, exitoso ? TipoEntrada.INICIO_DE_SESION : TipoEntrada.INICIO_DE_SESION_FALLIDO, null, usuarioId,
-                exitoso ? Resumenes.inicioDeSesion(usuarioId) : Resumenes.inicioDeSesionFallido(usuarioId), null);
-    }
-
     private void registrar(EventoRecibido evento, TipoEntrada tipo, String preguntaId, String actorId, String resumen,
                            Runnable efectoAdicional) {
         if (!procesados.registrarSiEsNuevo(evento.eventId())) {
@@ -154,13 +147,6 @@ public class HistoryApplicationService {
         validarPagina(pagina, tamano);
         return corregir(pagina, historial.visiblesPara(observador, pagina, tamano),
                 p -> historial.visiblesPara(observador, p, tamano));
-    }
-
-    /** La auditoría completa (incluidos los inicios de sesión), con filtros opcionales. */
-    @Transactional(readOnly = true)
-    public Pagina<EntradaDeHistorial> auditoria(FiltroAuditoria filtro, int pagina, int tamano) {
-        validarPagina(pagina, tamano);
-        return corregir(pagina, historial.auditoria(filtro, pagina, tamano), p -> historial.auditoria(filtro, p, tamano));
     }
 
     private static void validarPagina(int pagina, int tamano) {

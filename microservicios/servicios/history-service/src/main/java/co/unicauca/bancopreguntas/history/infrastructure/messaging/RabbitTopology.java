@@ -26,8 +26,6 @@ public class RabbitTopology {
     public static final String QUEUE_REVIEWERS_ASSIGNED = "history.q.reviewers-assigned";
     public static final String QUEUE_EVALUATION_SUBMITTED = "history.q.evaluation-submitted";
     public static final String QUEUE_REVIEW_COMPLETED = "history.q.review-completed";
-    public static final String QUEUE_LOGIN_SUCCEEDED = "history.q.login-succeeded";
-    public static final String QUEUE_LOGIN_FAILED = "history.q.login-failed";
 
     @Bean
     Declarables historyQueues() {
@@ -39,8 +37,6 @@ public class RabbitTopology {
         enlazar(declarables, QUEUE_REVIEWERS_ASSIGNED, "review.reviewers-assigned");
         enlazar(declarables, QUEUE_EVALUATION_SUBMITTED, "review.evaluation-submitted");
         enlazar(declarables, QUEUE_REVIEW_COMPLETED, "review.completed");
-        enlazar(declarables, QUEUE_LOGIN_SUCCEEDED, "auth.login-succeeded");
-        enlazar(declarables, QUEUE_LOGIN_FAILED, "auth.login-failed");
         return new Declarables(declarables);
     }
 

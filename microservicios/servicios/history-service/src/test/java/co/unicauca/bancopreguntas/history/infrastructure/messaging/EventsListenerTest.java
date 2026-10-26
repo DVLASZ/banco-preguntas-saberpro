@@ -104,20 +104,6 @@ class EventsListenerTest {
     }
 
     @Test
-    @DisplayName("los inicios de sesión exitosos y fallidos llegan por sus propias colas")
-    void sesiones() {
-        escucha.alIniciarSesion(mensaje("""
-                {"eventId":"e-8","data":{"userId":"autor-1"}}
-                """));
-        escucha.alFallarElInicioDeSesion(mensaje("""
-                {"eventId":"e-9","data":{"userId":"intruso"}}
-                """));
-
-        verify(servicio).alIniciarSesion(org.mockito.ArgumentMatchers.any(), eq("autor-1"), eq(true));
-        verify(servicio).alIniciarSesion(org.mockito.ArgumentMatchers.any(), eq("intruso"), eq(false));
-    }
-
-    @Test
     @DisplayName("un resultado de revisión desconocido se descarta sin reencolar")
     void resultadoDesconocido() {
         assertThatThrownBy(() -> escucha.alCompletarseUnaRevision(mensaje("""
@@ -133,9 +119,6 @@ class EventsListenerTest {
                 .isInstanceOf(AmqpRejectAndDontRequeueException.class);
         assertThatThrownBy(() -> escucha.alEnviarseUnaPregunta(mensaje("""
                 {"eventId":"e-11","data":{"questionId":"Q-1"}}
-                """))).isInstanceOf(AmqpRejectAndDontRequeueException.class);
-        assertThatThrownBy(() -> escucha.alIniciarSesion(mensaje("""
-                {"eventId":"e-12","data":{}}
                 """))).isInstanceOf(AmqpRejectAndDontRequeueException.class);
         verifyNoInteractions(servicio);
     }

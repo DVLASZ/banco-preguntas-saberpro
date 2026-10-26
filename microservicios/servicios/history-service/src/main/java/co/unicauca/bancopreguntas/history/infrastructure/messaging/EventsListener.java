@@ -81,18 +81,6 @@ public class EventsListener {
         historial.alCompletarseUnaRevision(recibido(e), e.requireText("questionId"), e.optionalInt("round", 1), aprobada);
     }
 
-    @RabbitListener(queues = RabbitTopology.QUEUE_LOGIN_SUCCEEDED)
-    public void alIniciarSesion(Message mensaje) {
-        IncomingEvent e = lector.leer(mensaje);
-        historial.alIniciarSesion(recibido(e), e.requireText("userId"), true);
-    }
-
-    @RabbitListener(queues = RabbitTopology.QUEUE_LOGIN_FAILED)
-    public void alFallarElInicioDeSesion(Message mensaje) {
-        IncomingEvent e = lector.leer(mensaje);
-        historial.alIniciarSesion(recibido(e), e.requireText("userId"), false);
-    }
-
     private static EventoRecibido recibido(IncomingEvent e) {
         return new EventoRecibido(e.eventId(), cuando(e.occurredAt()), e.data().toString());
     }

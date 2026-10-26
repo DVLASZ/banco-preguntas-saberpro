@@ -15,14 +15,12 @@ class EntradaDeHistorialTest {
     private static final Instant T = Instant.parse("2026-10-08T10:00:00Z");
 
     @Test
-    @DisplayName("una entrada de pregunta exige la pregunta; una de seguridad no")
+    @DisplayName("una entrada del historial exige la pregunta")
     void preguntaObligatoria() {
         assertThatThrownBy(() -> new EntradaDeHistorial("id", "ev", null, "a", TipoEntrada.PREGUNTA_ENVIADA, "r", null, T, T))
                 .isInstanceOf(IllegalArgumentException.class);
-
-        EntradaDeHistorial login = new EntradaDeHistorial("id", "ev", null, "a", TipoEntrada.INICIO_DE_SESION, "r", null, T, T);
-
-        assertThat(login.preguntaId()).isNull();
+        assertThatThrownBy(() -> new EntradaDeHistorial("id", "ev", " ", "a", TipoEntrada.PREGUNTA_ENVIADA, "r", null, T, T))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -38,27 +36,6 @@ class EntradaDeHistorialTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new EntradaDeHistorial("id", "ev", "q", "a", TipoEntrada.PREGUNTA_ENVIADA, "r", null, null, T))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("solo los inicios de sesión son de seguridad")
-    void seguridad() {
-        for (TipoEntrada tipo : TipoEntrada.values()) {
-            boolean esperado = tipo == TipoEntrada.INICIO_DE_SESION || tipo == TipoEntrada.INICIO_DE_SESION_FALLIDO;
-            assertThat(tipo.esDeSeguridad()).as(tipo.name()).isEqualTo(esperado);
-        }
-    }
-
-    @Test
-    @DisplayName("el filtro de auditoría rechaza un rango invertido y normaliza los textos vacíos")
-    void filtro() {
-        assertThatThrownBy(() -> new FiltroAuditoria(null, null, null, T, T.minusSeconds(1)))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        FiltroAuditoria f = new FiltroAuditoria(null, "  ", " q-1 ", null, null);
-
-        assertThat(f.actorId()).isNull();
-        assertThat(f.preguntaId()).isEqualTo("q-1");
     }
 
     @Test

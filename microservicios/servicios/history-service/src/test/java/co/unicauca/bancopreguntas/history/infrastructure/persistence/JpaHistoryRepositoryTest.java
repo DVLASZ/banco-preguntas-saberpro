@@ -2,7 +2,6 @@ package co.unicauca.bancopreguntas.history.infrastructure.persistence;
 
 import co.unicauca.bancopreguntas.history.EmbeddedPostgresConfig;
 import co.unicauca.bancopreguntas.history.domain.EntradaDeHistorial;
-import co.unicauca.bancopreguntas.history.domain.FiltroAuditoria;
 import co.unicauca.bancopreguntas.history.domain.InfoPregunta;
 import co.unicauca.bancopreguntas.history.domain.Observador;
 import co.unicauca.bancopreguntas.history.domain.TipoEntrada;
@@ -28,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Prueba de los adaptadores de persistencia contra un PostgreSQL real embebido (sin Docker): aplica las
- * migraciones de Flyway, valida el mapeo JPA y ejecuta las consultas de visibilidad y de auditoría.
+ * migraciones de Flyway, valida el mapeo JPA y ejecuta las consultas de visibilidad.
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -84,15 +83,6 @@ class JpaHistoryRepositoryTest {
     }
 
     @Test
-    @DisplayName("una entrada de seguridad se guarda sin pregunta ni actor")
-    void sinPregunta() {
-        EntradaDeHistorial login = guardar(null, null, TipoEntrada.INICIO_DE_SESION, 0);
-
-        assertThat(repositorio.auditoria(new FiltroAuditoria(TipoEntrada.INICIO_DE_SESION, null, null, null, null), 1, 1000)
-                .elementos()).contains(login);
-    }
-
-    @Test
     @DisplayName("no admite dos entradas del mismo evento")
     void eventoUnico() {
         String q = id();
@@ -135,7 +125,6 @@ class JpaHistoryRepositoryTest {
         guardar(propia, null, TipoEntrada.REVISION_COMPLETADA, 2);
         guardar(ajena, "otro-autor", TipoEntrada.PREGUNTA_ENVIADA, 3);
         guardar(ajena, revisor, TipoEntrada.EVALUACION_ENVIADA, 4);
-        guardar(null, autor, TipoEntrada.INICIO_DE_SESION, 5);
 
         var delAutor = repositorio.visiblesPara(new Observador(autor, false, true, false), 1, 100);
         var delRevisor = repositorio.visiblesPara(new Observador(revisor, false, false, true), 1, 100);
@@ -149,18 +138,16 @@ class JpaHistoryRepositoryTest {
     }
 
     @Test
-    @DisplayName("el administrador ve todo, también los inicios de sesión; el revisor y el autor nunca los ven")
+    @DisplayName("el administrador ve las entradas de todas las preguntas, sin importar su autor")
     void administrador() {
-        String q = id();
-        String login = "u-" + id();
-        EntradaDeHistorial sesion = guardar(null, login, TipoEntrada.INICIO_DE_SESION, 0);
-        guardar(q, "a", TipoEntrada.PREGUNTA_ENVIADA, 1);
+        String q1 = id();
+        String q2 = id();
+        EntradaDeHistorial a = guardar(q1, "a", TipoEntrada.PREGUNTA_ENVIADA, 0);
+        EntradaDeHistorial b = guardar(q2, "b", TipoEntrada.EVALUACION_ENVIADA, 1);
 
         var admin = repositorio.visiblesPara(new Observador("admin-1", true, false, false), 1, 1000);
-        var todoslosRoles = repositorio.visiblesPara(new Observador(login, false, true, true), 1, 1000);
 
-        assertThat(admin.elementos()).contains(sesion);
-        assertThat(todoslosRoles.elementos()).doesNotContain(sesion);
+        assertThat(admin.elementos()).contains(a, b);
     }
 
     @Test
@@ -180,26 +167,6 @@ class JpaHistoryRepositoryTest {
         assertThat(primera.totalElementos()).isEqualTo(5);
         assertThat(primera.totalPaginas()).isEqualTo(3);
         assertThat(tercera.elementos()).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("la auditoría combina los filtros de tipo, actor, pregunta y fechas")
-    void auditoria() {
-        String q = id();
-        String actor = "actor-" + id();
-        guardar(q, actor, TipoEntrada.PREGUNTA_ENVIADA, 0);
-        EntradaDeHistorial medio = guardar(q, actor, TipoEntrada.CAMBIO_DE_ESTADO, 100);
-        guardar(q, "otro", TipoEntrada.CAMBIO_DE_ESTADO, 200);
-
-        assertThat(repositorio.auditoria(new FiltroAuditoria(null, actor, null, null, null), 1, 100).elementos()).hasSize(2);
-        assertThat(repositorio.auditoria(new FiltroAuditoria(TipoEntrada.CAMBIO_DE_ESTADO, null, q, null, null), 1, 100)
-                .elementos()).hasSize(2);
-        assertThat(repositorio.auditoria(new FiltroAuditoria(TipoEntrada.CAMBIO_DE_ESTADO, actor, q, null, null), 1, 100)
-                .elementos()).containsExactly(medio);
-        assertThat(repositorio.auditoria(new FiltroAuditoria(null, null, q, T0.plusSeconds(50), T0.plusSeconds(150)), 1, 100)
-                .elementos()).containsExactly(medio);
-        assertThat(repositorio.auditoria(new FiltroAuditoria(null, null, q, null, null), 1, 100).elementos())
-                .extracting(EntradaDeHistorial::ocurridaEn).isSortedAccordingTo(java.util.Comparator.reverseOrder());
     }
 
     @Test

@@ -47,14 +47,6 @@ public final class Resumenes {
         return "La ronda " + ronda + " terminó " + (aprobada ? "aprobada" : "rechazada");
     }
 
-    public static String inicioDeSesion(String usuarioId) {
-        return usuario(usuarioId) + " inició sesión";
-    }
-
-    public static String inicioDeSesionFallido(String usuarioId) {
-        return "Intento fallido de inicio de sesión de " + usuario(usuarioId);
-    }
-
     private static String nombre(String titulo) {
         return titulo == null || titulo.isBlank() ? " la pregunta" : " «" + titulo + "»";
     }

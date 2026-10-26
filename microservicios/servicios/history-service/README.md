@@ -1,9 +1,6 @@
-# history-service · Historial y auditoría
+# history-service · Historial de preguntas
 
-> **Primera distribución (7 servicios).** Este README describe el servicio tal como está publicado hoy. En la nueva distribución, de 14
-> servicios, se divide en `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría); ver el [README de los servicios](../README.md).
-
-Guarda, en orden cronológico, todo lo que le pasó a cada pregunta (envíos, asignaciones, evaluaciones, resultados) y la auditoría del sistema, incluidos los inicios de sesión.
+Arma la línea de tiempo de cada pregunta con lo que ocurre a lo largo de la revisión.
 
 | | |
 |---|---|
@@ -11,28 +8,25 @@ Guarda, en orden cronológico, todo lo que le pasó a cada pregunta (envíos, as
 | **Base de datos** | PostgreSQL `history_db` (puerto 5437 en local), con migraciones de Flyway |
 | **Swagger** | `http://localhost:8080/docs/history-service/v3/api-docs` (a través del gateway) |
 | **Contrato exportado** | [`openapi-history-service.json`](../../../docs/corte-2/api/openapi/openapi-history-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/history-service.postman_collection.json) |
-| **Pruebas** | 63 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| **Pruebas** | 54 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Administración y Trazabilidad** (historia nueva del autor que ve el historial de revisiones y auditoría del administrador). Consume todos los eventos del sistema y los convierte en una línea de tiempo por pregunta; no decide nada, solo registra y responde consultas.
+Es el contexto de **Historial** (RF-29). Escucha los eventos de preguntas y revisión y guarda una entrada por cada uno, para que el autor, los revisores y el administrador vean el recorrido de una pregunta. La auditoría de accesos y acciones es de `audit-service`.
 
 ## Reglas de negocio
 
-- Cada evento se guarda una sola vez (idempotencia por `eventId`).
-- El **administrador** consulta cualquier pregunta y la auditoría completa; el **autor**, el rastro de sus preguntas; el **revisor**,
-  el de las preguntas que revisa.
-- La auditoría admite filtros (tipo de evento, actor, pregunta, desde y hasta) y es solo para el administrador.
-- No tiene Outbox: no publica eventos.
+- Cada evento con pregunta deja una entrada con quién, qué y cuándo.
+- El autor ve el historial de sus preguntas; el revisor, el de las que le asignaron; el administrador, el de todas.
+- «Mi historial» muestra todo lo que el usuario puede ver, lo más reciente primero.
+- Un evento repetido no duplica entradas.
 
 ## API REST
 
-Todas las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el rol; el servicio vuelve a
-comprobarlo con el usuario autenticado que recibe.
+Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el rol; el servicio vuelve a comprobarlo con el usuario autenticado que recibe.
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| `GET` | `/api/history/audit` | Auditoría completa, incluidos los inicios de sesión, con filtros opcionales. Rol ADMIN. |
 | `GET` | `/api/history/me` | Todo lo que puedo ver de mis preguntas, lo más reciente primero. ADMIN, AUTHOR o REVIEWER. |
 | `GET` | `/api/history/questions/{questionId}` | El rastro de una pregunta en orden cronológico. ADMIN, AUTHOR (sus preguntas) o REVIEWER (las que revisa). |
 
@@ -40,15 +34,24 @@ comprobarlo con el usuario autenticado que recibe.
 
 **Publica:** nada; es un consumidor puro.
 
-**Consume** (una cola por tipo de evento): `question.submitted`, `question.reopened`, `question.published`, `question.state-changed`,
-`review.reviewers-assigned`, `review.evaluation-submitted`, `review.completed`, `auth.login-succeeded` y `auth.login-failed`
-(colas `history.q.*`).
+**Consume:**
+
+| Cola | Routing key | Efecto |
+|---|---|---|
+| `history.q.question-submitted` | `question.submitted` | Registra el envío a revisión |
+| `history.q.question-reopened` | `question.reopened` | Registra la reapertura |
+| `history.q.question-published` | `question.published` | Registra la publicación |
+| `history.q.question-state-changed` | `question.state-changed` | Registra el cambio de estado |
+| `history.q.reviewers-assigned` | `review.reviewers-assigned` | Registra la asignación de revisores |
+| `history.q.evaluation-submitted` | `review.evaluation-submitted` | Registra cada evaluación |
+| `history.q.review-completed` | `review.completed` | Registra el resultado de la ronda |
 
 ## Base de datos
 
 | Migración | Contenido |
 |---|---|
-| `V1__esquema_inicial.sql` | Entradas del historial, datos de la pregunta y de sus revisores, y eventos ya procesados |
+| `V1__esquema_inicial.sql` | history_db: historial de las preguntas y auditoría del sistema |
+| `V2__sin_auditoria.sql` | La auditoría (y con ella los inicios de sesión) pasó al audit-service: aquí quedan solo los hechos de las preguntas. Lo que se quita se copia antes a `history_entry_auditoria` |
 
 ## Estructura
 
@@ -57,10 +60,10 @@ src/main/java/co/unicauca/bancopreguntas/history/
 ├── api/              Controlador REST, DTO y manejo de errores
 ├── application/      Casos de uso y puertos (interfaces que el dominio necesita)
 ├── domain/           Reglas de negocio y eventos; no depende de Spring ni de la base de datos
-└── infrastructure/   Adaptadores: JPA, RabbitMQ
+└── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Adapter y Observer.
+**Patrones de diseño que usa:** Adapter y Observer. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 
@@ -82,8 +85,7 @@ src/main/java/co/unicauca/bancopreguntas/history/
 ```bash
 # desde microservicios/
 ./mvnw -pl servicios/history-service -am test          # pruebas del servicio
-docker compose up -d --build history-service    # el servicio con sus dependencias (base, RabbitMQ, Eureka, Keycloak)
+docker compose up -d --build history-service    # el servicio con sus dependencias
 ```
 
-La pila completa se levanta como se explica en el [README de microservicios](../../README.md). Para recorrer el
-servicio a mano, importar su colección de Postman y el entorno `SaberPro_Local`.
+La pila completa se levanta como se explica en el [README de microservicios](../../README.md). Para recorrer el servicio a mano, importar su colección de Postman y el entorno `SaberPro_Local`.

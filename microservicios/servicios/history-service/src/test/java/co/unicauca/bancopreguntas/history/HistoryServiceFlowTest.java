@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Prueba de extremo a extremo del servicio: la aplicación Spring completa sobre un PostgreSQL real
  * embebido y el broker simulado. Reproduce la secuencia de eventos de una pregunta y comprueba qué ve cada
- * rol y que la auditoría reúne también los inicios de sesión.
+ * rol.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -141,24 +141,6 @@ class HistoryServiceFlowTest {
     }
 
     @Test
-    @DisplayName("la auditoría del administrador incluye los inicios de sesión y se puede filtrar")
-    void auditoria() {
-        String usuario = "autor-" + uuid();
-        escucha.alIniciarSesion(evento("auth.login-succeeded", 10, "{\"userId\":\"%s\",\"ip\":\"10.0.0.1\"}".formatted(usuario)));
-        escucha.alFallarElInicioDeSesion(evento("auth.login-failed", 11, "{\"userId\":\"%s\"}".formatted(usuario)));
-
-        JsonNode todos = consultar("/api/history/audit?actorId=" + usuario, "admin-1").getBody();
-        JsonNode fallidos = consultar("/api/history/audit?actorId=" + usuario + "&tipo=INICIO_DE_SESION_FALLIDO", "admin-1").getBody();
-
-        assertThat(todos.get("contenido").findValuesAsText("tipo"))
-                .containsExactly("INICIO_DE_SESION_FALLIDO", "INICIO_DE_SESION"); // lo más reciente primero
-        assertThat(fallidos.get("contenido")).hasSize(1);
-        assertThat(todos.get("contenido").get(1).get("detalles").get("ip").asText()).isEqualTo("10.0.0.1");
-        assertThat(consultar("/api/history/audit", usuario).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(consultar("/api/history/me?size=100", usuario).getBody().get("contenido")).isEmpty(); // el login no es suyo para verlo
-    }
-
-    @Test
     @DisplayName("un evento repetido no duplica la entrada")
     void idempotente() {
         String q = uuid();
@@ -177,7 +159,8 @@ class HistoryServiceFlowTest {
         ResponseEntity<JsonNode> docs = http.getForEntity("/v3/api-docs", JsonNode.class);
 
         assertThat(docs.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(docs.getBody().get("paths").has("/api/history/audit")).isTrue();
+        assertThat(docs.getBody().get("paths").has("/api/history/questions/{questionId}")).isTrue();
+        assertThat(docs.getBody().get("paths").has("/api/history/audit")).isFalse();
         assertThat(docs.getBody().get("info").get("title").asText()).isEqualTo("history-service");
     }
 }

@@ -2,7 +2,6 @@ package co.unicauca.bancopreguntas.history.application;
 
 import co.unicauca.bancopreguntas.history.domain.EntradaDeHistorial;
 import co.unicauca.bancopreguntas.history.domain.EventoRecibido;
-import co.unicauca.bancopreguntas.history.domain.FiltroAuditoria;
 import co.unicauca.bancopreguntas.history.domain.HistorialNoEncontradoException;
 import co.unicauca.bancopreguntas.history.domain.Observador;
 import co.unicauca.bancopreguntas.history.domain.TipoEntrada;
@@ -89,16 +88,12 @@ class HistoryApplicationServiceTest {
         recorrido(q);
         servicio.alReabrirseUnaPregunta(evento(7), q, "autor-1", 2);
         servicio.alPublicarseUnaPregunta(evento(8), q, "admin-1");
-        servicio.alIniciarSesion(evento(9), "autor-1", true);
-        servicio.alIniciarSesion(evento(10), "intruso", false);
 
         assertThat(repositorio.todas()).extracting(EntradaDeHistorial::tipo).containsExactly(
                 TipoEntrada.PREGUNTA_ENVIADA, TipoEntrada.CAMBIO_DE_ESTADO, TipoEntrada.REVISORES_ASIGNADOS,
                 TipoEntrada.EVALUACION_ENVIADA, TipoEntrada.REVISION_COMPLETADA, TipoEntrada.EVALUACION_TARDIA,
-                TipoEntrada.PREGUNTA_REABIERTA, TipoEntrada.PREGUNTA_PUBLICADA, TipoEntrada.INICIO_DE_SESION,
-                TipoEntrada.INICIO_DE_SESION_FALLIDO);
-        assertThat(repositorio.todas().get(8).preguntaId()).isNull();
-        assertThat(repositorio.todas().get(9).resumen()).contains("fallido").contains("intruso");
+                TipoEntrada.PREGUNTA_REABIERTA, TipoEntrada.PREGUNTA_PUBLICADA);
+        assertThat(repositorio.todas()).allSatisfy(e -> assertThat(e.preguntaId()).isNotNull());
     }
 
     @Test
@@ -175,9 +170,8 @@ class HistoryApplicationServiceTest {
     void visiblesPara() {
         recorrido("q-1");
         servicio.alEnviarseUnaPregunta(evento(40), "q-2", "autor-2", "Ajena", 1);
-        servicio.alIniciarSesion(evento(41), "autor-1", true);
 
-        assertThat(servicio.visiblesPara(ADMIN, 1, 50).totalElementos()).isEqualTo(8);
+        assertThat(servicio.visiblesPara(ADMIN, 1, 50).totalElementos()).isEqualTo(7);
         assertThat(servicio.visiblesPara(AUTOR, 1, 50).elementos())
                 .extracting(EntradaDeHistorial::preguntaId).containsOnly("q-1").hasSize(4);
         assertThat(servicio.visiblesPara(REVISOR, 1, 50).elementos()).hasSize(6);
@@ -197,29 +191,11 @@ class HistoryApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("la auditoría filtra por tipo, actor, pregunta y rango de fechas")
-    void auditoria() {
-        recorrido("q-1");
-        servicio.alIniciarSesion(evento(50), "autor-1", true);
-        servicio.alIniciarSesion(evento(51), "intruso", false);
-
-        assertThat(servicio.auditoria(FiltroAuditoria.sinFiltros(), 1, 50).totalElementos()).isEqualTo(8);
-        assertThat(servicio.auditoria(new FiltroAuditoria(TipoEntrada.INICIO_DE_SESION_FALLIDO, null, null, null, null),
-                1, 50).elementos()).singleElement().satisfies(e -> assertThat(e.actorId()).isEqualTo("intruso"));
-        assertThat(servicio.auditoria(new FiltroAuditoria(null, "rev-1", null, null, null), 1, 50).totalElementos())
-                .isEqualTo(1);
-        assertThat(servicio.auditoria(new FiltroAuditoria(null, null, "q-1", null, null), 1, 50).totalElementos())
-                .isEqualTo(6);
-        assertThat(servicio.auditoria(new FiltroAuditoria(null, null, null, T0.plusSeconds(50), T0.plusSeconds(50)), 1, 50)
-                .elementos()).singleElement().satisfies(e -> assertThat(e.tipo()).isEqualTo(TipoEntrada.INICIO_DE_SESION));
-    }
-
-    @Test
-    @DisplayName("la auditoría se devuelve de lo más reciente a lo más antiguo")
-    void auditoriaOrdenada() {
+    @DisplayName("lo visible se devuelve de lo más reciente a lo más antiguo")
+    void visiblesOrdenados() {
         recorrido("q-1");
 
-        var pagina = servicio.auditoria(FiltroAuditoria.sinFiltros(), 1, 50);
+        var pagina = servicio.visiblesPara(ADMIN, 1, 50);
 
         assertThat(pagina.elementos()).extracting(EntradaDeHistorial::ocurridaEn).isSortedAccordingTo(java.util.Comparator.reverseOrder());
     }
@@ -229,12 +205,11 @@ class HistoryApplicationServiceTest {
     void paginacion() {
         recorrido("q-1");
 
-        var pagina = servicio.auditoria(FiltroAuditoria.sinFiltros(), 99, 4);
+        var pagina = servicio.visiblesPara(ADMIN, 99, 4);
 
         assertThat(pagina.numero()).isEqualTo(2);
         assertThat(pagina.elementos()).hasSize(2);
-        assertThatThrownBy(() -> servicio.auditoria(FiltroAuditoria.sinFiltros(), 0, 10))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> servicio.visiblesPara(ADMIN, 0, 10)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> servicio.visiblesPara(ADMIN, 1, 0)).isInstanceOf(IllegalArgumentException.class);
     }
 

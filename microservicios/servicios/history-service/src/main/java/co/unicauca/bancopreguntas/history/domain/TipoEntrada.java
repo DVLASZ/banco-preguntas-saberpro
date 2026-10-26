@@ -13,9 +13,7 @@ public enum TipoEntrada {
     REVISORES_ASIGNADOS(false),
     EVALUACION_ENVIADA(false),
     EVALUACION_TARDIA(true),
-    REVISION_COMPLETADA(true),
-    INICIO_DE_SESION(false),
-    INICIO_DE_SESION_FALLIDO(false);
+    REVISION_COMPLETADA(true);
 
     private final boolean visibleParaElAutor;
 
@@ -25,10 +23,5 @@ public enum TipoEntrada {
 
     public boolean visibleParaElAutor() {
         return visibleParaElAutor;
-    }
-
-    /** Si la entrada es de la seguridad del sistema y no de una pregunta (solo la ve el administrador). */
-    public boolean esDeSeguridad() {
-        return this == INICIO_DE_SESION || this == INICIO_DE_SESION_FALLIDO;
     }
 }

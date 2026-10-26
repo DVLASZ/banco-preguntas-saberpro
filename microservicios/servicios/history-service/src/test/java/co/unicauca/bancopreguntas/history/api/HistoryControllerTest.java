@@ -2,7 +2,6 @@ package co.unicauca.bancopreguntas.history.api;
 
 import co.unicauca.bancopreguntas.history.application.HistoryApplicationService;
 import co.unicauca.bancopreguntas.history.domain.EntradaDeHistorial;
-import co.unicauca.bancopreguntas.history.domain.FiltroAuditoria;
 import co.unicauca.bancopreguntas.history.domain.HistorialNoEncontradoException;
 import co.unicauca.bancopreguntas.history.domain.Observador;
 import co.unicauca.bancopreguntas.history.domain.Pagina;
@@ -110,34 +109,8 @@ class HistoryControllerTest {
     void paginacion() throws Exception {
         mvc.perform(como(get("/api/history/me?page=-1"), "autor-1", "AUTHOR")).andExpect(status().isBadRequest());
         mvc.perform(como(get("/api/history/me?size=0"), "autor-1", "AUTHOR")).andExpect(status().isBadRequest());
-        mvc.perform(como(get("/api/history/audit?size=101"), "admin-1", "ADMIN")).andExpect(status().isBadRequest());
+        mvc.perform(como(get("/api/history/me?size=101"), "autor-1", "AUTHOR")).andExpect(status().isBadRequest());
         verifyNoInteractions(servicio);
     }
 
-    @Test
-    @DisplayName("GET /audit aplica los filtros y es solo del administrador")
-    void auditoria() throws Exception {
-        FiltroAuditoria filtro = new FiltroAuditoria(TipoEntrada.INICIO_DE_SESION_FALLIDO, "intruso", null,
-                Instant.parse("2026-10-08T00:00:00Z"), Instant.parse("2026-10-09T00:00:00Z"));
-        when(servicio.auditoria(filtro, 2, 5)).thenReturn(new Pagina<>(List.of(entrada()), 2, 5, 6));
-
-        mvc.perform(como(get("/api/history/audit?tipo=INICIO_DE_SESION_FALLIDO&actorId=intruso"
-                        + "&desde=2026-10-08T00:00:00Z&hasta=2026-10-09T00:00:00Z&page=1&size=5"), "admin-1", "ADMIN"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.contenido[0].id").value("h-1"))
-                .andExpect(jsonPath("$.pagina").value(1));
-
-        mvc.perform(como(get("/api/history/audit"), "autor-1", "AUTHOR")).andExpect(status().isForbidden());
-        mvc.perform(como(get("/api/history/audit"), "rev-1", "REVIEWER")).andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("un tipo o una fecha inválidos responden 400; un rango invertido también")
-    void filtrosInvalidos() throws Exception {
-        mvc.perform(como(get("/api/history/audit?tipo=NADA"), "admin-1", "ADMIN")).andExpect(status().isBadRequest());
-        mvc.perform(como(get("/api/history/audit?desde=ayer"), "admin-1", "ADMIN")).andExpect(status().isBadRequest());
-        mvc.perform(como(get("/api/history/audit?desde=2026-10-09T00:00:00Z&hasta=2026-10-08T00:00:00Z"), "admin-1", "ADMIN"))
-                .andExpect(status().isBadRequest());
-        verifyNoInteractions(servicio);
-    }
 }

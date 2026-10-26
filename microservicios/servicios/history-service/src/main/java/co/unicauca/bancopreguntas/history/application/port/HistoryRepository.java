@@ -1,7 +1,6 @@
 package co.unicauca.bancopreguntas.history.application.port;
 
 import co.unicauca.bancopreguntas.history.domain.EntradaDeHistorial;
-import co.unicauca.bancopreguntas.history.domain.FiltroAuditoria;
 import co.unicauca.bancopreguntas.history.domain.Observador;
 import co.unicauca.bancopreguntas.history.domain.Pagina;
 import co.unicauca.bancopreguntas.history.domain.TipoEntrada;
@@ -23,7 +22,4 @@ public interface HistoryRepository {
 
     /** Todo lo que el observador puede ver de todas las preguntas, lo más reciente primero. */
     Pagina<EntradaDeHistorial> visiblesPara(Observador observador, int pagina, int tamano);
-
-    /** Toda la actividad registrada (incluida la de seguridad), con filtros opcionales, lo más reciente primero. */
-    Pagina<EntradaDeHistorial> auditoria(FiltroAuditoria filtro, int pagina, int tamano);
 }

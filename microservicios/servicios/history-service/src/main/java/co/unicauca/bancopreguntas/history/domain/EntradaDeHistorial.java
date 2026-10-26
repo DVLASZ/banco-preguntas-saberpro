@@ -6,7 +6,7 @@ import java.time.Instant;
  * Un hecho del historial: quién hizo qué y cuándo. Nunca se modifica ni se borra.
  *
  * @param eventId    el evento del que viene; evita registrar dos veces el mismo hecho
- * @param preguntaId la pregunta a la que se refiere, o nulo si es de seguridad (inicios de sesión)
+ * @param preguntaId la pregunta a la que se refiere
  * @param actorId    quien lo hizo, o nulo si fue el sistema
  * @param detalles   el cuerpo del evento tal como llegó, en JSON
  */
@@ -26,8 +26,8 @@ public record EntradaDeHistorial(String id, String eventId, String preguntaId, S
         if (ocurridaEn == null || registradaEn == null) {
             throw new IllegalArgumentException("Las fechas son obligatorias");
         }
-        if (preguntaId == null && !tipo.esDeSeguridad()) {
-            throw new IllegalArgumentException("Una entrada de pregunta debe indicar la pregunta");
+        if (preguntaId == null || preguntaId.isBlank()) {
+            throw new IllegalArgumentException("Una entrada del historial debe indicar la pregunta");
         }
     }
 }

@@ -3,7 +3,6 @@ package co.unicauca.bancopreguntas.history.application;
 import co.unicauca.bancopreguntas.history.application.port.HistoryRepository;
 import co.unicauca.bancopreguntas.history.application.port.QuestionRegistry;
 import co.unicauca.bancopreguntas.history.domain.EntradaDeHistorial;
-import co.unicauca.bancopreguntas.history.domain.FiltroAuditoria;
 import co.unicauca.bancopreguntas.history.domain.Observador;
 import co.unicauca.bancopreguntas.history.domain.Pagina;
 import co.unicauca.bancopreguntas.history.domain.TipoEntrada;
@@ -50,17 +49,6 @@ class InMemoryHistoryRepository implements HistoryRepository {
                         .map(i -> i.autorId().equals(o.usuarioId())).orElse(false))
                 || (o.revisor() && preguntas.esRevisor(e.preguntaId(), o.usuarioId()))));
         return paginar(entradas.stream().filter(visible)
-                .sorted(Comparator.comparing(EntradaDeHistorial::ocurridaEn).reversed()).toList(), pagina, tamano);
-    }
-
-    @Override
-    public Pagina<EntradaDeHistorial> auditoria(FiltroAuditoria f, int pagina, int tamano) {
-        return paginar(entradas.stream()
-                .filter(e -> f.tipo() == null || e.tipo() == f.tipo())
-                .filter(e -> f.actorId() == null || f.actorId().equals(e.actorId()))
-                .filter(e -> f.preguntaId() == null || f.preguntaId().equals(e.preguntaId()))
-                .filter(e -> f.desde() == null || !e.ocurridaEn().isBefore(f.desde()))
-                .filter(e -> f.hasta() == null || !e.ocurridaEn().isAfter(f.hasta()))
                 .sorted(Comparator.comparing(EntradaDeHistorial::ocurridaEn).reversed()).toList(), pagina, tamano);
     }
 
