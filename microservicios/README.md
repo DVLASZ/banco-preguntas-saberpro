@@ -3,20 +3,21 @@
 Segunda iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
 corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../docs/corte-2/README.md).
 
-## Estado: 8 servicios publicados, 14 en implementación
+## Estado: 10 servicios publicados, 14 en implementación
 
 Esta documentación describe la arquitectura de **14 microservicios** que se está
-implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**, más el `email-service` (el correo ya
-salió de `notification-service`, que publica `notification.created`); la nueva
+implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**, más tres servicios de la nueva distribución: `email-service` (el correo ya
+salió de `notification-service`, que publica `notification.created`), `audit-service` (la auditoría salió de `history-service`) y
+`validation-service` (la validación estructural, sin estado); la nueva
 distribución divide varios de ellos para que cada uno tenga una sola responsabilidad (ver la tabla del [README de los servicios](servicios/README.md)). Ya está implementada y verificada de punta a punta en local y el código se irá publicando por
 partes; mientras tanto, lo que no está en el repositorio aparece en esta documentación como texto, sin enlace.
 
 | Servicio publicado hoy (primera distribución, 7) | En la nueva distribución (14) |
 |---|---|
-| `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad) y `lifecycle-service` (estados y su historial) |
+| `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad, ya publicado) y `lifecycle-service` (estados y su historial) |
 | `review-service` | `assignment-service` (asignación de revisores) y `evaluation-service` (evaluación y unanimidad) |
 | `notification-service` | `notification-service` (bandeja) y `email-service` (correo, ya publicado) |
-| `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión) |
+| `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión, ya publicado) |
 | `user-service` | `user-service` |
 | `simulation-service` | `catalog-service` (preguntas publicadas y selección) y `simulation-service` (simulacros) |
 | `tracking-service` | `statistics-service` (historial y estadísticas) y `report-service` (reporte del grupo) |
@@ -35,7 +36,9 @@ microservicios/
 │   ├── review-service/           Asignación de revisores, rondas, unanimidad y reasignación automática
 │   ├── notification-service/     Bandeja de notificaciones
 │   ├── email-service/            Correo simulado de cada notificación
-│   ├── history-service/          Historial por pregunta y auditoría de accesos
+│   ├── history-service/          Historial por pregunta
+│   ├── audit-service/            Auditoría de acciones e inicios de sesión
+│   ├── validation-service/       Validación estructural de preguntas (sin estado)
 │   ├── simulation-service/       Catálogo de preguntas publicadas y simulacros con tiempo y calificación
 │   ├── tracking-service/         Historial de simulacros, estadísticas, fortalezas y debilidades y reporte del grupo
 │   └── user-service/             Usuarios de Keycloak y eventos de acceso
@@ -56,7 +59,9 @@ Pruebas de lo publicado hoy (`./mvnw test`, 5 min 55 s; no necesitan Docker):
 | [review-service](servicios/review-service/) | 102 |
 | [notification-service](servicios/notification-service/) | 91 |
 | [email-service](servicios/email-service/) | 38 |
-| [history-service](servicios/history-service/) | 63 |
+| [history-service](servicios/history-service/) | 54 |
+| [audit-service](servicios/audit-service/) | 38 |
+| [validation-service](servicios/validation-service/) | 53 |
 | [simulation-service](servicios/simulation-service/) | 88 |
 | [tracking-service](servicios/tracking-service/) | 61 |
 | [user-service](servicios/user-service/) | 62 |

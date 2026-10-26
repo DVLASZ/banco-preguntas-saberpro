@@ -55,17 +55,17 @@ El diseño completo está en la [documentación del segundo corte](docs/corte-2/
 ## Estado del código publicado
 
 El repositorio contiene hoy la **primera distribución, de 7 servicios** (`question`, `review`, `notification`, `history`, `user`,
-`simulation` y `tracking`) más el `email-service` (el correo ya salió de `notification`), la biblioteca común, el gateway, Eureka, Keycloak, el frontend con las pantallas de autor, revisor y
+`simulation` y `tracking`) más `email-service`, `audit-service` y `validation-service` (ya salieron de `notification`, `history` y `question`), la biblioteca común, el gateway, Eureka, Keycloak, el frontend con las pantallas de autor, revisor y
 administrador y el Docker Compose. La **nueva distribución, de 14 servicios**, ya está implementada y verificada en local (1040
 pruebas de backend, 183 del frontend, recorrido funcional, Postman y k6); su código se irá publicando por partes. Cada servicio
 actual se divide así:
 
 | Servicio publicado hoy (primera distribución, 7) | En la nueva distribución (14) |
 |---|---|
-| `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad) y `lifecycle-service` (estados y su historial) |
+| `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad, ya publicado) y `lifecycle-service` (estados y su historial) |
 | `review-service` | `assignment-service` (asignación de revisores) y `evaluation-service` (evaluación y unanimidad) |
 | `notification-service` | `notification-service` (bandeja) y `email-service` (correo, ya publicado) |
-| `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión) |
+| `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión, ya publicado) |
 | `user-service` | `user-service` |
 | `simulation-service` | `catalog-service` (preguntas publicadas y selección) y `simulation-service` (simulacros) |
 | `tracking-service` | `statistics-service` (historial y estadísticas) y `report-service` (reporte del grupo) |

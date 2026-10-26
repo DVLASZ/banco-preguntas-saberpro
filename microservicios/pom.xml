@@ -28,6 +28,7 @@
         <module>servicios/user-service</module>
         <module>servicios/simulation-service</module>
         <module>servicios/tracking-service</module>
+        <module>servicios/validation-service</module>
         <module>infraestructura/discovery-server</module>
         <module>infraestructura/api-gateway</module>
         <module>servicios/history-service</module>

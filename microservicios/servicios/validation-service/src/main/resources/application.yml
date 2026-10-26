@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: validation-service
+  autoconfigure:
+    # Servicio sin estado: no usa broker ni base de datos.
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+      - co.unicauca.bancopreguntas.platform.config.PlatformEventsAutoConfiguration
+
+server:
+  # Respeta X-Forwarded-* del gateway: Swagger muestra la dirección pública y no la de la réplica.
+  forward-headers-strategy: framework
+  port: ${VALIDATION_SERVICE_PORT:8095}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+    healthcheck:
+      enabled: true
+  instance:
+    # Las réplicas se anuncian por IP: así el gateway las alcanza dentro de la red de Docker.
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
