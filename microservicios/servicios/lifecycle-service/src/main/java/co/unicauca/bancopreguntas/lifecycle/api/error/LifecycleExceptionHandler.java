@@ -7,6 +7,7 @@ import co.unicauca.bancopreguntas.platform.api.ApiError;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,6 +30,12 @@ public class LifecycleExceptionHandler {
     @ExceptionHandler(OperacionNoPermitidaException.class)
     ResponseEntity<ApiError> alNoPermitirseLaOperacion(OperacionNoPermitidaException e) {
         return respuesta(HttpStatus.CONFLICT, "OPERACION_NO_PERMITIDA", e);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    ResponseEntity<ApiError> alChocarDosCambios(OptimisticLockingFailureException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.de("CAMBIO_CONCURRENTE",
+                "Otro cambio modificó la pregunta al mismo tiempo; vuelve a intentarlo."));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

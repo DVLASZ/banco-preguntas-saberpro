@@ -59,6 +59,7 @@ Las rutas **no pasan por el gateway**: las llaman otros servicios con la identid
 | Migración | Contenido |
 |---|---|
 | `V1__esquema_inicial.sql` | lifecycle_db: estado de cada pregunta, historial de cambios, eventos procesados y bandeja de salida |
+| `V2__bloqueo_optimista.sql` | Columna `lock_version`: dos cambios simultáneos sobre la misma pregunta ya no se pisan (el segundo recibe 409) |
 
 ## Estructura
 

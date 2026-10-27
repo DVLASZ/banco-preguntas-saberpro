@@ -152,6 +152,20 @@ obligaría a borrarlas). Los mensajes malformados (JSON inválido, campos faltan
 Todas se ejecutan sin Docker (PostgreSQL embebido y RabbitMQ simulado). La pila se verificó en Docker el 26 de octubre de 2026: el
 recorrido funcional pasó con 71 comprobaciones y 0 fallos (ver [plan de pruebas](anexos/plan-de-pruebas.md)).
 
+## Limitaciones conocidas
+
+Salieron de las revisiones de código y de base de datos. Se corrigieron dos (bloqueo optimista en `lifecycle-service` y tiempos de espera
+en las llamadas de `question-service` a validación y a ciclo de vida); las demás quedan anotadas para el siguiente corte:
+
+| Limitación | Detalle |
+|---|---|
+| Outbox sin confirmación del broker | `OutboxRelay` marca como enviado lo que RabbitMQ aceptó, pero no espera la confirmación del publicador ni usa `mandatory`. La entrega sigue siendo al menos una vez en el caso normal; un fallo entre el envío y la confirmación podría perder un evento |
+| Orden entre colas | Los eventos de una misma pregunta viajan por colas distintas; el orden solo se garantiza con el número de secuencia de `question.state-changed` |
+| Modo de seguridad por defecto | `bp-platform` arranca en modo `headers` si no se configura nada; el `docker-compose.yml` lo deja en `jwt`. Un despliegue real debe fijar `SECURITY_MODE` |
+| Limpieza de `processed_event` | La tabla de eventos ya procesados crece sin límite; falta una tarea que borre los antiguos |
+| Migración de `question` (V5) | Elimina las tablas de historial, eventos procesados y Outbox porque el ciclo de vida pasó a otro servicio. Sirve para una base nueva; con datos viejos habría que migrarlos antes |
+| Llamadas REST dentro de una transacción | `question-service` llama a validación y ciclo de vida durante el caso de uso; los tiempos de espera acotan el costo, pero la transacción sigue abierta mientras esperan |
+
 ## Qué queda para el corte 3
 
 Rediseño con DDD en un servicio (agregados, objetos de valor y servicios de dominio), el documento final y la demostración.

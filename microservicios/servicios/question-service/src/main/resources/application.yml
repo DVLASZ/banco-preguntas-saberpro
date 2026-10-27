@@ -1,6 +1,11 @@
 spring:
   application:
     name: question-service
+  http:
+    client:
+      # las llamadas a validation y lifecycle no se quedan esperando para siempre
+      connect-timeout: 2s
+      read-timeout: 5s
   datasource:
     url: ${QUESTION_DB_URL:jdbc:postgresql://localhost:5434/question_db}
     username: ${QUESTION_DB_USER:question}

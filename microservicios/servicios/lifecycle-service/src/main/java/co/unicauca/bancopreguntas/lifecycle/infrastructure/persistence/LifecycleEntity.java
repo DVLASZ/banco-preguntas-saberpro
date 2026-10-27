@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.time.Instant;
 
@@ -30,6 +31,11 @@ class LifecycleEntity {
 
     @Column(name = "updated_at", nullable = false)
     Instant actualizadoEn;
+
+    /** Bloqueo optimista: si dos cambios llegan a la vez sobre la misma pregunta, el segundo falla en vez de pisar al primero. */
+    @Version
+    @Column(name = "lock_version", nullable = false)
+    Long lockVersion;
 
     protected LifecycleEntity() {
         // requerido por JPA
