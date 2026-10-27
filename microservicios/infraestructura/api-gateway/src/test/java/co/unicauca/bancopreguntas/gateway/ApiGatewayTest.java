@@ -101,12 +101,8 @@ class ApiGatewayTest {
     @DynamicPropertySource
     static void rutas(DynamicPropertyRegistry registro) {
         String destino = "http://127.0.0.1:" + iniciarServicio().getAddress().getPort();
-        registro.add("gateway.uris.question-service", () -> destino);
-        registro.add("gateway.uris.review-service", () -> destino);
-        registro.add("gateway.uris.notification-service", () -> destino);
-        registro.add("gateway.uris.history-service", () -> destino);
-        registro.add("gateway.uris.simulation-service", () -> destino);
-        registro.add("gateway.uris.tracking-service", () -> destino);
+        GatewayProperties.SERVICIOS.keySet().forEach(servicio -> registro.add("gateway.uris." + servicio, () -> destino));
+        GatewayProperties.INTERNOS.forEach(servicio -> registro.add("gateway.uris." + servicio, () -> destino));
         registro.add("gateway.uris.user-service", () -> "http://127.0.0.1:1"); // nadie escucha: el servicio está caído
     }
 
@@ -227,8 +223,8 @@ class ApiGatewayTest {
         cliente.post().uri("/api/reviews/q-1/assignments").header("Authorization", autor).exchange().expectStatus().isForbidden();
         cliente.post().uri("/api/questions/q-1/publish").header("Authorization", autor).exchange().expectStatus().isForbidden();
         cliente.get().uri("/api/questions/all").header("Authorization", autor).exchange().expectStatus().isForbidden();
-        cliente.get().uri("/api/history/audit").header("Authorization", autor).exchange().expectStatus().isForbidden();
-        cliente.get().uri("/api/notifications/emails").header("Authorization", autor).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/audit").header("Authorization", autor).exchange().expectStatus().isForbidden();
+        cliente.get().uri("/api/emails").header("Authorization", autor).exchange().expectStatus().isForbidden();
         cliente.get().uri("/api/users").header("Authorization", autor).exchange().expectStatus().isForbidden();
         assertThat(RECIBIDAS).isEmpty();
     }
@@ -241,7 +237,7 @@ class ApiGatewayTest {
         cliente.get().uri("/api/reviews/pending-assignment").header("Authorization", admin).exchange().expectStatus().isOk();
         cliente.post().uri("/api/reviews/q-1/assignments").header("Authorization", admin).exchange().expectStatus().isOk();
         cliente.post().uri("/api/questions/q-1/publish").header("Authorization", admin).exchange().expectStatus().isOk();
-        cliente.get().uri("/api/history/audit").header("Authorization", admin).exchange().expectStatus().isOk();
+        cliente.get().uri("/api/audit").header("Authorization", admin).exchange().expectStatus().isOk();
     }
 
     @Test
@@ -331,7 +327,7 @@ class ApiGatewayTest {
     void publico() {
         cliente.get().uri("/actuator/health").exchange().expectStatus().isOk();
         cliente.get().uri("/docs/question-service/v3/api-docs").exchange().expectStatus().isOk();
-        cliente.get().uri("/docs/review-service/v3/api-docs").exchange().expectStatus().isOk();
+        cliente.get().uri("/docs/evaluation-service/v3/api-docs").exchange().expectStatus().isOk();
 
         assertThat(RECIBIDAS).extracting(Recibida::camino).containsOnly("/v3/api-docs");
     }
@@ -436,7 +432,7 @@ class ApiGatewayTest {
     @Test
     @DisplayName("el mensaje de respaldo es público y no depende de ningún servicio")
     void respaldo() {
-        cliente.method(HttpMethod.GET).uri("/fallback/review-service").exchange()
+        cliente.method(HttpMethod.GET).uri("/fallback/evaluation-service").exchange()
                 .expectStatus().isEqualTo(503)
                 .expectBody().jsonPath("$.codigo").isEqualTo("SERVICIO_NO_DISPONIBLE");
     }

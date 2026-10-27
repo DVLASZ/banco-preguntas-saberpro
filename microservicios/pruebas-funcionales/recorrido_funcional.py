@@ -172,7 +172,7 @@ def main():
     chequeo('HU-05 el autor recibe el resultado', esperar(lambda: 'REVISION_APROBADA' in tipos('autor1')))
     chequeo('HU-05 el administrador y los revisores reciben el resultado de la revisión',
             esperar(lambda: 'RESULTADO_DE_REVISION' in tipos('admin') and 'RESULTADO_DE_REVISION' in tipos('revisor1')))
-    estado, correos = http('GET', API + '/notifications/emails', t['admin'])
+    estado, correos = http('GET', API + '/emails', t['admin'])
     chequeo('El administrador consulta los correos (simulados) enviados', estado == 200 and len(json.dumps(correos)) > 50, (estado, str(correos)[:120]))
 
     estado, j = http('POST', API + '/questions/%s/publish' % q1id, t['admin'])
@@ -280,16 +280,17 @@ def main():
     # Historial y auditoría
     chequeo('Historial de la pregunta visible para su autor', esperar(
         lambda: (lambda r: r[0] == 200 and len(json.dumps(r[1])) > 50)(http('GET', API + '/history/questions/%s' % q1id, t['autor1']))))
-    estado, auditoria = http('GET', API + '/history/audit', t['admin'])
+    estado, auditoria = http('GET', API + '/audit', t['admin'])
     chequeo('Auditoría de accesos (administrador)', estado == 200, (estado, str(auditoria)[:120]))
-    estado, _ = http('GET', API + '/history/audit', t['autor1'])
+    estado, _ = http('GET', API + '/audit', t['autor1'])
     chequeo('La auditoría no es visible para un autor (403)', estado == 403, estado)
 
     # Swagger
     for nombre, url in [('Swagger UI del gateway', BASE + '/swagger-ui.html'),
                         ('OpenAPI de question-service', BASE + '/docs/question-service/v3/api-docs'),
                         ('OpenAPI de simulation-service', BASE + '/docs/simulation-service/v3/api-docs'),
-                        ('OpenAPI de tracking-service', BASE + '/docs/tracking-service/v3/api-docs')]:
+                        ('OpenAPI de tracking-service', BASE + '/docs/tracking-service/v3/api-docs'),
+                        ('OpenAPI de lifecycle-service (interno)', BASE + '/docs/lifecycle-service/v3/api-docs')]:
         try:
             chequeo(nombre, urllib.request.urlopen(url, timeout=15).status == 200)
         except urllib.error.HTTPError as e:

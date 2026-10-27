@@ -13,7 +13,7 @@ import {
 } from '../models';
 import { parametros } from './http-util';
 
-/** Revisión por pares (servicio review-service, a través del gateway). */
+/** Revisión por pares (servicios assignment-service y evaluation-service, a través del gateway). */
 @Injectable({ providedIn: 'root' })
 export class ReviewsService {
   private readonly http = inject(HttpClient);

@@ -5,11 +5,12 @@ import { APP_CONFIG } from '../config';
 import { EntradaHistorial, FiltroAuditoria, Pagina } from '../models';
 import { parametros } from './http-util';
 
-/** Historial y auditoría (servicio history-service). Cada rol recibe solo la parte que le corresponde. */
+/** Historial (history-service) y auditoría (audit-service). Cada rol recibe solo la parte que le corresponde. */
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${inject(APP_CONFIG).apiUrl}/api/history`;
+  private readonly apiUrl = inject(APP_CONFIG).apiUrl;
+  private readonly base = `${this.apiUrl}/api/history`;
 
   deUnaPregunta(preguntaId: string): Observable<EntradaHistorial[]> {
     return this.http.get<EntradaHistorial[]>(`${this.base}/questions/${preguntaId}`);
@@ -22,6 +23,6 @@ export class HistoryService {
 
   /** Auditoría completa, con inicios de sesión (rol ADMIN). */
   auditoria(filtro: FiltroAuditoria = {}): Observable<Pagina<EntradaHistorial>> {
-    return this.http.get<Pagina<EntradaHistorial>>(`${this.base}/audit`, { params: parametros({ ...filtro }) });
+    return this.http.get<Pagina<EntradaHistorial>>(`${this.apiUrl}/api/audit`, { params: parametros({ ...filtro }) });
   }
 }

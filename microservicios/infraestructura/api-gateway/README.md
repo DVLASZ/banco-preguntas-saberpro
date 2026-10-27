@@ -7,7 +7,7 @@ y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gatew
 |---|---|
 | **Puerto** | 8080 (`GATEWAY_PORT`) |
 | **Descubrimiento** | Eureka: reparte entre las réplicas de cada servicio con `lb://<servicio>` |
-| **Swagger agregado** | `http://localhost:8080/swagger-ui.html` (un solo Swagger para los siete servicios) |
+| **Swagger agregado** | `http://localhost:8080/swagger-ui.html` (un solo Swagger para todos los servicios) |
 | **Pruebas** | 25 |
 
 ## Qué hace
@@ -16,8 +16,10 @@ y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gatew
    `KEYCLOAK_ISSUER_URI`). Sin token válido responde 401.
 2. **Autorización por rol** (primera barrera, `RoleRules`). Cada servicio vuelve a comprobar el rol de cada operación, así que un
    fallo del gateway no abre nada. Gana la primera regla que coincide; por eso van primero las más específicas.
-3. **Enrutamiento.** Cada servicio atiende sus caminos `/api/...` (preguntas, revisiones, notificaciones, historial, usuarios,
-   simulacros y seguimiento) y publica su OpenAPI en `/docs/<servicio>/v3/api-docs`.
+3. **Enrutamiento.** Cada servicio atiende sus caminos `/api/...` y publica su OpenAPI en `/docs/<servicio>/v3/api-docs`. Las
+   rutas de `/api/reviews` las reparten dos servicios: las de asignación (`config`, `pending-assignment`, `assigned`,
+   `*/assignments`) van a `assignment-service` y el resto, a `evaluation-service`; por eso el orden de las rutas importa.
+   `validation-service` y `lifecycle-service` son internos: **no tienen rutas** (solo se publica su documentación).
 4. **Resiliencia.** Cada ruta tiene un circuit breaker (si el servicio no responde, contesta 503 de inmediato con el mensaje de
    `FallbackController` en lugar de dejar esperando), un bulkhead que limita las llamadas simultáneas y reintentos de las consultas
    GET cuando una réplica falla. El circuit breaker va por fuera y el reintento por dentro.
@@ -32,7 +34,7 @@ y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gatew
 |---|---|
 | `GET /api/users/me` | Cualquier rol |
 | `/api/users/**` | `ADMIN` |
-| `GET /api/history/audit`, `GET /api/notifications/emails` | `ADMIN` |
+| `GET /api/audit/**` (audit-service), `GET /api/emails/**` (email-service) | `ADMIN` |
 | `/api/history/**`, `/api/notifications/**` | `ADMIN`, `AUTHOR`, `REVIEWER` |
 | `POST /api/reviews/*/assignments`, `GET /api/reviews/pending-assignment` | `ADMIN` |
 | `GET /api/reviews/assigned`, `POST /api/reviews/*/evaluations` | `REVIEWER` |
@@ -52,6 +54,7 @@ y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gatew
 | `GATEWAY_PORT` | `8080` | Puerto HTTP |
 | `GATEWAY_ALLOWED_ORIGINS` | `http://localhost:4200` | Orígenes del navegador permitidos |
 | `GATEWAY_TIMEOUT` | `10s` | Espera máxima por un servicio antes de abrir el circuito |
+| `GATEWAY_CONNECT_TIMEOUT_MS` | `2000` | Espera máxima para conectarse a un servicio; si no acepta la conexión se da por caído |
 | `KEYCLOAK_JWK_SET_URI` | `http://localhost:8180/realms/bancopreguntas/protocol/openid-connect/certs` | Claves públicas de Keycloak |
 | `KEYCLOAK_ISSUER_URI` | `http://localhost:8180/realms/bancopreguntas` | Emisor esperado del token |
 | `EUREKA_ENABLED` / `EUREKA_URL` | `true` / `http://localhost:8761/eureka` | Registro y descubrimiento |

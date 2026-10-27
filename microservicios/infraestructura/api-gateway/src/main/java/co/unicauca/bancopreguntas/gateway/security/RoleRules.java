@@ -25,11 +25,11 @@ public final class RoleRules {
             // usuarios
             regla(HttpMethod.GET, "/api/users/me", ADMIN, AUTHOR, REVIEWER, TEACHER, STUDENT),
             regla(null, "/api/users/**", ADMIN),
-            // historial y auditoría
-            regla(HttpMethod.GET, "/api/history/audit", ADMIN),
+            // historial de las preguntas, auditoría y registro de correos
             regla(HttpMethod.GET, "/api/history/**", ADMIN, AUTHOR, REVIEWER),
+            regla(HttpMethod.GET, "/api/audit/**", ADMIN),
+            regla(HttpMethod.GET, "/api/emails/**", ADMIN),
             // notificaciones
-            regla(HttpMethod.GET, "/api/notifications/emails", ADMIN),
             regla(null, "/api/notifications/**", ADMIN, AUTHOR, REVIEWER),
             // revisión
             regla(HttpMethod.GET, "/api/reviews/pending-assignment", ADMIN),

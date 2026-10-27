@@ -23,7 +23,8 @@ import java.time.Duration;
 
 /**
  * Las rutas del gateway: cada servicio atiende sus caminos {@code /api/...}, y su documentación Swagger se
- * publica en {@code /docs/<servicio>/v3/api-docs} para verlas todas juntas. Cada ruta tiene un circuit breaker
+ * publica en {@code /docs/<servicio>/v3/api-docs} para verlas todas juntas. Los servicios internos (validación y ciclo de
+ * vida) no tienen rutas de API, solo documentación. Cada ruta tiene un circuit breaker
  * (si el servicio no responde, se contesta 503 de inmediato en lugar de dejar esperando) y las consultas GET se
  * reintentan si una réplica falla.
  */
@@ -44,6 +45,10 @@ public class GatewayRoutesConfig {
                     .filters(f -> f.rewritePath("/docs/" + servicio + "/v3/api-docs", "/v3/api-docs"))
                     .uri(destino));
         });
+        GatewayProperties.INTERNOS.forEach(servicio -> rutas.route(servicio + "-docs",
+                r -> r.path("/docs/" + servicio + "/v3/api-docs")
+                        .filters(f -> f.rewritePath("/docs/" + servicio + "/v3/api-docs", "/v3/api-docs"))
+                        .uri(propiedades.uris().get(servicio))));
         return rutas.build();
     }
 

@@ -5,7 +5,7 @@
 # cambiarlos copia .env.example a .env y edítalo (el archivo .env no se versiona).
 #
 #   docker compose up -d --build              # todo
-#   docker compose up -d --scale review-service=3    # varias réplicas de un servicio (sin puerto fijo)
+#   docker compose up -d --scale evaluation-service=3    # varias réplicas de un servicio (sin puerto fijo)
 #   SECURITY_MODE=headers docker compose up -d       # sin tokens: la identidad llega en X-User-Id / X-User-Roles
 #
 # Keycloak: http://localhost:8180 (administración: usuario y clave de KEYCLOAK_ADMIN_*). El realm
@@ -58,17 +58,41 @@ services:
     volumes:
       - question-data:/var/lib/postgresql/data
 
-  postgres-review:
+  postgres-lifecycle:
     <<: *postgres
-    container_name: bp-postgres-review
+    container_name: bp-postgres-lifecycle
     environment:
-      POSTGRES_DB: review_db
-      POSTGRES_USER: ${REVIEW_DB_USER:-review}
-      POSTGRES_PASSWORD: ${REVIEW_DB_PASSWORD:-review}
+      POSTGRES_DB: lifecycle_db
+      POSTGRES_USER: ${LIFECYCLE_DB_USER:-lifecycle}
+      POSTGRES_PASSWORD: ${LIFECYCLE_DB_PASSWORD:-lifecycle}
     ports:
-      - "5435:5432"
+      - "5444:5432"
     volumes:
-      - review-data:/var/lib/postgresql/data
+      - lifecycle-data:/var/lib/postgresql/data
+
+  postgres-assignment:
+    <<: *postgres
+    container_name: bp-postgres-assignment
+    environment:
+      POSTGRES_DB: assignment_db
+      POSTGRES_USER: ${ASSIGNMENT_DB_USER:-assignment}
+      POSTGRES_PASSWORD: ${ASSIGNMENT_DB_PASSWORD:-assignment}
+    ports:
+      - "5445:5432"
+    volumes:
+      - assignment-data:/var/lib/postgresql/data
+
+  postgres-evaluation:
+    <<: *postgres
+    container_name: bp-postgres-evaluation
+    environment:
+      POSTGRES_DB: evaluation_db
+      POSTGRES_USER: ${EVALUATION_DB_USER:-evaluation}
+      POSTGRES_PASSWORD: ${EVALUATION_DB_PASSWORD:-evaluation}
+    ports:
+      - "5446:5432"
+    volumes:
+      - evaluation-data:/var/lib/postgresql/data
 
   postgres-notification:
     <<: *postgres
@@ -82,6 +106,18 @@ services:
     volumes:
       - notification-data:/var/lib/postgresql/data
 
+  postgres-email:
+    <<: *postgres
+    container_name: bp-postgres-email
+    environment:
+      POSTGRES_DB: email_db
+      POSTGRES_USER: ${EMAIL_DB_USER:-email}
+      POSTGRES_PASSWORD: ${EMAIL_DB_PASSWORD:-email}
+    ports:
+      - "5440:5432"
+    volumes:
+      - email-data:/var/lib/postgresql/data
+
   postgres-history:
     <<: *postgres
     container_name: bp-postgres-history
@@ -93,6 +129,18 @@ services:
       - "5437:5432"
     volumes:
       - history-data:/var/lib/postgresql/data
+
+  postgres-audit:
+    <<: *postgres
+    container_name: bp-postgres-audit
+    environment:
+      POSTGRES_DB: audit_db
+      POSTGRES_USER: ${AUDIT_DB_USER:-audit}
+      POSTGRES_PASSWORD: ${AUDIT_DB_PASSWORD:-audit}
+    ports:
+      - "5441:5432"
+    volumes:
+      - audit-data:/var/lib/postgresql/data
 
   postgres-simulation:
     <<: *postgres
@@ -220,6 +268,10 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      lifecycle-service:
+        condition: service_healthy
+      validation-service:
+        condition: service_healthy
       discovery-server:
         condition: service_healthy
     environment:
@@ -227,6 +279,8 @@ services:
       QUESTION_DB_URL: jdbc:postgresql://postgres-question:5432/question_db
       QUESTION_DB_USER: ${QUESTION_DB_USER:-question}
       QUESTION_DB_PASSWORD: ${QUESTION_DB_PASSWORD:-question}
+      LIFECYCLE_SERVICE_URL: http://lifecycle-service:8094
+      VALIDATION_SERVICE_URL: http://validation-service:8095
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health/readiness | grep -q UP"]
       interval: 10s
@@ -234,14 +288,32 @@ services:
       retries: 12
       start_period: 40s
 
-  review-service:
+  validation-service:
     build:
       context: .
-      dockerfile: servicios/review-service/Dockerfile
-    image: bancopreguntas/review-service:0.1.0
+      dockerfile: servicios/validation-service/Dockerfile
+    image: bancopreguntas/validation-service:0.1.0
     restart: unless-stopped
     depends_on:
-      postgres-review:
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8095/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  lifecycle-service:
+    build:
+      context: .
+      dockerfile: servicios/lifecycle-service/Dockerfile
+    image: bancopreguntas/lifecycle-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-lifecycle:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -249,12 +321,62 @@ services:
         condition: service_healthy
     environment:
       <<: *service-env
-      REVIEW_DB_URL: jdbc:postgresql://postgres-review:5432/review_db
-      REVIEW_DB_USER: ${REVIEW_DB_USER:-review}
-      REVIEW_DB_PASSWORD: ${REVIEW_DB_PASSWORD:-review}
-      REVIEW_MAX_REVIEWERS: ${REVIEW_MAX_REVIEWERS:-3}
+      LIFECYCLE_DB_URL: jdbc:postgresql://postgres-lifecycle:5432/lifecycle_db
+      LIFECYCLE_DB_USER: ${LIFECYCLE_DB_USER:-lifecycle}
+      LIFECYCLE_DB_PASSWORD: ${LIFECYCLE_DB_PASSWORD:-lifecycle}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8094/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  assignment-service:
+    build:
+      context: .
+      dockerfile: servicios/assignment-service/Dockerfile
+    image: bancopreguntas/assignment-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-assignment:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      ASSIGNMENT_DB_URL: jdbc:postgresql://postgres-assignment:5432/assignment_db
+      ASSIGNMENT_DB_USER: ${ASSIGNMENT_DB_USER:-assignment}
+      ASSIGNMENT_DB_PASSWORD: ${ASSIGNMENT_DB_PASSWORD:-assignment}
+      ASSIGNMENT_MAX_REVIEWERS: ${ASSIGNMENT_MAX_REVIEWERS:-3}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  evaluation-service:
+    build:
+      context: .
+      dockerfile: servicios/evaluation-service/Dockerfile
+    image: bancopreguntas/evaluation-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-evaluation:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      EVALUATION_DB_URL: jdbc:postgresql://postgres-evaluation:5432/evaluation_db
+      EVALUATION_DB_USER: ${EVALUATION_DB_USER:-evaluation}
+      EVALUATION_DB_PASSWORD: ${EVALUATION_DB_PASSWORD:-evaluation}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8096/actuator/health/readiness | grep -q UP"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -278,9 +400,35 @@ services:
       NOTIFICATION_DB_URL: jdbc:postgresql://postgres-notification:5432/notification_db
       NOTIFICATION_DB_USER: ${NOTIFICATION_DB_USER:-notification}
       NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD:-notification}
-      NOTIFICATION_EMAIL_DOMAIN: ${NOTIFICATION_EMAIL_DOMAIN:-bancopreguntas.local}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  email-service:
+    build:
+      context: .
+      dockerfile: servicios/email-service/Dockerfile
+    image: bancopreguntas/email-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-email:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      EMAIL_DB_URL: jdbc:postgresql://postgres-email:5432/email_db
+      EMAIL_DB_USER: ${EMAIL_DB_USER:-email}
+      EMAIL_DB_PASSWORD: ${EMAIL_DB_PASSWORD:-email}
+      EMAIL_DOMAIN: ${EMAIL_DOMAIN:-bancopreguntas.local}
+      EMAIL_ATTEMPTS: ${EMAIL_ATTEMPTS:-3}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8090/actuator/health/readiness | grep -q UP"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -306,6 +454,31 @@ services:
       HISTORY_DB_PASSWORD: ${HISTORY_DB_PASSWORD:-history}
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8085/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  audit-service:
+    build:
+      context: .
+      dockerfile: servicios/audit-service/Dockerfile
+    image: bancopreguntas/audit-service:0.1.0
+    restart: unless-stopped
+    depends_on:
+      postgres-audit:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      <<: *service-env
+      AUDIT_DB_URL: jdbc:postgresql://postgres-audit:5432/audit_db
+      AUDIT_DB_USER: ${AUDIT_DB_USER:-audit}
+      AUDIT_DB_PASSWORD: ${AUDIT_DB_PASSWORD:-audit}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8091/actuator/health/readiness | grep -q UP"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -447,9 +620,13 @@ services:
 volumes:
   user-data:
   question-data:
-  review-data:
+  lifecycle-data:
+  assignment-data:
+  evaluation-data:
   notification-data:
+  email-data:
   history-data:
+  audit-data:
   simulation-data:
   tracking-data:
   rabbitmq-data:

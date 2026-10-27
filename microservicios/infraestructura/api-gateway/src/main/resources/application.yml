@@ -53,12 +53,22 @@ springdoc:
     urls:
       - name: question-service
         url: /docs/question-service/v3/api-docs
-      - name: review-service
-        url: /docs/review-service/v3/api-docs
+      - name: validation-service
+        url: /docs/validation-service/v3/api-docs
+      - name: lifecycle-service
+        url: /docs/lifecycle-service/v3/api-docs
+      - name: assignment-service
+        url: /docs/assignment-service/v3/api-docs
+      - name: evaluation-service
+        url: /docs/evaluation-service/v3/api-docs
       - name: notification-service
         url: /docs/notification-service/v3/api-docs
+      - name: email-service
+        url: /docs/email-service/v3/api-docs
       - name: history-service
         url: /docs/history-service/v3/api-docs
+      - name: audit-service
+        url: /docs/audit-service/v3/api-docs
       - name: user-service
         url: /docs/user-service/v3/api-docs
       - name: simulation-service

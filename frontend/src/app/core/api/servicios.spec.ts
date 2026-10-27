@@ -150,7 +150,7 @@ describe('servicios del API', () => {
     it('consulta los correos simulados con paginación', () => {
       TestBed.inject(NotificationsService).correos(1, 5).subscribe();
 
-      const r = controlador.expectOne((req) => req.url === `${API}/api/notifications/emails`);
+      const r = controlador.expectOne((req) => req.url === `${API}/api/emails`);
       expect(r.request.params.get('page')).toBe('1');
       r.flush({});
     });
@@ -167,7 +167,7 @@ describe('servicios del API', () => {
       controlador.expectOne((req) => req.url === `${API}/api/history/me`).flush({});
 
       servicio.auditoria({ tipo: 'INICIO_DE_SESION_FALLIDO', actorId: 'intruso', preguntaId: '' }).subscribe();
-      const auditoria = controlador.expectOne((req) => req.url === `${API}/api/history/audit`);
+      const auditoria = controlador.expectOne((req) => req.url === `${API}/api/audit`);
       expect(auditoria.request.params.get('tipo')).toBe('INICIO_DE_SESION_FALLIDO');
       expect(auditoria.request.params.get('actorId')).toBe('intruso');
       expect(auditoria.request.params.has('preguntaId')).toBe(false);

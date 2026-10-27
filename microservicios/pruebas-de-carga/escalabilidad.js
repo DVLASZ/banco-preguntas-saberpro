@@ -124,6 +124,6 @@ export function administrador(tokens) {
   pausa();
   ok(http.get(`${BASE}/api/questions/all?size=10`, { ...p, tags: { name: 'todas-las-preguntas' } }), 'todas las preguntas');
   pausa();
-  ok(http.get(`${BASE}/api/history/audit?size=10`, { ...p, tags: { name: 'auditoria' } }), 'auditoría');
+  ok(http.get(`${BASE}/api/audit?size=10`, { ...p, tags: { name: 'auditoria' } }), 'auditoría');
   pausa();
 }

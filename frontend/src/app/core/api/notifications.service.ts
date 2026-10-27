@@ -9,7 +9,8 @@ import { parametros } from './http-util';
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${inject(APP_CONFIG).apiUrl}/api/notifications`;
+  private readonly apiUrl = inject(APP_CONFIG).apiUrl;
+  private readonly base = `${this.apiUrl}/api/notifications`;
 
   private readonly _noLeidas = signal(0);
   readonly noLeidas = this._noLeidas.asReadonly();
@@ -35,8 +36,8 @@ export class NotificationsService {
     return this.http.post<{ marcadas: number }>(`${this.base}/read-all`, null).pipe(tap(() => this._noLeidas.set(0)));
   }
 
-  /** Correos simulados enviados (rol ADMIN). */
+  /** Correos simulados enviados (rol ADMIN); los lleva email-service. */
   correos(page = 0, size = 10): Observable<Pagina<CorreoSimulado>> {
-    return this.http.get<Pagina<CorreoSimulado>>(`${this.base}/emails`, { params: parametros({ page, size }) });
+    return this.http.get<Pagina<CorreoSimulado>>(`${this.apiUrl}/api/emails`, { params: parametros({ page, size }) });
   }
 }
