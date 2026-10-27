@@ -2,9 +2,9 @@
 
 | Carpeta | Contenido |
 |---|---|
-| [`openapi/`](openapi/) | Contrato OpenAPI de cada uno de los **14 servicios**, **exportado de los propios servicios** (prueba `ContratoOpenApiTest`) |
-| [`eventos/`](eventos/) | Esquema JSON de los doce eventos que se publican en RabbitMQ |
-| [`postman/`](postman/) | Colecciones de Postman por servicio (11, las de los servicios que el gateway expone) y el entorno `SaberPro_Local` |
+| [`openapi/`](openapi/) | Contrato OpenAPI de cada uno de los **10 servicios**, **exportado de los propios servicios** (prueba `ContratoOpenApiTest`) |
+| [`eventos/`](eventos/) | Esquema JSON de los diez eventos que se publican en RabbitMQ |
+| [`postman/`](postman/) | Colecciones de Postman por servicio (7, las de los servicios que el gateway expone) y el entorno `SaberPro_Local` |
 
 Cada servicio publica además su propio Swagger en `/swagger-ui.html` cuando está en ejecución; los archivos de `openapi/`
 son una copia de lo que sirve `GET /docs/<servicio>/v3/api-docs` a través del gateway (se regeneran si cambia la API, ver
@@ -24,12 +24,8 @@ son una copia de lo que sirve `GET /docs/<servicio>/v3/api-docs` a través del g
 | [`openapi-email-service.json`](openapi/openapi-email-service.json) | `email-service` | `/api/emails` |
 | [`openapi-history-service.json`](openapi/openapi-history-service.json) | `history-service` | `/api/history/questions/{id}`, `/me` |
 | [`openapi-audit-service.json`](openapi/openapi-audit-service.json) | `audit-service` | `/api/audit` |
-| [`openapi-catalog-service.json`](openapi/openapi-catalog-service.json) | `catalog-service` | `/api/catalog/summary` y `/api/catalog/selection` (esta última es interna: el gateway no la expone) |
-| [`openapi-simulation-service.json`](openapi/openapi-simulation-service.json) | `simulation-service` | `/api/simulations`, `/{id}`, `/{id}/answers`, `/{id}/finish` |
-| [`openapi-statistics-service.json`](openapi/openapi-statistics-service.json) | `statistics-service` | `/api/statistics/me/*`, `/api/statistics/students/{id}/*` |
-| [`openapi-report-service.json`](openapi/openapi-report-service.json) | `report-service` | `/api/reports/group` y `/api/reports/group.csv` |
 
-Los servicios **internos** (`validation-service`, `lifecycle-service` y la selección del catálogo) solo los llaman otros servicios, pasando la
+Los servicios **internos** (`validation-service` y `lifecycle-service`) solo los llaman otros servicios, pasando la
 identidad de quien hizo la petición; el gateway no tiene rutas hacia ellos (solo publica su documentación).
 
 ## Colecciones de Postman
@@ -47,10 +43,6 @@ servicios internos no existen: se ejercitan a través de `question-service`, que
 | [`email-service`](postman/email-service.postman_collection.json) | `email-service` | 9 | 14 |
 | [`history-service`](postman/history-service.postman_collection.json) | `history-service` | 12 | 19 |
 | [`audit-service`](postman/audit-service.postman_collection.json) | `audit-service` | 9 | 14 |
-| [`catalog-service`](postman/catalog-service.postman_collection.json) | `catalog-service` | 16 | 25 |
-| [`simulation-service`](postman/simulation-service.postman_collection.json) | `simulation-service` | 31 | 47 |
-| [`statistics-service`](postman/statistics-service.postman_collection.json) | `statistics-service` | 27 | 41 |
-| [`report-service`](postman/report-service.postman_collection.json) | `report-service` | 19 | 29 |
 
 ### Cómo usarlas
 
@@ -63,6 +55,6 @@ servicios internos no existen: se ejercitan a través de `question-service`, que
 
 Por consola: `npx newman run user-service.postman_collection.json -e SaberPro_Local.postman_environment.json`.
 
-> **Estado de la verificación.** Las 11 colecciones se ejecutaron completas con newman contra la pila de Docker de 14 servicios el
-> 19 de octubre de 2026: 200 peticiones y 314 verificaciones, sin fallos. Los contratos OpenAPI se regeneraron de los servicios. Las
-> colecciones que preparan una pregunta publicada esperan unos segundos entre pasos porque los eventos viajan por RabbitMQ.
+> **Estado de la verificación.** Las 7 colecciones se ejecutaron completas con newman contra la pila de Docker el 26 de octubre de
+> 2026: 107 peticiones y 172 verificaciones, sin fallos. Los contratos OpenAPI se regeneraron de los servicios. Las colecciones que
+> preparan una pregunta publicada esperan unos segundos entre pasos porque los eventos viajan por RabbitMQ.

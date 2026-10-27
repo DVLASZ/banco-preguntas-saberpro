@@ -1,16 +1,10 @@
 # 02 · Contextos delimitados y eventos
 
-> **Estado del repositorio (octubre de 2026).** Esta documentación describe la arquitectura de **14 microservicios** que se está
-> implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**; la nueva
-> distribución divide varios de ellos para que cada uno tenga una sola responsabilidad (ver la tabla del [README de los servicios](../../microservicios/servicios/README.md)). Ya está implementada y verificada de punta a punta en local y el código se irá publicando por
-> partes; mientras tanto, lo que no está en el repositorio aparece en esta documentación como texto, sin enlace.
-
 ## Contextos delimitados
 
 El docente propone ocho contextos como aproximación. Para esta iteración partimos de ellos y los dividimos hasta que cada servicio
-tiene **una sola responsabilidad y es pequeño**: son **14 servicios** más el gateway. Los dos contextos que los docentes dejaron para
-el tercer corte (simulacros y seguimiento académico) también están construidos por adelantado (ver
-[simulacros y seguimiento](../corte-3/simulacros-y-seguimiento.md)).
+tiene **una sola responsabilidad y es pequeño**: son **10 servicios** más el gateway. Los contextos de simulacros y seguimiento
+académico los dejaron los docentes para el tercer corte y no forman parte de esta entrega.
 
 ```mermaid
 flowchart TB
@@ -31,12 +25,6 @@ flowchart TB
     HS["Historial<br/>history-service"]
     AU["Auditoría<br/>audit-service"]
   end
-  subgraph Simulacros
-    CS["Catálogo<br/>catalog-service"]
-    SIM["Simulacros<br/>simulation-service"]
-    ST["Estadísticas<br/>statistics-service"]
-    RP["Reportes<br/>report-service"]
-  end
   US["Usuarios<br/>user-service"]
   QS -. "REST: validar" .-> VS
   QS -. "REST: transiciones" .-> LS
@@ -44,10 +32,7 @@ flowchart TB
   AS -- "review.reviewers-assigned" --> ES & LS
   ES -- "review.completed" --> LS & AS
   LS -- "question.state-changed" --> QS
-  LS -- "question.published" --> CS
-  SIM -. "REST: escoger preguntas" .-> CS
-  SIM -- "simulation.completed" --> ST
-  ST -- "statistics.student-updated" --> RP
+  LS -- "question.published" --> NS
   NS -- "notification.created" --> EM
 ```
 
@@ -63,10 +48,6 @@ flowchart TB
 | (transversal) | `email-service` | El correo simulado de cada aviso, con reintentos y registro |
 | Administración y Trazabilidad | `history-service` | Línea de tiempo de cada pregunta (HU-06) |
 | Administración y Trazabilidad | `audit-service` | Auditoría de acciones e inicios de sesión |
-| Simulacros de Evaluación | `catalog-service` | Copia de las preguntas publicadas y selección al azar (RF-22). Los docentes lo ubicaron en el corte 3 ([consulta 4](../general/consultas-a-docentes.md)); se construyó por adelantado |
-| Simulacros de Evaluación | `simulation-service` | RF-21 a RF-24: generar, presentar con tiempo y calificar |
-| Seguimiento Académico | `statistics-service` | RF-25 a RF-27: historial, estadísticas, fortalezas y debilidades |
-| Seguimiento Académico | `report-service` | RF-28: reporte del grupo en JSON y CSV |
 
 **Por qué se dividió así.** La regla fue que cada servicio tenga un motivo de cambio y sus datos propios: la validación cambia cuando
 cambian los criterios de calidad; el ciclo de vida, cuando cambian los estados; la asignación y la evaluación, cuando cambia cómo se
@@ -74,13 +55,12 @@ reparte y cómo se decide la revisión; el correo, cuando cambia el canal de env
 quiere saber de cada pregunta o de cada usuario. Cada división quitó de un servicio una responsabilidad que escalaba o fallaba distinto.
 
 **El costo y cómo se acota.** Dividir cuesta llamadas de red. Se evitó con eventos casi siempre; las únicas llamadas REST síncronas son
-tres, y todas propagan la identidad de quien hizo la petición para que el servicio llamado vuelva a comprobar el rol:
+dos, y todas propagan la identidad de quien hizo la petición para que el servicio llamado vuelva a comprobar el rol:
 
 | Llamada | Por qué es síncrona |
 |---|---|
 | `question-service` → `validation-service` | El autor necesita saber **ahora** qué campos corregir; la respuesta decide si se guarda |
 | `question-service` → `lifecycle-service` | Crear, enviar, reabrir y publicar deben cambiar el estado antes de contestarle al usuario |
-| `simulation-service` → `catalog-service` | El estudiante espera el simulacro armado; las respuestas correctas nunca salen del catálogo hacia el navegador |
 
 Si uno de esos servicios no responde, la operación no se hace y se informa 503 (la consulta de una pregunta sigue funcionando).
 
@@ -103,14 +83,12 @@ contenido para que el catálogo no tenga que consultar a nadie).
 |---|---|---|---|
 | `question.submitted` | lifecycle-service | assignment, evaluation, notification, history, audit | Se abre el caso y la ronda de revisión pendiente de asignar |
 | `question.reopened` | lifecycle-service | assignment, evaluation, history, audit | El autor corrige una pregunta rechazada: la ronda anterior se cierra |
-| `question.state-changed` | lifecycle-service | question, catalog, history, audit | Traza del ciclo de vida; question-service actualiza su copia del estado; el catálogo retira la pregunta archivada |
-| `question.published` | lifecycle-service | catalog, notification, history, audit | El administrador publica una pregunta aprobada; el catálogo la agrega |
+| `question.state-changed` | lifecycle-service | question, history, audit | Traza del ciclo de vida; question-service actualiza su copia del estado |
+| `question.published` | lifecycle-service | notification, history, audit | El administrador publica una pregunta aprobada; se avisa al autor |
 | `review.reviewers-assigned` | assignment-service | evaluation, lifecycle, notification, history, audit | La pregunta pasa a "En revisión"; evaluation-service registra a los revisores; se avisa a cada revisor y al autor |
 | `review.evaluation-submitted` | evaluation-service | assignment, notification, history, audit | La bandeja del revisor lo marca como evaluado; se avisa al administrador (y al autor si es tardía) |
 | `review.completed` | evaluation-service | assignment, lifecycle, notification, history, audit | La pregunta pasa a Aprobada o Rechazada; se avisa al autor, al administrador y a los revisores |
 | `notification.created` | notification-service | email | Se envía (de forma simulada) el correo del aviso |
-| `simulation.completed` | simulation-service | statistics | Un simulacro terminó y está calificado; entra al historial del estudiante |
-| `statistics.student-updated` | statistics-service | report | Cambió el resumen de un estudiante; el reporte del grupo lo guarda |
 | `auth.login-succeeded` / `auth.login-failed` | user-service | audit | Auditoría de inicios de sesión, tomados de los eventos de Keycloak |
 
 Cuerpo (`data`) de cada evento:
@@ -125,17 +103,14 @@ Cuerpo (`data`) de cada evento:
 | `review.evaluation-submitted` | `questionId`, `authorId`, `round`, `reviewerId`, `decision` (`APROBAR` o `RECHAZAR`), `observation`, `late` |
 | `review.completed` | `questionId`, `authorId`, `round`, `result` (`APPROVED` o `REJECTED`), `observations[]` (`reviewerId`, `decision`, `text`) |
 | `notification.created` | `notificationId`, `recipientId`, `kind`, `questionId`, `subject`, `message`, `createdAt` |
-| `simulation.completed` | `simulationId`, `studentId`, `startedAt`, `finishedAt`, `durationSeconds`, `expired`, `total`, `correct`, `incorrect`, `unanswered`, `score`, `byCompetency[]` (`competency`, `correct`, `total`) |
-| `statistics.student-updated` | `studentId`, `simulations`, `scoreSum`, `average`, `best`, `last`, `trend`, `weaknesses[]`, `byCompetency[]`, `updatedAt` |
 | `auth.login-succeeded` | `userId`, `ip`, `loggedInAt` |
 | `auth.login-failed` | `userId`, `ip`, `reason`, `attemptedAt` |
 
 El esquema formal está en [`api/eventos/eventos.schema.json`](api/eventos/eventos.schema.json).
 
 Garantías: mensajes persistentes con confirmación de entrega y consumidores **idempotentes** (se ignora un
-`eventId` ya procesado). Dos eventos llevan además un número que permite ignorar avisos atrasados sin llevar registro:
-`sequence` en `question.state-changed` (quien guarda una copia del estado solo acepta un cambio más nuevo) y `simulations` en
-`statistics.student-updated` (el reporte solo reemplaza un resumen por otro con más simulacros).
+`eventId` ya procesado). El evento `question.state-changed` lleva además un número, `sequence`, que permite ignorar avisos atrasados sin llevar registro
+(quien guarda una copia del estado solo acepta un cambio más nuevo).
 
 ## Flujo principal
 
@@ -166,19 +141,18 @@ sequenceDiagram
   MQ->>NS: aviso al autor y al administrador
 ```
 
-## Cambios respecto al diseño inicial (implementación)
+## Cambios respecto al diseño inicial
 
-- El servicio opcional de auditoría se implementó primero como `history-service` (historial y auditoría juntos) y luego se
-  separó en **`history-service`** (línea de tiempo de cada pregunta, HU-06) y **`audit-service`** (auditoría de acciones e inicios de
-  sesión, que no es requisito de los docentes pero se construyó como valor agregado).
-- La validación, el ciclo de vida y el catálogo salieron de `question-service` y de `simulation-service`; la revisión se dividió en
-  asignación y evaluación; el correo salió de `notification-service`; y el seguimiento se dividió en estadísticas y reportes
-  (la última versión de esta división es la de los 14 servicios).
-- Se añadieron los eventos `question.reopened`, `question.published`, `notification.created`, `statistics.student-updated` y `auth.*`
-  (tabla de arriba). Los eventos de revisión llevan además el número de **ronda** y las banderas `automatic` (reasignación automática de
-  revisores) y `late` (observación recibida cuando la ronda ya se había cerrado); los de pregunta llevan su **versión**.
-- Los eventos de los servicios que los publican (`lifecycle`, `assignment`, `evaluation`, `notification`, `simulation`, `statistics` y
-  `user`) se publican con el **patrón Outbox** (se guardan en la misma transacción que el cambio y un relevo los envía), de modo que
-  no se pierden si RabbitMQ está caído. Detalle en [08](08-implementacion-seguridad-y-resiliencia.md).
+- La auditoría empezó dentro de `history-service` y se separó en dos: `history-service` guarda la línea de tiempo de cada pregunta
+  (HU-06) y `audit-service` guarda la auditoría de acciones e inicios de sesión. Este último no lo piden los docentes, pero ya estaba
+  construido.
+- La validación y el ciclo de vida salieron de `question-service`; la revisión se dividió en asignación y evaluación; y el correo salió
+  de `notification-service`.
+- Se añadieron los eventos `question.reopened`, `question.published`, `notification.created` y `auth.*` (tabla de arriba). Los eventos
+  de revisión llevan el número de **ronda** y las banderas `automatic` (reasignación automática de revisores) y `late` (observación
+  recibida cuando la ronda ya se había cerrado); los de pregunta llevan su **versión**.
+- Los servicios que publican eventos (`lifecycle`, `assignment`, `evaluation`, `notification` y `user`) usan el **patrón Outbox**: el
+  evento se guarda en la misma transacción que el cambio y un relevo lo envía, así que no se pierde si RabbitMQ está caído. El detalle
+  está en [08](08-implementacion-seguridad-y-resiliencia.md).
 - Un mensaje que falla tras 4 reintentos va a la cola de mensajes muertos `bancopreguntas.dead-letter`.
 - `question.published` lleva el contenido de la pregunta.

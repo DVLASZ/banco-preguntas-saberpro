@@ -1,5 +1,8 @@
 # Simulacros y seguimiento académico
 
+> Este documento es el diseño para el tercer corte. Los servicios que describe (`catalog-service`, `statistics-service` y `report-service`) todavía no están
+> en el repositorio de la segunda entrega.
+
 Los docentes dejaron estos dos contextos para el tercer corte y los entregables de ese corte no los exigen, pero el
 proyecto de curso sí los describe (RF-21 a RF-28). Se construyeron **por adelantado**, con los roles **Estudiante** y
 **Docente**, y están repartidos en cuatro microservicios pequeños, cada uno con una sola responsabilidad:
@@ -165,14 +168,8 @@ Además de las variables comunes (`<SERVICIO>_DB_*`, RabbitMQ y Keycloak), ver [
 ver el resultado) y «Mi progreso» (historial, estadísticas, fortalezas y debilidades). El docente tiene «Reporte del grupo» con el
 detalle de cada estudiante y la descarga en CSV. Se construyeron en `frontend/src/app/features/student` y `features/teacher`.
 
-**Pruebas.** catalog-service 47, simulation-service 79, statistics-service 55 y report-service 31, más las del gateway (el
-estudiante, el docente y el administrador llegan solo a lo suyo) y 183 del frontend. Con la pila en Docker, el
-recorrido funcional comprueba RF-21 a RF-28 de punta a punta (el cierre por
-tiempo agotado con `PRUEBA_TIEMPO=1`), y las colecciones de Postman de
-[catalog](../corte-2/api/postman/catalog-service.postman_collection.json),
-[simulation](../corte-2/api/postman/simulation-service.postman_collection.json),
-[statistics](../corte-2/api/postman/statistics-service.postman_collection.json) y
-[report](../corte-2/api/postman/report-service.postman_collection.json) cubren cada servicio por su API.
+**Pruebas.** Se escriben con los servicios, en el tercer corte: pruebas de cada servicio, las del gateway para los roles de estudiante y docente,
+el recorrido funcional de RF-21 a RF-28 y colecciones de Postman por servicio.
 
 **Decisiones.**
 

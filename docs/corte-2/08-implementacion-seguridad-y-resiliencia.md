@@ -22,15 +22,10 @@ flowchart LR
   GW --> EM["email-service"]
   GW --> HS["history-service"]
   GW --> AU["audit-service"]
-  GW --> CS["catalog-service"]
-  GW --> SS["simulation-service"]
-  GW --> ST["statistics-service"]
-  GW --> RP["report-service"]
   QS -- "REST interno" --> VS["validation-service"]
   QS -- "REST interno" --> LS["lifecycle-service"]
-  SS -- "REST interno" --> CS
-  LS & AS & ES & NS & US & SS & ST -- "eventos" --> MQ["RabbitMQ<br/>bancopreguntas.events"]
-  MQ --> QS & LS & AS & ES & NS & EM & HS & AU & CS & ST & RP
+  LS & AS & ES & NS & US -- "eventos" --> MQ["RabbitMQ<br/>bancopreguntas.events"]
+  MQ --> QS & LS & AS & ES & NS & EM & HS & AU
   US -. "eventos de acceso (admin events)" .-> KC
 ```
 
@@ -51,12 +46,8 @@ flowchart LR
 | `email-service` | interno | Correo simulado con reintentos y registro |
 | `history-service` | interno | Línea de tiempo de cada pregunta |
 | `audit-service` | interno | Auditoría de acciones e inicios de sesión |
-| `catalog-service` | interno | Copia de las preguntas publicadas, resumen y selección al azar |
-| `simulation-service` | interno | Simulacros con tiempo y calificación automática (RF-21 a RF-24) |
-| `statistics-service` | interno | Historial, estadísticas, fortalezas y debilidades de cada estudiante (RF-25 a RF-27) |
-| `report-service` | interno | Reporte del grupo para docentes (RF-28) |
 | `rabbitmq` | 5672 / 15672 | Bus de eventos |
-| `postgres-*` ×13 | 5433–5446 | Una instancia de PostgreSQL 16 por servicio con datos (todos menos validation) |
+| `postgres-*` ×9 | 5433–5446 | Una instancia de PostgreSQL 16 por servicio con datos (todos menos validation) |
 
 Los servicios no publican puertos al exterior: se entra solo por `edge`. El archivo
 `docker-compose.debug.yml` los publica (8081–8087 y 8090–8096) para depurar desde el IDE.
@@ -76,9 +67,7 @@ cada controlador exige el rol de su operación (`requireAnyRole`). Un error en u
 |---|---|
 | `AUTHOR` | Crear, modificar, enviar a revisión y reabrir sus preguntas; ver historial y notificaciones propias |
 | `REVIEWER` | Ver las preguntas asignadas y enviar evaluaciones |
-| `ADMIN` | Ver todas las preguntas, asignar revisores, publicar, listar usuarios, ver auditoría y correos; consultar simulacros y el seguimiento de los estudiantes |
-| `STUDENT` | Generar, presentar y finalizar sus simulacros; ver su historial, estadísticas y fortalezas |
-| `TEACHER` | Consultar simulacros y el seguimiento de cualquier estudiante y descargar el reporte del grupo |
+| `ADMIN` | Ver todas las preguntas, asignar revisores, publicar, listar usuarios, ver auditoría y correos |
 
 **Anti-suplantación.** En modo `jwt` las cabeceras `X-User-Id` y `X-User-Roles` se ignoran en los servicios y el
 gateway las elimina de la petición entrante. El modo `headers` existe solo para pruebas y desarrollo; el
@@ -88,10 +77,9 @@ compose arranca en `jwt` por defecto (`SECURITY_MODE`).
 los consulta periódicamente y publica `auth.login-succeeded` / `auth.login-failed`, que `audit-service`
 guarda. Un administrador los ve en la pantalla de auditoría.
 
-**Identidad entre servicios.** Las tres llamadas REST entre servicios (question → validation, question → lifecycle y
-simulation → catalog) pasan la identidad de quien hizo la petición: `bp-platform` copia el token (`Authorization`) y las
+**Identidad entre servicios.** Las dos llamadas REST entre servicios (question → validation y question → lifecycle) pasan la identidad de quien hizo la petición: `bp-platform` copia el token (`Authorization`) y las
 cabeceras de identidad al `RestClient`, así que el servicio llamado vuelve a validar el token y a exigir el rol, y nadie gana
-permisos por pasar por un servicio intermedio. El gateway no tiene rutas hacia validation, lifecycle ni la selección del catálogo.
+permisos por pasar por un servicio intermedio. El gateway no tiene rutas hacia validation ni lifecycle. Solo se manda el token a servicios internos (nombres sin puntos), nunca a un servidor externo.
 
 **Cuenta de servicio.** `user-service` habla con la API de administración de Keycloak con un cliente de
 credenciales propio (`client credentials`), sin usuario ni contraseña de persona.
@@ -108,7 +96,7 @@ prueba trae usuarios de ejemplo solo para el entorno local.
 | **Bulkhead** | Gateway, 1000 llamadas simultáneas por servicio | Que un servicio lento acumule peticiones sin límite. El valor por defecto (25) rechazaba llamadas sanas bajo carga |
 | **Límite de tiempo** | Gateway, 10 s | Peticiones colgadas |
 | **Balanceo con reintento** | `edge` | Una réplica del gateway caída: nginx prueba otra |
-| **Outbox** | lifecycle, assignment, evaluation, notification, simulation, statistics y user | Perder un evento cuando RabbitMQ está caído (ver abajo) |
+| **Outbox** | lifecycle, assignment, evaluation, notification y user | Perder un evento cuando RabbitMQ está caído (ver abajo) |
 | **Reintento del consumidor + cola de mensajes muertos** | Todos los consumidores | Perder o bloquear la cola por un mensaje que falla |
 | **Consumidores idempotentes** | Todos | Efectos dobles si un evento llega repetido (`processed_event`) |
 
@@ -127,8 +115,8 @@ neto es *exactamente una vez*.
 - Los eventos enviados se borran pasadas 24 h; el aviso de “broker caído” se limita a uno cada 30 s en el registro.
 - Se desactiva con `bancopreguntas.events.outbox.enabled=false` (se publica directo tras el commit).
 - Código: `bp-platform/.../events/{EventPublisher, OutboxEventPublisher, OutboxRelay}`; migraciones
-  `lifecycle V1`, `assignment V1`, `evaluation V1`, `notification V3`, `simulation V1`, `statistics V2` y `user V2`. Los servicios que
-  solo escuchan eventos (`question`, `email`, `history`, `audit`, `catalog` y `report`) desactivan el Outbox con
+  `lifecycle V1`, `assignment V1`, `evaluation V1`, `notification V3` y `user V2`. Los servicios que
+  solo escuchan eventos (`question`, `email`, `history` y `audit`) desactivan el Outbox con
   `bancopreguntas.events.outbox.enabled=false`.
 
 **Prueba realizada:** con RabbitMQ detenido, un autor envió una pregunta a revisión. El servicio respondió
@@ -148,31 +136,24 @@ obligaría a borrarlas). Los mensajes malformados (JSON inválido, campos faltan
 
 | Módulo | Pruebas |
 |---|---|
-| `bp-platform` | 69 |
-| `question-service` | 189 |
-| `validation-service` | 28 |
-| `lifecycle-service` | 78 |
-| `assignment-service` | 77 |
-| `evaluation-service` | 76 |
-| `notification-service` | 91 |
+| `bp-platform` | 70 |
+| `question-service` | 141 |
+| `validation-service` | 53 |
+| `lifecycle-service` | 99 |
+| `assignment-service` | 96 |
+| `evaluation-service` | 107 |
+| `notification-service` | 85 |
 | `email-service` | 38 |
 | `history-service` | 54 |
 | `audit-service` | 38 |
-| `catalog-service` | 47 |
-| `simulation-service` | 79 |
-| `statistics-service` | 55 |
-| `report-service` | 31 |
 | `user-service` | 62 |
 | `api-gateway` | 25 |
-| `frontend` (Vitest) | 183 |
 
-Todas se ejecutan sin Docker (PostgreSQL embebido y RabbitMQ simulado). La pila completa de 14 servicios se verificó en Docker
-(19 de octubre de 2026): recorrido funcional de 73 comprobaciones, 11 colecciones de Postman con 200 peticiones y 314 verificaciones, y una
-prueba de humo de k6 con 30 usuarios (ver [plan de pruebas](anexos/plan-de-pruebas.md)).
+Todas se ejecutan sin Docker (PostgreSQL embebido y RabbitMQ simulado). La pila se verificó en Docker el 26 de octubre de 2026: el
+recorrido funcional pasó con 71 comprobaciones y 0 fallos (ver [plan de pruebas](anexos/plan-de-pruebas.md)).
 
 ## Qué queda para el corte 3
 
-Rediseño hexagonal con DDD en un servicio (agregados, objetos de valor y servicios de dominio), el documento final y la
-demostración. La historia nueva del corte 3 (HU-06, historial de revisiones del autor) y la seguridad con Keycloak ya están
-hechas. Los servicios actuales separan dominio, aplicación (puertos) e infraestructura (adaptadores), con ArchUnit vigilando
-que el dominio no dependa de Spring, pero el modelado formal en DDD no se hizo en esta iteración.
+Rediseño con DDD en un servicio (agregados, objetos de valor y servicios de dominio), el documento final y la demostración.
+Los servicios actuales separan dominio, aplicación (interfaces) e infraestructura, con ArchUnit vigilando que el dominio no dependa
+de Spring, pero el modelado formal en DDD no se hizo en esta iteración.

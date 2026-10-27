@@ -25,8 +25,7 @@ de la sincronización periódica). Las contraseñas no están en la base de los 
 | `estudiante3` | Emilio Estudiante Tres | STUDENT | estudiante3@bancopreguntas.local |
 
 Los roles Docente y Estudiante pertenecen a los simulacros y al seguimiento académico (RF-21 a RF-28), que los docentes
-ubicaron en el tercer corte y que se construyeron por adelantado
-([simulacros y seguimiento](../../corte-3/simulacros-y-seguimiento.md)).
+ubicaron en el tercer corte. Los usuarios existen en el realm, pero esta entrega no los usa.
 
 ## Clientes de Keycloak
 
@@ -43,5 +42,5 @@ publicar). Así el historial, las rondas y las notificaciones se generan por los
 no hay datos que se contradigan.
 
 El recorrido funcional automatizado contra la pila de Docker
-(`microservicios/pruebas-funcionales`) crea sus propias preguntas
+([`microservicios/pruebas-funcionales`](../../../microservicios/pruebas-funcionales/README.md)) crea sus propias preguntas
 con estos usuarios y comprueba las historias de usuario de punta a punta.

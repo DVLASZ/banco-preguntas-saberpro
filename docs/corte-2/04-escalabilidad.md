@@ -38,31 +38,19 @@ docker run --rm -i -e PW=<clave de prueba> -e VUS=600 -e HOLD=1m \
 `PAUSA` fija el tiempo de lectura entre acciones: `1` (por defecto) imita a una persona; `0.05` convierte la prueba
 en una de estrés.
 
-## Resultados (8 de octubre de 2026, una réplica de cada servicio)
+## Resultados (26 de octubre de 2026, una réplica de cada servicio)
+
+Con los diez servicios de la entrega, el gateway, `edge`, Keycloak y RabbitMQ en la misma máquina (16 CPU, 11,4 GB para Docker).
 
 | Corrida | Usuarios | Pausa | Peticiones | Peticiones/s | p95 | p99 | Error |
 |---|---|---|---|---|---|---|---|
-| Ritmo humano | 600 | 1 s | 33 156 | 223 | **18 ms** | 28 ms | 0 % |
-| Estrés | 600 | 0,05 s | 159 028 | 1 128 | **692 ms** | 962 ms | 0 % |
+| Ritmo humano | 600 | 1 s | 33 204 | 223 | **30 ms** | 69 ms | 0 % |
+| Estrés | 600 | 0,05 s | 130 012 | 921 | **826 ms** | 1,1 s | 0 % |
 
-Con 600 usuarios a ritmo humano se supera con mucho el objetivo (3 s). Con la pausa reducida 20 veces, el sistema
-sostiene 1 128 peticiones por segundo sin un solo error y con p95 por debajo de 0,7 s, es decir: aún no se llega al
-límite de la máquina con 600 usuarios; el cuello de botella pasa a ser el CPU compartido.
-
-### Resultados con los 14 servicios (19 de octubre de 2026, una réplica de cada servicio)
-
-Misma prueba, tras dividir el sistema en 14 servicios (la ruta de las consultas ahora pasa por `lifecycle`, `assignment`,
-`email`, `audit` y los demás servicios pequeños).
-
-| Corrida | Usuarios | Pausa | Peticiones | Peticiones/s | p95 | p99 | Error |
-|---|---|---|---|---|---|---|---|
-| Ritmo humano | 600 | 1 s | 32 956 | 223 | **52 ms** | 130 ms | 0 % |
-| Estrés | 600 | 0,05 s | 140 474 | 998 | **752 ms** | 996 ms | 0 % |
-
-Se cumplen los tres umbrales (p95 menor de 1500 ms, error menor del 1 % y comprobaciones por encima del 99 %; fallaron 3 de
-32 948 comprobaciones del ritmo humano y 4 de 140 466 en estrés, todas en los primeros segundos del calentamiento). El p95 a ritmo
-humano subió de 18 a 52 ms respecto a siete servicios, y el rendimiento en estrés bajó de 1 128 a 998 peticiones por segundo:
-es el costo esperado de tener 14 JVM compartiendo la misma máquina y de las tres llamadas síncronas entre servicios.
+Se cumplen los tres umbrales (p95 menor de 1500 ms, error menor del 1 % y comprobaciones por encima del 99 %: todas las comprobaciones
+salieron bien en las dos corridas). Con 600 usuarios a ritmo humano se supera con mucho el objetivo de 3 s. Con la pausa reducida 20 veces el
+sistema sostiene 921 peticiones por segundo sin un solo error y con p95 por debajo de 0,9 s: no se llega al límite de la máquina con 600
+usuarios; el cuello de botella pasa a ser el CPU compartido.
 
 ### Qué se encontró y se corrigió al medir
 
@@ -75,7 +63,7 @@ es el costo esperado de tener 14 JVM compartiendo la misma máquina y de las tre
 
 ### Réplicas: ¿más réplicas rinden más?
 
-Se comprobó que añadir réplicas **funciona** (Eureka las descubre, el gateway las reparte, y al detener una el
+Se comprobó (8 de octubre de 2026) que añadir réplicas **funciona** (Eureka las descubre, el gateway las reparte, y al detener una el
 sistema sigue respondiendo sin errores), pero en esta máquina **no mejora** el rendimiento: los contenedores
 comparten los mismos 16 CPU, así que más réplicas solo reparten el mismo cómputo y añaden cambios de contexto.
 La escalabilidad horizontal tiene sentido cuando cada réplica dispone de recursos propios (varios nodos). Es un

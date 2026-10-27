@@ -1,7 +1,7 @@
 # JPA y DTO en el proyecto
 
 Verificación hecha el 20 de octubre de 2026 a raíz del requerimiento de los docentes de usar **JPA** y **DTO**. Resumen: los
-13 servicios con datos ya persisten con JPA y todas sus APIs hablan con DTO; el monolito del primer corte (congelado en la rama
+9 servicios con datos ya persisten con JPA y todas sus APIs hablan con DTO; el monolito del primer corte (congelado en la rama
 `corte-1`) solo los usa en `modulo-api-rest`.
 
 ## 1. Cómo se aplican en los microservicios
@@ -38,10 +38,6 @@ depende de la API. Además, `spring.jpa.open-in-view=false` en todos los servici
 | `email-service` | `SentEmailEntity`, `ProcessedEventEntity` | `EmailResponse`, `PageResponse` | V1 |
 | `history-service` | `HistoryEntryEntity`, `QuestionInfoEntity`, `QuestionReviewerEntity`, `ProcessedEventEntity` | `EntryResponse`, `PageResponse` | V1 y V2 |
 | `audit-service` | `AuditEntryEntity`, `ProcessedEventEntity` | `EntryResponse`, `PageResponse` | V1 |
-| `catalog-service` | `CatalogQuestionEntity`, `ProcessedEventEntity` | `SelectionRequest`, `SelectedQuestionResponse`, `CatalogSummaryResponse` | V1 |
-| `simulation-service` | `SimulationEntity`, `SimulationItemEntity` | `CreateSimulationRequest`, `AnswerRequest`, `SimulationResponse`, `SimulationItemResponse`, `SimulationSummaryResponse`, `ResultResponse`, `PageResponse` | V1 y V2 |
-| `statistics-service` | `ResultEntryEntity`, `ProcessedEventEntity` | `StatsResponse`, `StrengthsResponse`, `CompetencyResponse`, `HistoryEntryResponse`, `PageResponse` | V1 y V2 |
-| `report-service` | `StudentSummaryEntity`, `ProcessedEventEntity` | `GroupReportResponse`, `CompetencyResponse` | V1 |
 | `user-service` | `UserEntity`, `SessionCursorEntity` | `UserResponse`, `MeResponse`, `SyncResponse`, `PageResponse` | V1 y V2 |
 
 Los servicios con Outbox (publican eventos) comparten además la tabla `outbox_event` de `bp-platform`.

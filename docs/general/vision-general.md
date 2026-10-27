@@ -43,7 +43,7 @@ banco-preguntas-saberpro/
 │   └── modulos/          Módulos Maven: usuarios, preguntas, simulacros, microkernel, revisión y api-rest
 ├── microservicios/       Cortes 2 y 3
 │   ├── plataforma/       Biblioteca común (bp-platform)
-│   ├── servicios/        los 14 servicios: user, question, validation, lifecycle, assignment, evaluation, notification, email, history, audit, catalog, simulation, statistics y report
+│   ├── servicios/        los servicios: user, question, validation, lifecycle, assignment, evaluation, notification, email, history y audit
 │   ├── infraestructura/  api-gateway, discovery-server, edge (nginx) y keycloak
 │   ├── pruebas-de-carga/ y pruebas-funcionales/
 │   └── docker-compose.yml

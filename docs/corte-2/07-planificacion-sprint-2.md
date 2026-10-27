@@ -1,7 +1,7 @@
 # 07 · Planificación del Sprint 2
 
 > Este es el plan del sprint tal como se ejecutó. Los nombres de servicio son los de entonces (siete servicios); la división posterior en
-> 14 servicios pequeños (`review-service` pasó a `assignment-service` y `evaluation-service`, etc.) está en [02](02-contextos-y-eventos.md) y [10](10-decisiones-y-solid.md).
+> servicios más pequeños (`review-service` pasó a `assignment-service` y `evaluation-service`, etc.) está en [02](02-contextos-y-eventos.md) y [10](10-decisiones-y-solid.md).
 
 Tablero en Jira: proyecto **SCRUM**, sprint **SCRUM Sprint 2**, del **13 al 30 de octubre de 2026**
 ([tablero](https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1)). El sprint reúne once historias

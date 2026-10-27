@@ -9,9 +9,9 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 |---|---|---|---|
 | Creacional | **Builder** | `Question.Builder` | `question-service` |
 | Creacional | **Factory Method** | `CreadorDeAviso` (creador) y sus ocho subclases (`AvisoRevisoresAsignados`, `AvisoPreguntaEnRevision`, `AvisoEvaluacionRecibida`, `AvisoRevisionAprobada`, `AvisoRevisionRechazada`, `AvisoResultadoDeRevision`, `AvisoObservacionTardia`, `AvisoPreguntaPublicada`); registro `CreadoresDeAviso` | `notification-service` |
-| Estructural | **Adapter** | Puertos y adaptadores: `JpaQuestionRepository`, `JpaLifecycleRepository`, `JpaAssignmentRepository`, `JpaEvaluationRepository`, `JpaNotificationRepository`; mensajería (`LifecycleEventPublisher`, `AssignmentEventPublisher`, `EvaluationEventPublisher`, `UserEventPublisher`); clientes REST de otros servicios (`ValidadorRemoto`, `CicloDeVidaRemoto`, `CatalogoRemoto`); correo (`SimulatedEmailSender` detrás del puerto `EmailSender`) | todos |
+| Estructural | **Adapter** | Puertos y adaptadores: `JpaQuestionRepository`, `JpaLifecycleRepository`, `JpaAssignmentRepository`, `JpaEvaluationRepository`, `JpaNotificationRepository`; mensajería (`LifecycleEventPublisher`, `AssignmentEventPublisher`, `EvaluationEventPublisher`, `UserEventPublisher`); clientes REST de otros servicios (`ValidadorRemoto`, `CicloDeVidaRemoto`); correo (`SimulatedEmailSender` detrás del puerto `EmailSender`) | todos |
 | Estructural | **Facade** | `api-gateway` (Spring Cloud Gateway): una sola entrada que oculta la topología interna y centraliza token, autorización, circuit breaker y CORS | `api-gateway` |
-| Comportamiento | **Strategy** | `PoliticaDeDecision` con la estrategia `Unanimidad` (`evaluation-service`) y `SelectorDePreguntas` con `SeleccionAleatoria` (`catalog-service`); cada servicio la recibe por constructor (`ApplicationConfig`) | `evaluation-service`, `catalog-service` |
+| Comportamiento | **Strategy** | `PoliticaDeDecision` con la estrategia `Unanimidad`; el servicio la recibe por constructor (`ApplicationConfig`) | `evaluation-service` |
 | Comportamiento | **State** | `FaseDePregunta` y sus siete fases (`FaseBorrador`, `FasePendienteDeRevision`, `FaseEnRevision`, `FaseAprobada`, `FaseRechazada`, `FasePublicada`, `FaseArchivada`) | `lifecycle-service` |
 | Comportamiento | **Template Method** | `ReglaPorOpcion` con las reglas `ExpresionesProhibidasRule` y `LongitudYEstructuraOpcionesRule` | `validation-service` |
 | Estructural | **Decorator** | `EmailConReintentos` y `EmailConRegistro` decoran el puerto `EmailSender` | `email-service` |
@@ -52,10 +52,10 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 
 ### Facade · `api-gateway`
 
-- **Problema:** el frontend no debe conocer catorce servicios, sus direcciones ni sus réplicas.
+- **Problema:** el frontend no debe conocer diez servicios, sus direcciones ni sus réplicas.
 - **Solución:** el gateway expone una sola interfaz bajo `/api`, resuelve los servicios por Eureka, valida el JWT,
   aplica la tabla de roles y protege con circuit breaker, reintentos y bulkhead (documento 08).
-- **Prueba:** las 22 pruebas de `api-gateway`.
+- **Prueba:** las 25 pruebas de `api-gateway`.
 
 ### Strategy · `PoliticaDeDecision`
 
@@ -63,10 +63,6 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 - **Solución:** `PoliticaDeDecision.decidir(revisores, evaluaciones)` es la interfaz y `Unanimidad` la estrategia
   vigente (con un rechazo se cierra la ronda). `CasoDeEvaluacion` usa la interfaz, no la clase.
 - **Prueba:** `UnanimidadTest` y las pruebas de `CasoDeEvaluacion`.
-
-Una segunda estrategia, `SelectorDePreguntas`, decide cómo se escogen las preguntas de un simulacro (hoy, al azar:
-`SeleccionAleatoria`); cambiarla por una que equilibre por competencia no toca `SimulationApplicationService`
-(`SeleccionAleatoriaTest`).
 
 ### State · `FaseDePregunta`
 
@@ -133,10 +129,10 @@ Esto **no es** un patrón GoF; se documenta porque explica una decisión del có
 |---|---|
 | API Gateway | `api-gateway` (Spring Cloud Gateway): entrada única, autorización, CORS |
 | Service Registry y Discovery | Eureka (`discovery-server`); las réplicas se registran solas |
-| Base de datos por servicio | Cinco instancias de PostgreSQL |
+| Base de datos por servicio | Nueve instancias de PostgreSQL (una por servicio, menos `validation-service`, que no guarda datos) |
 | Arquitectura orientada a eventos | RabbitMQ, exchange *topic* `bancopreguntas.events` |
 | Consumidor idempotente | Tabla `processed_event` en cada consumidor |
-| Transactional Outbox | question, review y user: el evento se guarda con el cambio y un relevo lo publica |
+| Transactional Outbox | lifecycle, assignment, evaluation, notification y user: el evento se guarda con el cambio y un relevo lo publica |
 | Circuit Breaker, Retry y Bulkhead | Gateway (Resilience4J) |
 | Dead Letter Queue | `bancopreguntas.dead-letter`, por política de RabbitMQ |
 | Seguridad con JWT | Keycloak, validado en el gateway y en cada servicio |

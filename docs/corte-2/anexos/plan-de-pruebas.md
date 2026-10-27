@@ -18,35 +18,31 @@ quedó construido. Todas las pruebas automatizadas se ejecutan con `./mvnw test`
 | Arquitectura | El dominio no depende de Spring, JPA, Jackson ni de las capas externas | ArchUnit |
 | Extremo a extremo por servicio | Flujo completo del servicio con su base y su API | Spring Boot Test |
 | Frontend | Componentes, servicios, validaciones, etiquetas y rutas | Vitest |
-| Funcional con Docker | Las historias de usuario contra la pila completa | `recorrido_funcional.py` |
+| Funcional con Docker | Las historias de usuario contra la pila completa | [`recorrido_funcional.py`](../../../microservicios/pruebas-funcionales/README.md) |
 | Contrato | Cada servicio por su API pública, con casos de éxito y de error | [Colecciones de Postman](../api/README.md) ejecutadas con newman |
 | Carga | Escalabilidad (no cuenta como unitaria) | k6, ver [04](../04-escalabilidad.md) |
 
-## Resultados (octubre de 2026, versión de 14 servicios)
+## Resultados (26 de octubre de 2026)
 
 | Módulo | Pruebas | Qué cubren |
 |---|---|---|
-| `bp-platform` | 69 | JWT y roles, anti-suplantación de cabeceras, propagación de la identidad entre servicios, sobre de eventos, publicador AMQP, lector de eventos entrantes, Outbox sobre PostgreSQL real, manejo de errores |
-| `question-service` | 189 | `Question` y su Builder, copia del estado y su secuencia, filtros y paginación, casos de uso con dobles de validación y de ciclo de vida, clientes REST (`ValidadorRemoto`, `CicloDeVidaRemoto`), API, persistencia, escucha de `question.state-changed`, flujo completo |
-| `validation-service` | 28 | Las siete reglas de validación y `QuestionValidator`, `ReglaPorOpcion`, API (siempre 200 con las violaciones), roles y flujo sin base de datos |
-| `lifecycle-service` | 78 | Estados y fases (State), `CicloDeVida`, secuencia y versión, casos de uso (enviar, reabrir, publicar y reacción a la revisión, idempotencia), API, persistencia, publicador de eventos y flujo completo |
-| `assignment-service` | 77 | `CasoDeAsignacion` (rondas, asignar, reasignación automática, reapertura), casos de uso, bandeja del revisor, API, persistencia, escucha de eventos, JWT y flujo completo |
-| `evaluation-service` | 76 | `CasoDeEvaluacion` (evaluar, rondas, vistas por observador), `Unanimidad`, casos de uso, API, persistencia, concurrencia (varios revisores a la vez), mensajería, JWT |
-| `notification-service` | 91 | `Notificacion`, Factory Method de avisos (`CreadoresDeAvisoTest`), casos de uso (quién recibe qué, idempotencia), publicación de `notification.created`, API, persistencia, escucha de eventos, flujo completo |
+| `bp-platform` | 70 | JWT y roles, anti-suplantación de cabeceras, propagación de la identidad entre servicios, sobre de eventos, publicador AMQP, lector de eventos entrantes, Outbox sobre PostgreSQL real, manejo de errores |
+| `question-service` | 141 | `Question` y su Builder, copia del estado y su secuencia, filtros y paginación, casos de uso con dobles de validación y de ciclo de vida, clientes REST (`ValidadorRemoto`, `CicloDeVidaRemoto`), API, persistencia, escucha de `question.state-changed`, flujo completo |
+| `validation-service` | 53 | Las siete reglas de validación y `QuestionValidator`, `ReglaPorOpcion`, API (siempre 200 con las violaciones), roles y flujo sin base de datos |
+| `lifecycle-service` | 99 | Estados y fases (State), `CicloDeVida`, secuencia y versión, casos de uso (enviar, reabrir, publicar y reacción a la revisión, idempotencia), API, persistencia, publicador de eventos y flujo completo |
+| `assignment-service` | 96 | `CasoDeAsignacion` (rondas, asignar, reasignación automática, reapertura), casos de uso, bandeja del revisor, API, persistencia, escucha de eventos, JWT y flujo completo |
+| `evaluation-service` | 107 | `CasoDeEvaluacion` (evaluar, rondas, vistas por observador), `Unanimidad`, casos de uso, API, persistencia, concurrencia (varios revisores a la vez), mensajería, JWT |
+| `notification-service` | 85 | `Notificacion`, Factory Method de avisos (`CreadoresDeAvisoTest`), casos de uso (quién recibe qué, idempotencia), publicación de `notification.created`, API, persistencia, escucha de eventos, flujo completo |
 | `email-service` | 38 | Envío con reintentos y registro (Decorator), casos de uso, API (solo administrador), persistencia, escucha de `notification.created` y flujo completo |
 | `history-service` | 54 | Entradas de historial, visibilidad por rol, casos de uso, API, persistencia, escucha de eventos |
 | `audit-service` | 38 | Entradas de auditoría de los nueve eventos, filtros, casos de uso, API (solo administrador), persistencia, escucha de eventos y flujo completo |
-| `catalog-service` | 47 | Catálogo por evento (versiones y archivado), criterios y selección aleatoria, resumen, casos de uso, API (con el 409 de preguntas insuficientes), persistencia y flujo completo |
-| `simulation-service` | 79 | Criterios, calificación, control del tiempo y estados del simulacro, casos de uso con catálogo y reloj manual, cliente `CatalogoRemoto`, API, persistencia y flujo completo |
-| `statistics-service` | 55 | Estadísticas y tendencia, fortalezas y debilidades, casos de uso, publicación de `statistics.student-updated`, API, persistencia, escucha de eventos y flujo completo |
-| `report-service` | 31 | Reporte de grupo y CSV, resúmenes (el más reciente gana), casos de uso, API, persistencia, escucha de eventos y flujo completo |
 | `user-service` | 62 | Perfiles, sincronización con Keycloak (cliente simulado), eventos de acceso, API, persistencia |
-| `api-gateway` | 25 | Rutas de los 14 servicios, 401 y 403 por rol (incluidos estudiante y docente), anti-suplantación, circuit breaker, fallback, CORS y rutas internas sin exponer |
+| `api-gateway` | 25 | Rutas de los servicios, 401 y 403 por rol, anti-suplantación, circuit breaker, fallback, CORS y rutas internas sin exponer |
 | `discovery-server` | 3 | Salud y registro de servicios de Eureka |
-| **Backend** | **1040** | |
-| `frontend` (Vitest) | 183 | Formularios y validación, listados, detalle, evaluación, selector de revisores, notificaciones, simulacros, presentación del simulacro, seguimiento, reporte del grupo, guardias de rutas, etiquetas y estados |
+| **Backend (sin los servicios del tercer corte)** | **868** | |
+| `frontend` (Vitest) | 166 | Formularios y validación, listados, detalle, evaluación, selector de revisores, notificaciones, guardias de rutas, etiquetas y estados |
 
-Cobertura del dominio: todas las clases del dominio de los 14 servicios tienen pruebas propias o directas
+Cobertura del dominio: todas las clases del dominio de los diez servicios tienen pruebas propias o directas
 (incluidas las utilidades internas de validación, `TextoTest`). Los tipos de aviso se prueban uno por uno
 (`CreadoresDeAvisoTest`).
 
@@ -110,18 +106,6 @@ Cobertura del dominio: todas las clases del dominio de los 14 servicios tienen p
 | `history-service` | Guarda una entrada por evento de la pregunta, ignora eventos repetidos, el autor ve solo sus preguntas, el revisor las asignadas y el administrador todo |
 | `audit-service` | Guarda los nueve eventos (incluidos los inicios de sesión), filtra por tipo, usuario, pregunta y fechas, y solo el administrador consulta |
 
-### catalog-service, simulation-service, statistics-service y report-service
-
-| Elemento | Casos principales |
-|---|---|
-| Catálogo | Versiones y archivado; filtros por competencia, tema (sin tildes, también por subtema) y dificultad; selección sin repetir; 409 si no hay suficientes |
-| `Simulacro` | Contestar y cambiar respuestas, el límite exacto del tiempo, finalizar a tiempo y expirado, no contestar un simulacro terminado |
-| `Calificador` | Aciertos, errores y sin responder; puntaje con dos decimales; agrupación por competencia |
-| Casos de uso (simulacros) | Generar con el catálogo, contestar con el tiempo agotado, cierre periódico de vencidos, acceso solo a lo propio, 503 si el catálogo cae |
-| `EstadisticasIndividuales` y `AnalisisDeCompetencias` | Resumen, tendencia (ventana de 3), fortalezas, debilidades e intermedias; límites de los umbrales |
-| `ReporteDeGrupo` | Promedios, orden, empates y CSV con escape; un resumen más viejo no reemplaza al más nuevo |
-| Flujo de extremo a extremo | Del evento al simulacro calificado, a las estadísticas y al reporte por la API |
-
 ### api-gateway
 
 | Caso | Resultado esperado |
@@ -134,8 +118,8 @@ Cobertura del dominio: todas las clases del dominio de los 14 servicios tienen p
 
 ## Pruebas de aceptación
 
-Los criterios de aceptación de [01 · Historias de usuario](../01-historias-de-usuario.md) se recorren con el recorrido
-funcional automático y las colecciones de Postman (11 colecciones, 314 verificaciones). Ambos se ejecutaron contra la pila de Docker
-de 14 servicios el 19 de octubre de 2026 (73 y 314 comprobaciones, sin fallos), y k6 se corrió como prueba de humo con 30 usuarios
-(umbrales cumplidos, p95 de 17 ms); la prueba de carga completa con 600 usuarios queda por repetir. La prueba de usabilidad con usuarios reales está pendiente de aplicar
-([guion y plantillas](prueba-de-usabilidad.md)).
+Los criterios de aceptación de [01 · Historias de usuario](../01-historias-de-usuario.md) se recorren con el recorrido funcional automático
+y las colecciones de Postman. El 26 de octubre de 2026, contra la pila de Docker, el recorrido funcional pasó con 71 comprobaciones y 0
+fallos, y las 7 colecciones de Postman con 107 peticiones y 172 verificaciones, también sin fallos. La prueba de carga con k6 (600
+usuarios) cumplió los tres umbrales: a ritmo humano p95 de 30 ms y en estrés p95 de 826 ms con 921 peticiones por segundo, sin errores
+([04 · Escalabilidad](../04-escalabilidad.md)).

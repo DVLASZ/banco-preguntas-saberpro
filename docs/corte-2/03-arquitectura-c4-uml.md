@@ -1,17 +1,12 @@
 # 03 · Arquitectura (C4 y UML)
 
-> **Estado del repositorio (octubre de 2026).** Esta documentación describe la arquitectura de **14 microservicios** que se está
-> implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**; la nueva
-> distribución divide varios de ellos para que cada uno tenga una sola responsabilidad (ver la tabla del [README de los servicios](../../microservicios/servicios/README.md)). Ya está implementada y verificada de punta a punta en local y el código se irá publicando por
-> partes; mientras tanto, lo que no está en el repositorio aparece en esta documentación como texto, sin enlace.
-
 > Cada diagrama de este documento también está como imagen (SVG y PNG) en [`img/diagramas`](img/diagramas/), lista para el documento formal en Word o PDF.
 > Los nombres de clases, tablas y rutas son los del código; si algo cambia en el código, este documento se actualiza con él.
 
 ## Estilo arquitectónico
 
 Microservicios orientados a eventos con un API Gateway como único punto de entrada, una base de datos
-por servicio y un broker de mensajes para la comunicación entre servicios. Son 14 servicios pequeños, cada uno con una sola
+por servicio y un broker de mensajes para la comunicación entre servicios. Son 10 servicios pequeños, cada uno con una sola
 responsabilidad ([02 · Contextos](02-contextos-y-eventos.md) explica la división). Frontend y backend están
 separados y se comunican solo por API REST. La identidad la gestiona un proveedor externo (Keycloak) y los
 servicios validan el JWT que emite. La justificación de cada decisión está en
@@ -24,15 +19,11 @@ flowchart LR
   AUT["Autor de preguntas"]
   ADM["Administrador"]
   REV["Revisor"]
-  EST["Estudiante"]
-  DOC["Docente"]
   SYS["Sistema Banco de Preguntas<br/>Saber Pro"]
   KC["Keycloak<br/>proveedor de identidad"]
   AUT -- "crea, envía y consulta preguntas" --> SYS
   ADM -- "asigna revisores y publica" --> SYS
   REV -- "evalúa preguntas" --> SYS
-  EST -- "presenta simulacros y ve su progreso" --> SYS
-  DOC -- "consulta el progreso y los reportes" --> SYS
   SYS -- "autentica y obtiene usuarios" --> KC
 ```
 
@@ -58,25 +49,20 @@ flowchart TB
   EM["email-service"]
   HS["history-service"]
   AU["audit-service"]
-  CS["catalog-service"]
-  SS["simulation-service"]
-  ST["statistics-service"]
-  RP["report-service"]
   MQ{{"RabbitMQ<br/>exchange bancopreguntas.events"}}
-  DB[("13 bases PostgreSQL<br/>una por servicio")]
+  DB[("9 bases PostgreSQL<br/>una por servicio")]
   FE -- "REST/JSON" --> EDGE
   FE -. "login PKCE" .-> KC
   EDGE --> GW
   GW -. "registro" .-> EU
   GW -. "claves públicas" .-> KC
   US -. "usuarios y eventos de acceso" .-> KC
-  GW --> US & QS & AS & ES & NS & EM & HS & AU & CS & SS & ST & RP
+  GW --> US & QS & AS & ES & NS & EM & HS & AU
   QS -- "REST interno" --> VS
   QS -- "REST interno" --> LS
-  SS -- "REST interno" --> CS
-  US & LS & AS & ES & NS & SS & ST <-. "eventos" .-> MQ
-  QS & CS & EM & HS & AU & RP <-. "eventos" .-> MQ
-  US & QS & LS & AS & ES & NS & EM & HS & AU & CS & SS & ST & RP --- DB
+  US & LS & AS & ES & NS <-. "eventos" .-> MQ
+  QS & EM & HS & AU <-. "eventos" .-> MQ
+  US & QS & LS & AS & ES & NS & EM & HS & AU --- DB
 ```
 
 | Contenedor | Responsabilidad | Puerto |
@@ -91,17 +77,13 @@ flowchart TB
 | assignment-service | Rondas de revisión, asignación de revisores y bandeja del revisor | 8083 (depuración) |
 | notification-service | Consume eventos y crea los avisos de la bandeja; publica `notification.created` | 8084 (depuración) |
 | history-service | Línea de tiempo de cada pregunta | 8085 (depuración) |
-| simulation-service | Simulacros con tiempo y calificación automática | 8086 (depuración) |
-| statistics-service | Historial, estadísticas, fortalezas y debilidades de cada estudiante | 8087 (depuración) |
 | email-service | Correo simulado de cada aviso, con reintentos y registro | 8090 (depuración) |
 | audit-service | Auditoría de acciones e inicios de sesión | 8091 (depuración) |
-| catalog-service | Copia de las preguntas publicadas, resumen y selección al azar | 8092 (depuración) |
-| report-service | Reporte del grupo para docentes | 8093 (depuración) |
 | lifecycle-service | Estados de la pregunta, transiciones, historial y sus eventos (interno) | 8094 (depuración) |
 | validation-service | Reglas de calidad del contenido de una pregunta (interno, sin estado) | 8095 (depuración) |
 | evaluation-service | Evaluación de los revisores y decisión por unanimidad | 8096 (depuración) |
 | RabbitMQ | Broker de eventos | 5672, panel 15672 |
-| PostgreSQL ×13 | Una base por servicio (todos menos validation) | 5433 a 5446 (depuración) |
+| PostgreSQL ×9 | Una base por servicio (todos menos validation) | 5433 a 5446 (depuración) |
 
 ## C4 · Nivel 3: componentes
 
@@ -109,7 +91,7 @@ Todos los servicios siguen la misma organización interna: `api`, `application`,
 `infrastructure`. La capa de aplicación declara **puertos** (interfaces) y la de infraestructura los implementa con
 **adaptadores** (JPA, RabbitMQ, clientes REST): es una organización hexagonal. Una prueba de arquitectura
 (`ArquitecturaTest`, con ArchUnit) hace fallar la compilación si el dominio depende de Spring, de JPA o de las otras
-capas. Se muestran los servicios con más lógica; los demás (`user`, `history`, `audit`, `report`, `statistics`, `email`) siguen el
+capas. Se muestran los servicios con más lógica; los demás (`user`, `history`, `audit` y `email`) siguen el
 mismo esquema con un controlador, un servicio de aplicación, sus puertos y adaptadores.
 
 ### question-service
@@ -285,81 +267,6 @@ flowchart LR
   EC --> EAS
 ```
 
-### catalog-service y simulation-service
-
-```mermaid
-flowchart LR
-  subgraph catalog-service
-    CC["CatalogController"]
-    CAS["CatalogApplicationService"]
-    CRP["CatalogRepository (puerto)"]
-    SEL["SelectorDePreguntas<br/>(SeleccionAleatoria)"]
-    CRI["CriteriosDeSeleccion"]
-    PC["PreguntaDeCatalogo"]
-    QL["QuestionEventsListener"]
-  end
-  subgraph simulation-service
-    SC["SimulationController"]
-    SAS["SimulationApplicationService"]
-    CAT["CatalogoDePreguntas (puerto)"]
-    REM["CatalogoRemoto"]
-    SIM["Simulacro"]
-    CAL["Calificador"]
-    EXP["ExpirationScheduler"]
-  end
-  CC --> CAS
-  QL --> CAS
-  CAS --> CRI
-  CAS --> SEL
-  CAS --> CRP
-  CRP --> PC
-  SC --> SAS
-  SAS --> CAT
-  SAS --> SIM
-  SIM --> CAL
-  EXP --> SAS
-  REM -. implementa .-> CAT
-  REM -- "POST /api/catalog/selection" --> CC
-```
-
-### statistics-service y report-service
-
-```mermaid
-flowchart LR
-  subgraph statistics-service
-    TC["StatisticsController"]
-    TAS["StatisticsApplicationService"]
-    HR["HistorialRepository (puerto)"]
-    RR["ResultadoRegistrado"]
-    EI["EstadisticasIndividuales"]
-    AC["AnalisisDeCompetencias"]
-    SEL["SimulationEventsListener"]
-    SPUB["StatisticsEventPublisher"]
-  end
-  subgraph report-service
-    RL["StatisticsEventsListener"]
-    RAS["ReportApplicationService"]
-    SR["ResumenRepository (puerto)"]
-    RG["ReporteDeGrupo"]
-    RC["ReportController"]
-  end
-  TC --> TAS
-  SEL --> TAS
-  TAS --> HR
-  TAS --> EI
-  TAS --> AC
-  EI --> RR
-  TAS --> SPUB
-  SPUB -- "statistics.student-updated" --> RL
-  RL --> RAS
-  RAS --> SR
-  RAS --> RG
-  RC --> RAS
-```
-
-`user-service` además habla con Keycloak a través del puerto `IdentityProvider`. `validation-service` solo tiene
-`ValidationController`, `ValidationApplicationService` y las siete reglas `ValidationRule` que agrupa `QuestionValidator`.
-
 ## Máquina de estados de la pregunta
 
 ```mermaid
@@ -462,44 +369,12 @@ sequenceDiagram
   MQ->>AS: nueva ronda con los mismos revisores (asignación automática)
 ```
 
-## Secuencia · simulacros y seguimiento (RF-21 a RF-28)
-
-```mermaid
-sequenceDiagram
-  actor EST as Estudiante
-  actor DOC as Docente
-  participant GW as api-gateway
-  participant SS as simulation-service
-  participant CS as catalog-service
-  participant MQ as RabbitMQ
-  participant ST as statistics-service
-  participant RP as report-service
-  EST->>GW: POST /api/simulations (criterios, cantidad, duración)
-  GW->>SS: valida token y rol STUDENT
-  SS->>CS: POST /api/catalog/selection (con la identidad del estudiante)
-  CS-->>SS: preguntas al azar con su respuesta correcta
-  SS-->>EST: 201, simulacro en curso con su tiempo (sin respuestas correctas)
-  EST->>GW: POST /api/simulations/{id}/answers (por pregunta)
-  EST->>GW: POST /api/simulations/{id}/finish
-  SS->>SS: califica automáticamente
-  SS->>MQ: simulation.completed
-  SS-->>EST: resultado y respuestas correctas
-  MQ->>ST: simulation.completed
-  ST->>ST: guarda el resultado en el historial
-  ST->>MQ: statistics.student-updated
-  MQ->>RP: guarda el resumen del estudiante
-  EST->>GW: GET /api/statistics/me/stats (historial, fortalezas)
-  DOC->>GW: GET /api/reports/group
-  GW->>RP: valida token y rol TEACHER o ADMIN
-  RP-->>DOC: reporte del grupo (JSON o CSV)
-```
-
 ## Modelo de datos por servicio
 
 Los servicios se refieren entre sí solo por identificador, sin claves foráneas entre bases. No hay borrado
 físico (RNF-16): se usan estados y fechas. Las migraciones de Flyway están en `src/main/resources/db/migration`
 de cada servicio. Todos los consumidores de eventos guardan `processed_event` (idempotencia) y los servicios que publican
-(`lifecycle_db`, `assignment_db`, `evaluation_db`, `notification_db`, `simulation_db`, `statistics_db` y `user_db`) guardan además
+(`lifecycle_db`, `assignment_db`, `evaluation_db`, `notification_db` y `user_db`) guardan además
 `outbox_event` (patrón Outbox: `seq`, `event_id`, `routing_key`, `payload`, `created_at`, `sent_at`). `validation-service` no tiene base.
 
 ### user_db
@@ -740,109 +615,6 @@ erDiagram
     text details
     timestamp occurred_at
     timestamp recorded_at
-  }
-```
-
-### catalog_db
-
-```mermaid
-erDiagram
-  CATALOG_QUESTION {
-    string question_id PK
-    int question_version
-    string title
-    string competency
-    string topic
-    string subtopic
-    string difficulty
-    text context
-    text statement
-    string option_a
-    string option_b
-    string option_c
-    string option_d
-    string correct_answer
-    timestamp published_at
-    boolean available
-  }
-```
-
-### simulation_db
-
-```mermaid
-erDiagram
-  SIMULATION ||--|{ SIMULATION_ITEM : contiene
-  SIMULATION {
-    string id PK
-    string student_id
-    string status
-    timestamp started_at
-    timestamp due_at
-    timestamp finished_at
-    int duration_minutes
-    int requested_count
-    string competencies
-    string topics
-    string difficulties
-    int total
-    int correct
-    int incorrect
-    int unanswered
-    decimal score
-    text by_competency
-  }
-  SIMULATION_ITEM {
-    long id PK
-    string simulation_id FK
-    int position
-    string question_id
-    int question_version
-    string competency
-    string difficulty
-    text statement
-    string correct_answer
-    string answer
-  }
-```
-
-`simulation_item` guarda una copia completa de la pregunta (título, tema, subtema, contexto y las cuatro opciones; aquí se
-muestran solo algunas columnas): el simulacro no cambia aunque la pregunta se archive después. El catálogo ya no está aquí.
-
-### statistics_db
-
-```mermaid
-erDiagram
-  RESULT_ENTRY {
-    string simulation_id PK
-    string student_id
-    timestamp started_at
-    timestamp finished_at
-    long duration_seconds
-    boolean expired
-    int total
-    int correct
-    int incorrect
-    int unanswered
-    decimal score
-    text by_competency
-  }
-```
-
-### report_db
-
-```mermaid
-erDiagram
-  STUDENT_SUMMARY {
-    string student_id PK
-    int simulations
-    decimal score_sum
-    decimal average
-    decimal best
-    decimal last_score
-    string trend
-    text weaknesses
-    text by_competency
-    timestamp updated_at
   }
 ```
 

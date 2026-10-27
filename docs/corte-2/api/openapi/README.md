@@ -15,10 +15,6 @@ expone**. Se vuelven a generar cuando cambia una API.
 | email-service | [`openapi-email-service.json`](openapi-email-service.json) |
 | history-service | [`openapi-history-service.json`](openapi-history-service.json) |
 | audit-service | [`openapi-audit-service.json`](openapi-audit-service.json) |
-| catalog-service | [`openapi-catalog-service.json`](openapi-catalog-service.json) |
-| simulation-service | [`openapi-simulation-service.json`](openapi-simulation-service.json) |
-| statistics-service | [`openapi-statistics-service.json`](openapi-statistics-service.json) |
-| report-service | [`openapi-report-service.json`](openapi-report-service.json) |
 
 ## Regenerarlos
 
@@ -27,7 +23,7 @@ Cada servicio trae una prueba, `ContratoOpenApiTest`, que arranca el servicio co
 
 ```bash
 cd microservicios
-./mvnw -q -pl servicios/catalog-service -am test -Dtest=ContratoOpenApiTest -Dsurefire.failIfNoSpecifiedTests=false \
+./mvnw -q -pl servicios/lifecycle-service -am test -Dtest=ContratoOpenApiTest -Dsurefire.failIfNoSpecifiedTests=false \
   -Dopenapi.export=../docs/corte-2/api/openapi
 ```
 

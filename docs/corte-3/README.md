@@ -4,8 +4,9 @@ Tercera iteración del Sistema de Banco de Preguntas Saber Pro. Los requisitos o
 [`EntregablesTercerCorte2026.2-IngSoft2.docx`](../general/enunciados/EntregablesTercerCorte2026.2-IngSoft2.docx).
 Esta carpeta se llena a medida que se avanza; hoy recoge el alcance y el estado.
 
-> **Adelantado:** los simulacros y el seguimiento académico (RF-21 a RF-28), que los docentes ubicaron en este corte, ya
-> están construidos en el backend: ver [simulacros y seguimiento](simulacros-y-seguimiento.md).
+> **Nota:** los simulacros y el seguimiento académico (RF-21 a RF-28) son de este corte. El diseño de cómo quedarán está en
+> [simulacros y seguimiento](simulacros-y-seguimiento.md). En el repositorio, `simulation-service` y `tracking-service` siguen como en el
+> primer diseño y no forman parte de la entrega del segundo corte.
 
 ## Alcance del corte
 
