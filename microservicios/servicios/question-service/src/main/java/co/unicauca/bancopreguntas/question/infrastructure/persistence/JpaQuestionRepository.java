@@ -1,8 +1,6 @@
 package co.unicauca.bancopreguntas.question.infrastructure.persistence;
 
 import co.unicauca.bancopreguntas.question.application.port.QuestionRepository;
-import co.unicauca.bancopreguntas.question.domain.CambioEstado;
-import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
 import co.unicauca.bancopreguntas.question.domain.Pagina;
 import co.unicauca.bancopreguntas.question.domain.Question;
@@ -21,11 +19,9 @@ import java.util.Optional;
 public class JpaQuestionRepository implements QuestionRepository {
 
     private final QuestionJpaRepository preguntas;
-    private final StateHistoryJpaRepository historial;
 
-    public JpaQuestionRepository(QuestionJpaRepository preguntas, StateHistoryJpaRepository historial) {
+    public JpaQuestionRepository(QuestionJpaRepository preguntas) {
         this.preguntas = preguntas;
-        this.historial = historial;
     }
 
     @Override
@@ -50,27 +46,6 @@ public class JpaQuestionRepository implements QuestionRepository {
                 PageRequest.of(pagina - 1, tamano));
         List<Question> elementos = resultado.getContent().stream().map(QuestionMapper::aDominio).toList();
         return new Pagina<>(elementos, pagina, tamano, Math.toIntExact(resultado.getTotalElements()));
-    }
-
-    @Override
-    public void registrarCambioEstado(String preguntaId, CambioEstado cambio) {
-        EstadoPregunta desde = cambio.desde();
-        historial.save(new StateHistoryEntity(preguntaId,
-                desde == null ? null : desde.name(),
-                cambio.hacia().name(),
-                cambio.cambiadoPor(),
-                cambio.fecha()));
-    }
-
-    @Override
-    public List<CambioEstado> historial(String preguntaId) {
-        return historial.findByQuestionIdOrderByFechaAscIdAsc(preguntaId).stream()
-                .map(h -> new CambioEstado(
-                        h.getDesde() == null ? null : EstadoPregunta.valueOf(h.getDesde()),
-                        EstadoPregunta.valueOf(h.getHacia()),
-                        h.getCambiadoPor(),
-                        h.getFecha()))
-                .toList();
     }
 
     /** {@code %texto%} con los comodines de LIKE escapados; {@code null} si no hay texto que buscar. */

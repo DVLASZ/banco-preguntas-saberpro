@@ -1,7 +1,6 @@
 package co.unicauca.bancopreguntas.question.application;
 
 import co.unicauca.bancopreguntas.question.application.port.QuestionRepository;
-import co.unicauca.bancopreguntas.question.domain.CambioEstado;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
 import co.unicauca.bancopreguntas.question.domain.Pagina;
 import co.unicauca.bancopreguntas.question.domain.Question;
@@ -17,7 +16,6 @@ import java.util.Optional;
 class InMemoryQuestionRepository implements QuestionRepository {
 
     private final Map<String, Question> preguntas = new LinkedHashMap<>();
-    private final Map<String, List<CambioEstado>> historiales = new LinkedHashMap<>();
 
     @Override
     public Question guardar(Question pregunta) {
@@ -40,16 +38,6 @@ class InMemoryQuestionRepository implements QuestionRepository {
         int desde = Math.min((pagina - 1) * tamano, coincidentes.size());
         int hasta = Math.min(desde + tamano, coincidentes.size());
         return new Pagina<>(new ArrayList<>(coincidentes.subList(desde, hasta)), pagina, tamano, coincidentes.size());
-    }
-
-    @Override
-    public void registrarCambioEstado(String preguntaId, CambioEstado cambio) {
-        historiales.computeIfAbsent(preguntaId, id -> new ArrayList<>()).add(cambio);
-    }
-
-    @Override
-    public List<CambioEstado> historial(String preguntaId) {
-        return List.copyOf(historiales.getOrDefault(preguntaId, List.of()));
     }
 
     int cantidad() {

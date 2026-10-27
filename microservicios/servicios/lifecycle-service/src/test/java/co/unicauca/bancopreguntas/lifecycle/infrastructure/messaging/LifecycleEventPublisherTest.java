@@ -1,0 +1,100 @@
+package co.unicauca.bancopreguntas.lifecycle.infrastructure.messaging;
+
+import co.unicauca.bancopreguntas.lifecycle.domain.ContenidoPublicado;
+import co.unicauca.bancopreguntas.lifecycle.domain.event.QuestionPublished;
+import co.unicauca.bancopreguntas.lifecycle.domain.event.QuestionReopened;
+import co.unicauca.bancopreguntas.lifecycle.domain.event.QuestionStateChanged;
+import co.unicauca.bancopreguntas.lifecycle.domain.event.QuestionSubmitted;
+import co.unicauca.bancopreguntas.platform.events.AmqpEventPublisher;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+@DisplayName("LifecycleEventPublisher")
+class LifecycleEventPublisherTest {
+
+    private final RabbitTemplate rabbit = mock(RabbitTemplate.class);
+    private final ObjectMapper json = new ObjectMapper();
+    private final LifecycleEventPublisher publicador = new LifecycleEventPublisher(new AmqpEventPublisher(
+            rabbit, json, Clock.fixed(Instant.parse("2026-10-08T15:00:00Z"), ZoneOffset.UTC)));
+
+    private JsonNode publicado(String routingKey) throws Exception {
+        ArgumentCaptor<Message> mensaje = ArgumentCaptor.forClass(Message.class);
+        verify(rabbit).send(eq("bancopreguntas.events"), eq(routingKey), mensaje.capture());
+        return json.readTree(mensaje.getValue().getBody());
+    }
+
+    @Test
+    @DisplayName("question.submitted lleva el título, la competencia y la versión")
+    void enviada() throws Exception {
+        publicador.publicar(new QuestionSubmitted("Q-1", "autor-1", "Observer", "INGLES", 2));
+
+        JsonNode sobre = publicado("question.submitted");
+
+        assertThat(sobre.get("type").asText()).isEqualTo("question.submitted");
+        JsonNode datos = sobre.get("data");
+        assertThat(datos.get("questionId").asText()).isEqualTo("Q-1");
+        assertThat(datos.get("authorId").asText()).isEqualTo("autor-1");
+        assertThat(datos.get("title").asText()).isEqualTo("Observer");
+        assertThat(datos.get("competency").asText()).isEqualTo("INGLES");
+        assertThat(datos.get("version").asInt()).isEqualTo(2);
+        assertThat(datos.has("type")).as("el tipo va solo en el sobre").isFalse();
+    }
+
+    @Test
+    @DisplayName("question.state-changed conserva el origen, el destino, la secuencia y un usuario nulo")
+    void cambioDeEstado() throws Exception {
+        publicador.publicar(new QuestionStateChanged("Q-1", "PENDIENTE_REVISION", "EN_REVISION", null, 3, 1));
+
+        JsonNode datos = publicado("question.state-changed").get("data");
+
+        assertThat(datos.get("from").asText()).isEqualTo("PENDIENTE_REVISION");
+        assertThat(datos.get("to").asText()).isEqualTo("EN_REVISION");
+        assertThat(datos.get("changedBy").isNull()).isTrue();
+        assertThat(datos.get("sequence").asInt()).isEqualTo(3);
+        assertThat(datos.get("version").asInt()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("question.reopened lleva la versión nueva")
+    void reabierta() throws Exception {
+        publicador.publicar(new QuestionReopened("Q-1", "autor-1", 3));
+
+        JsonNode datos = publicado("question.reopened").get("data");
+
+        assertThat(datos.get("questionId").asText()).isEqualTo("Q-1");
+        assertThat(datos.get("authorId").asText()).isEqualTo("autor-1");
+        assertThat(datos.get("version").asInt()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("question.published lleva quién publicó y el contenido de la pregunta")
+    void publicada() throws Exception {
+        publicador.publicar(QuestionPublished.de("Q-1", 2, "admin-1", new ContenidoPublicado("Observer", "LECTURA_CRITICA",
+                "Patrones", "Observer", "INTERMEDIO", "Contexto", "¿Qué patrón notifica?", "Factory", "Observer",
+                "Singleton", "Adapter", "B")));
+
+        JsonNode datos = publicado("question.published").get("data");
+
+        assertThat(datos.get("publishedBy").asText()).isEqualTo("admin-1");
+        assertThat(datos.get("version").asInt()).isEqualTo(2);
+        assertThat(datos.get("competency").asText()).isEqualTo("LECTURA_CRITICA");
+        assertThat(datos.get("difficulty").asText()).isEqualTo("INTERMEDIO");
+        assertThat(datos.get("statement").asText()).isEqualTo("¿Qué patrón notifica?");
+        assertThat(datos.get("optionB").asText()).isEqualTo("Observer");
+        assertThat(datos.get("correctAnswer").asText()).isEqualTo("B");
+    }
+}

@@ -1,9 +1,6 @@
 # question-service · Preguntas
 
-> **Primera distribución (7 servicios).** Este README describe el servicio tal como está publicado hoy. En la nueva distribución, de 14
-> servicios, se divide en `question-service` (contenido), `validation-service` (reglas de calidad) y `lifecycle-service` (estados y su historial); ver el [README de los servicios](../README.md).
-
-Dueño de las preguntas y de su ciclo de vida: el autor las redacta, las modifica mientras son borrador, las envía a revisión y, si el revisor las rechaza, las reabre como una versión nueva. El administrador publica las aprobadas.
+Dueño del contenido de las preguntas: el autor las redacta, las modifica mientras son borrador y las consulta con filtros; para validarlas, moverlas de estado y llevar su historial se apoya en `validation-service` y `lifecycle-service`.
 
 | | |
 |---|---|
@@ -11,28 +8,24 @@ Dueño de las preguntas y de su ciclo de vida: el autor las redacta, las modific
 | **Base de datos** | PostgreSQL `question_db` (puerto 5434 en local), con migraciones de Flyway |
 | **Swagger** | `http://localhost:8080/docs/question-service/v3/api-docs` (a través del gateway) |
 | **Contrato exportado** | [`openapi-question-service.json`](../../../docs/corte-2/api/openapi/openapi-question-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/question-service.postman_collection.json) |
-| **Pruebas** | 174 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| **Pruebas** | 141 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Gestión de Preguntas** (HU-01, HU-02, HU-03 y la publicación de HU-07). Guarda la pregunta con su contexto, enunciado, cuatro opciones, justificación, bibliografía y clasificación (competencia, tema, subtema y dificultad), lleva el historial de estados y la versión, y es la única que cambia el estado de una pregunta: lo hace al actuar el autor o el administrador, y al reaccionar a lo que informa `review-service`.
+Es el contexto de **Gestión de Preguntas** (HU-01, HU-02, HU-03 y la publicación de HU-07). Guarda la pregunta con su contexto, enunciado, cuatro opciones, justificación, bibliografía y clasificación (competencia, tema, subtema y dificultad) y su versión. **No decide el estado**: guarda una copia (con el número del último cambio aplicado) que mantiene al día con lo que le informa `lifecycle-service`, para poder listar y filtrar por estado y saber si la pregunta todavía se puede editar.
 
 ## Reglas de negocio
 
-- Una pregunta pasa por siete estados: Borrador, Pendiente de revisión, En revisión, Aprobada, Rechazada, Publicada y Archivada.
-  Las transiciones válidas son las de RF-15; cualquier otra se rechaza con 409.
-- Solo se modifica una pregunta en **Borrador** y solo su autor.
-- Al crear, modificar y enviar a revisión se valida la estructura con siete reglas (campos obligatorios, contexto, una única pregunta
-  directa, exactamente cuatro opciones, una única respuesta correcta, sin expresiones como «todas las anteriores» y longitud y estructura
-  de las opciones). El validador reúne todas las violaciones para que el autor corrija todo de una vez.
-- Una pregunta rechazada se **reabre** como Borrador con una versión nueva; el historial de estados se conserva.
-- Ninguna pregunta se borra: cualquier estado puede pasar a Archivada (RNF-16).
-- Si llega un evento que la fase actual de la pregunta no admite (por ejemplo, un resultado repetido), se ignora.
+- Solo se modifica una pregunta en **Borrador** y solo su autor (RF-06); fuera de ese estado se responde 409.
+- Al crear, modificar y enviar a revisión se pide la validación estructural a `validation-service`, que reúne todas las violaciones para que el autor corrija todo de una vez (400 con el detalle).
+- Crear registra la pregunta en `lifecycle-service`; enviar, reabrir y publicar piden la transición a ese servicio, que es quien la autoriza, la anota en el historial y publica los eventos. Lo que ese servicio rechaza (403, 404, 409) vuelve igual al cliente.
+- La copia del estado se actualiza con la respuesta de la transición y con `question.state-changed`; un aviso repetido o atrasado se ignora gracias al número de secuencia.
+- Si `validation-service` o `lifecycle-service` no responden, la operación no se hace y se informa 503; la consulta de una pregunta sigue funcionando y solo omite el historial.
+- Ninguna pregunta se borra (RNF-16).
 
 ## API REST
 
-Todas las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el rol; el servicio vuelve a
-comprobarlo con el usuario autenticado que recibe.
+Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el rol; el servicio vuelve a comprobarlo con el usuario autenticado que recibe.
 
 | Método | Ruta | Qué hace |
 |---|---|---|
@@ -46,32 +39,32 @@ comprobarlo con el usuario autenticado que recibe.
 | `POST` | `/api/questions/{id}/reopen` | Reabrir una pregunta rechazada para corregirla: vuelve a Borrador como una versión nueva. Rol AUTHOR. |
 | `POST` | `/api/questions/{id}/submit` | Enviar a revisión: de Borrador a Pendiente de revisión (HU-02). Rol AUTHOR. |
 
+## Llamadas a otros servicios
+
+Son llamadas REST síncronas con la identidad de quien hizo la petición (la propaga `bp-platform`):
+
+- `validation-service` (`VALIDATION_SERVICE_URL`): revisar el contenido.
+- `lifecycle-service` (`LIFECYCLE_SERVICE_URL`): registrar, enviar, reabrir, publicar y leer el historial.
+
 ## Mensajería (RabbitMQ)
 
-**Publica** (con Outbox transaccional, en el exchange `bancopreguntas.events`):
-
-| Evento | Cuándo | Quién lo consume |
-|---|---|---|
-| `question.submitted` | El autor envía la pregunta a revisión | review, notification, history |
-| `question.reopened` | El autor reabre una rechazada | review, history |
-| `question.published` | El administrador publica una aprobada; **lleva el contenido de la pregunta** | simulation, notification, history |
-| `question.state-changed` | Cualquier cambio de estado | simulation, history |
+**Publica:** nada; es un consumidor puro.
 
 **Consume:**
 
 | Cola | Routing key | Efecto |
 |---|---|---|
-| `question.q.reviewers-assigned` | `review.reviewers-assigned` | La pregunta pasa a En revisión |
-| `question.q.review-completed` | `review.completed` | La pregunta pasa a Aprobada o Rechazada |
+| `question.q.state-changed` | `question.state-changed` | Actualiza la copia del estado de la pregunta |
 
 ## Base de datos
 
 | Migración | Contenido |
 |---|---|
-| `V1__esquema_inicial.sql` | Preguntas, historial de estados, eventos procesados |
-| `V2__version_de_la_pregunta.sql` | Número de versión de cada pregunta |
-| `V3__indices_de_busqueda.sql` | Índices para listar y filtrar |
-| `V4__bandeja_de_salida.sql` | Tabla del Outbox con los eventos pendientes de publicar |
+| `V1__esquema_inicial.sql` | question_db: preguntas, historial de estados y eventos procesados |
+| `V2__version_de_la_pregunta.sql` | Número de versión del contenido: sube cada vez que el autor reabre una pregunta rechazada |
+| `V3__indices_de_busqueda.sql` | Índices para las listas paginadas (más recientes primero): sin ellos, cada consulta ordena todas las preguntas del autor, o de toda la tabla en la lista del administrador |
+| `V4__bandeja_de_salida.sql` | Patrón Outbox: los eventos se guardan aquí en la misma transacción que el cambio de negocio y un relevo los publica en el broker; así no se pierden si RabbitMQ está caído |
+| `V5__ciclo_de_vida_en_otro_servicio.sql` | El estado, el historial y los eventos de las preguntas pasaron a lifecycle-service: aquí solo queda una copia del estado |
 
 ## Estructura
 
@@ -80,11 +73,10 @@ src/main/java/co/unicauca/bancopreguntas/question/
 ├── api/              Controlador REST, DTO y manejo de errores
 ├── application/      Casos de uso y puertos (interfaces que el dominio necesita)
 ├── domain/           Reglas de negocio y eventos; no depende de Spring ni de la base de datos
-└── infrastructure/   Adaptadores: JPA, RabbitMQ
+└── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Builder (`Question.Builder`), State (`FaseDePregunta` y sus siete fases), Template Method
-(`ReglaPorOpcion`), Adapter (puertos y adaptadores) y Observer (los eventos). Ver el [documento de patrones](../../../docs/corte-2/05-patrones.md).
+**Patrones de diseño que usa:** Builder (`Question`), Adapter (puertos de validación, ciclo de vida y persistencia) y Facade (`QuestionApplicationService`). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 
@@ -100,14 +92,15 @@ src/main/java/co/unicauca/bancopreguntas/question/
 | `QUESTION_SERVICE_PORT` | `8082` | Puerto HTTP |
 | `EUREKA_ENABLED` | `true` | Registrarse en Eureka (se apaga en las pruebas) |
 | `EUREKA_URL` | `http://localhost:8761/eureka` | Dirección de Eureka |
+| `VALIDATION_SERVICE_URL` | `http://localhost:8095` | Dónde está validation-service |
+| `LIFECYCLE_SERVICE_URL` | `http://localhost:8094` | Dónde está lifecycle-service |
 
 ## Ejecutar y probar
 
 ```bash
 # desde microservicios/
 ./mvnw -pl servicios/question-service -am test          # pruebas del servicio
-docker compose up -d --build question-service    # el servicio con sus dependencias (base, RabbitMQ, Eureka, Keycloak)
+docker compose up -d --build question-service    # el servicio con sus dependencias
 ```
 
-La pila completa se levanta como se explica en el [README de microservicios](../../README.md). Para recorrer el
-servicio a mano, importar su colección de Postman y el entorno `SaberPro_Local`.
+La pila completa se levanta como se explica en el [README de microservicios](../../README.md). Para recorrer el servicio a mano, importar su colección de Postman y el entorno `SaberPro_Local`.

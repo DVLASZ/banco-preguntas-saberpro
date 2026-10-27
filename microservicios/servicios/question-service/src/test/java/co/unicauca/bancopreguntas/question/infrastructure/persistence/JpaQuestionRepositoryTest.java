@@ -1,6 +1,5 @@
 package co.unicauca.bancopreguntas.question.infrastructure.persistence;
 
-import co.unicauca.bancopreguntas.question.domain.CambioEstado;
 import co.unicauca.bancopreguntas.question.domain.Competencia;
 import co.unicauca.bancopreguntas.question.domain.Dificultad;
 import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
@@ -17,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -33,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({JpaQuestionRepository.class, JpaProcessedEvents.class, EmbeddedPostgresConfig.class,
+@Import({JpaQuestionRepository.class, EmbeddedPostgresConfig.class,
         JpaQuestionRepositoryTest.RelojConfig.class})
 @DisplayName("Persistencia de preguntas (PostgreSQL)")
 class JpaQuestionRepositoryTest {
@@ -51,9 +49,6 @@ class JpaQuestionRepositoryTest {
 
     @Autowired
     private JpaQuestionRepository repositorio;
-
-    @Autowired
-    private JpaProcessedEvents procesados;
 
     private static Question.Builder base(String id) {
         return Question.builder()
@@ -106,6 +101,18 @@ class JpaQuestionRepositoryTest {
     }
 
     @Test
+    @DisplayName("persiste el estado y la secuencia del último cambio aplicado")
+    void secuenciaDelEstado() {
+        repositorio.guardar(base("Q-1").estadoSecuencia(1).build());
+        assertThat(repositorio.buscarPorId("Q-1").orElseThrow().getEstadoSecuencia()).isEqualTo(1);
+
+        repositorio.guardar(base("Q-1").estado(EstadoPregunta.EN_REVISION).estadoSecuencia(3).build());
+        Question leida = repositorio.buscarPorId("Q-1").orElseThrow();
+        assertThat(leida.getEstado()).isEqualTo(EstadoPregunta.EN_REVISION);
+        assertThat(leida.getEstadoSecuencia()).isEqualTo(3);
+    }
+
+    @Test
     @DisplayName("buscarPorId devuelve vacío si no existe")
     void noExiste() {
         assertThat(repositorio.buscarPorId("no-existe")).isEmpty();
@@ -126,33 +133,6 @@ class JpaQuestionRepositoryTest {
         assertThat(leida.getCreadaEn()).isEqualTo(T0);
         assertThat(leida.getActualizadaEn()).isEqualTo(T0.plusSeconds(60));
         assertThat(repositorio.buscar(null, FiltroPreguntas.sinFiltros(), 1, 10).totalElementos()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("el historial de estados se devuelve en orden y admite un origen nulo")
-    void historial() {
-        repositorio.guardar(base("Q-1").build());
-        repositorio.registrarCambioEstado("Q-1", new CambioEstado(null, EstadoPregunta.BORRADOR, "autor-1", T0));
-        repositorio.registrarCambioEstado("Q-1",
-                new CambioEstado(EstadoPregunta.BORRADOR, EstadoPregunta.PENDIENTE_REVISION, "autor-1", T0.plusSeconds(10)));
-        repositorio.registrarCambioEstado("Q-1",
-                new CambioEstado(EstadoPregunta.PENDIENTE_REVISION, EstadoPregunta.EN_REVISION, null, T0.plusSeconds(20)));
-
-        List<CambioEstado> historial = repositorio.historial("Q-1");
-
-        assertThat(historial).extracting(CambioEstado::hacia).containsExactly(
-                EstadoPregunta.BORRADOR, EstadoPregunta.PENDIENTE_REVISION, EstadoPregunta.EN_REVISION);
-        assertThat(historial.get(0).desde()).isNull();
-        assertThat(historial.get(2).cambiadoPor()).isNull();
-        assertThat(historial.get(1).fecha()).isEqualTo(T0.plusSeconds(10));
-    }
-
-    @Test
-    @DisplayName("no se puede registrar historial de una pregunta que no existe")
-    void historialDeUnaPreguntaInexistente() {
-        assertThatThrownBy(() -> repositorio.registrarCambioEstado("fantasma",
-                new CambioEstado(null, EstadoPregunta.BORRADOR, "autor-1", T0)))
-                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -248,14 +228,6 @@ class JpaQuestionRepositoryTest {
 
         assertThat(pagina.elementos()).isEmpty();
         assertThat(pagina.totalElementos()).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("los eventos procesados son idempotentes")
-    void eventosProcesados() {
-        assertThat(procesados.registrarSiEsNuevo("evento-1")).isTrue();
-        assertThat(procesados.registrarSiEsNuevo("evento-1")).isFalse();
-        assertThat(procesados.registrarSiEsNuevo("evento-2")).isTrue();
     }
 
     private static List<String> ids(Pagina<Question> pagina) {

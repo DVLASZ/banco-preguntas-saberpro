@@ -1,21 +1,18 @@
 package co.unicauca.bancopreguntas.question.application;
 
+import co.unicauca.bancopreguntas.question.application.port.EstadoDeCiclo;
 import co.unicauca.bancopreguntas.question.domain.AccesoDenegadoException;
 import co.unicauca.bancopreguntas.question.domain.CambioEstado;
 import co.unicauca.bancopreguntas.question.domain.Competencia;
+import co.unicauca.bancopreguntas.question.domain.DependenciaNoDisponibleException;
 import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
 import co.unicauca.bancopreguntas.question.domain.OperacionNoPermitidaException;
 import co.unicauca.bancopreguntas.question.domain.Pagina;
 import co.unicauca.bancopreguntas.question.domain.Question;
 import co.unicauca.bancopreguntas.question.domain.QuestionNotFoundException;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionPublished;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionReopened;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionStateChanged;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionSubmitted;
 import co.unicauca.bancopreguntas.question.domain.validation.ContenidoDePrueba;
 import co.unicauca.bancopreguntas.question.domain.validation.QuestionValidationException;
-import co.unicauca.bancopreguntas.question.domain.validation.QuestionValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,17 +35,18 @@ class QuestionApplicationServiceTest {
 
     private RelojManual reloj;
     private InMemoryQuestionRepository repositorio;
-    private RecordingEventPublisher eventos;
+    private ValidadorDePrueba validador;
+    private CicloDeVidaDePrueba ciclo;
     private QuestionApplicationService servicio;
 
     @BeforeEach
     void preparar() {
         reloj = new RelojManual(INICIO);
         repositorio = new InMemoryQuestionRepository();
-        eventos = new RecordingEventPublisher();
+        validador = new ValidadorDePrueba();
+        ciclo = new CicloDeVidaDePrueba(reloj);
         AtomicInteger consecutivo = new AtomicInteger();
-        servicio = new QuestionApplicationService(repositorio, eventos, new InMemoryProcessedEvents(),
-                QuestionValidator.porDefecto(), reloj, () -> "Q-" + consecutivo.incrementAndGet());
+        servicio = new QuestionApplicationService(repositorio, validador, ciclo, reloj, () -> "Q-" + consecutivo.incrementAndGet());
     }
 
     private Question borrador() {
@@ -58,16 +56,22 @@ class QuestionApplicationServiceTest {
     private Question pendiente() {
         Question creada = borrador();
         servicio.enviarARevision(creada.getId(), AUTOR);
-        eventos = new RecordingEventPublisher();
-        servicio = nuevoServicio(eventos);
         return servicio.obtener(creada.getId());
     }
 
-    /** Un servicio nuevo sobre el mismo repositorio, para empezar a contar eventos desde cero. */
-    private QuestionApplicationService nuevoServicio(RecordingEventPublisher nuevosEventos) {
-        AtomicInteger consecutivo = new AtomicInteger(100);
-        return new QuestionApplicationService(repositorio, nuevosEventos, new InMemoryProcessedEvents(),
-                QuestionValidator.porDefecto(), reloj, () -> "Q-" + consecutivo.incrementAndGet());
+    /** Deja la pregunta en el estado que dejaría la revisión y aplica el aviso de lifecycle-service. */
+    private Question enEstado(Question pregunta, EstadoPregunta estado) {
+        EstadoDeCiclo nuevo = ciclo.forzar(pregunta.getId(), estado);
+        servicio.alCambiarElEstado(pregunta.getId(), nuevo.estado(), nuevo.version(), nuevo.secuencia());
+        return servicio.obtener(pregunta.getId());
+    }
+
+    private Question aprobada() {
+        return enEstado(enEstado(pendiente(), EstadoPregunta.EN_REVISION), EstadoPregunta.APROBADA);
+    }
+
+    private Question rechazada() {
+        return enEstado(enEstado(pendiente(), EstadoPregunta.EN_REVISION), EstadoPregunta.RECHAZADA);
     }
 
     @Nested
@@ -75,7 +79,7 @@ class QuestionApplicationServiceTest {
     class CrearBorrador {
 
         @Test
-        @DisplayName("guarda la pregunta en Borrador, con su autor y sus fechas")
+        @DisplayName("guarda la pregunta en Borrador, con su autor, sus fechas y el estado que informó el ciclo de vida")
         void guardaEnBorrador() {
             Question creada = borrador();
 
@@ -84,22 +88,14 @@ class QuestionApplicationServiceTest {
             assertThat(creada.getAutor()).isEqualTo(AUTOR);
             assertThat(creada.getCreadaEn()).isEqualTo(INICIO);
             assertThat(creada.getActualizadaEn()).isEqualTo(INICIO);
+            assertThat(creada.getVersion()).isEqualTo(1);
+            assertThat(creada.getEstadoSecuencia()).isEqualTo(1);
             assertThat(servicio.obtener("Q-1").getNombre()).isEqualTo("Patrón Observer");
+            assertThat(ciclo.llamadas()).containsExactly("registrar");
         }
 
         @Test
-        @DisplayName("registra la creación en el historial y no publica eventos")
-        void registraLaCreacion() {
-            borrador();
-
-            List<CambioEstado> historial = servicio.historial("Q-1");
-
-            assertThat(historial).containsExactly(new CambioEstado(null, EstadoPregunta.BORRADOR, AUTOR, INICIO));
-            assertThat(eventos.publicados()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("no guarda nada si incumple la validación estructural y reporta todos los campos")
+        @DisplayName("no guarda ni registra nada si incumple la validación estructural y reporta todos los campos")
         void rechazaContenidoInvalido() {
             var invalido = ContenidoDePrueba.valido().contexto("").opcionB("Factory").build();
 
@@ -107,6 +103,7 @@ class QuestionApplicationServiceTest {
                     .isInstanceOf(QuestionValidationException.class)
                     .satisfies(e -> assertThat(((QuestionValidationException) e).getViolaciones()).hasSizeGreaterThan(1));
             assertThat(repositorio.cantidad()).isZero();
+            assertThat(ciclo.llamadas()).isEmpty();
         }
 
         @Test
@@ -114,10 +111,26 @@ class QuestionApplicationServiceTest {
         void exigeAutor() {
             var contenido = ContenidoDePrueba.valido().build();
 
-            assertThatThrownBy(() -> servicio.crearBorrador(contenido, " "))
-                    .isInstanceOf(IllegalArgumentException.class);
-            assertThatThrownBy(() -> servicio.crearBorrador(contenido, null))
-                    .isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> servicio.crearBorrador(contenido, " ")).isInstanceOf(IllegalArgumentException.class);
+            assertThatThrownBy(() -> servicio.crearBorrador(contenido, null)).isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        @DisplayName("si el servicio de validación o el de ciclo de vida están caídos, no se guarda nada")
+        void dependenciasCaidas() {
+            validador.caer();
+            assertThatThrownBy(this::crear).isInstanceOf(DependenciaNoDisponibleException.class);
+            assertThat(repositorio.cantidad()).isZero();
+
+            QuestionApplicationService otro = new QuestionApplicationService(repositorio, new ValidadorDePrueba(), ciclo, reloj, () -> "Q-9");
+            ciclo.caer();
+            assertThatThrownBy(() -> otro.crearBorrador(ContenidoDePrueba.valido().build(), AUTOR))
+                    .isInstanceOf(DependenciaNoDisponibleException.class);
+            assertThat(repositorio.cantidad()).isZero();
+        }
+
+        private Question crear() {
+            return servicio.crearBorrador(ContenidoDePrueba.valido().build(), AUTOR);
         }
     }
 
@@ -131,12 +144,11 @@ class QuestionApplicationServiceTest {
             assertThatThrownBy(() -> servicio.obtener("no-existe"))
                     .isInstanceOf(QuestionNotFoundException.class)
                     .hasMessageContaining("no-existe");
-            assertThatThrownBy(() -> servicio.historial("no-existe"))
-                    .isInstanceOf(QuestionNotFoundException.class);
+            assertThatThrownBy(() -> servicio.historial("no-existe")).isInstanceOf(QuestionNotFoundException.class);
         }
 
         @Test
-        @DisplayName("el historial queda en orden cronológico")
+        @DisplayName("el historial lo entrega el servicio de ciclo de vida, en orden cronológico")
         void historialEnOrden() {
             Question creada = borrador();
             reloj.avanzar(Duration.ofMinutes(5));
@@ -148,6 +160,16 @@ class QuestionApplicationServiceTest {
                     .containsExactly(EstadoPregunta.BORRADOR, EstadoPregunta.PENDIENTE_REVISION);
             assertThat(historial.get(1).desde()).isEqualTo(EstadoPregunta.BORRADOR);
             assertThat(historial.get(1).fecha()).isEqualTo(INICIO.plus(Duration.ofMinutes(5)));
+        }
+
+        @Test
+        @DisplayName("si el servicio de ciclo de vida no responde, el historial falla pero la pregunta se sigue leyendo")
+        void historialSinCiclo() {
+            Question creada = borrador();
+            ciclo.caer();
+
+            assertThatThrownBy(() -> servicio.historial(creada.getId())).isInstanceOf(DependenciaNoDisponibleException.class);
+            assertThat(servicio.obtener(creada.getId()).getId()).isEqualTo(creada.getId());
         }
     }
 
@@ -309,40 +331,28 @@ class QuestionApplicationServiceTest {
     class EnviarARevision {
 
         @Test
-        @DisplayName("pasa a Pendiente de revisión y publica question.submitted y question.state-changed")
-        void pasaAPendienteYPublica() {
+        @DisplayName("valida de nuevo, pide la transición y guarda el estado Pendiente de revisión")
+        void pasaAPendiente() {
             Question creada = borrador();
             reloj.avanzar(Duration.ofMinutes(10));
 
             Question enviada = servicio.enviarARevision(creada.getId(), AUTOR);
 
             assertThat(enviada.getEstado()).isEqualTo(EstadoPregunta.PENDIENTE_REVISION);
+            assertThat(enviada.getEstadoSecuencia()).isEqualTo(2);
             assertThat(enviada.getActualizadaEn()).isEqualTo(INICIO.plus(Duration.ofMinutes(10)));
-            assertThat(eventos.tipos()).containsExactly("question.state-changed", "question.submitted");
-            assertThat(eventos.publicados()).contains(
-                    new QuestionSubmitted(creada.getId(), AUTOR, "Patrón Observer", "LECTURA_CRITICA", 1),
-                    new QuestionStateChanged(creada.getId(), "BORRADOR", "PENDIENTE_REVISION", AUTOR));
+            assertThat(servicio.obtener(creada.getId()).getEstado()).isEqualTo(EstadoPregunta.PENDIENTE_REVISION);
+            assertThat(validador.llamadas()).isEqualTo(2);
+            assertThat(ciclo.llamadas()).containsExactly("registrar", "enviar");
         }
 
         @Test
-        @DisplayName("registra el cambio en el historial")
-        void registraElCambio() {
-            Question creada = borrador();
-
-            servicio.enviarARevision(creada.getId(), AUTOR);
-
-            assertThat(servicio.historial(creada.getId())).extracting(CambioEstado::hacia)
-                    .containsExactly(EstadoPregunta.BORRADOR, EstadoPregunta.PENDIENTE_REVISION);
-        }
-
-        @Test
-        @DisplayName("solo el autor puede enviarla")
+        @DisplayName("solo el autor puede enviarla y el ciclo de vida no se entera si no lo es")
         void soloElAutor() {
             Question creada = borrador();
 
-            assertThatThrownBy(() -> servicio.enviarARevision(creada.getId(), OTRO))
-                    .isInstanceOf(AccesoDenegadoException.class);
-            assertThat(eventos.publicados()).isEmpty();
+            assertThatThrownBy(() -> servicio.enviarARevision(creada.getId(), OTRO)).isInstanceOf(AccesoDenegadoException.class);
+            assertThat(ciclo.llamadas()).containsExactly("registrar");
         }
 
         @Test
@@ -352,134 +362,82 @@ class QuestionApplicationServiceTest {
 
             assertThatThrownBy(() -> servicio.enviarARevision(pendiente.getId(), AUTOR))
                     .isInstanceOf(OperacionNoPermitidaException.class);
-            assertThat(eventos.publicados()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("si la validación estructural falla, no cambia de estado")
+        void validaAlEnviar() {
+            Question creada = borrador();
+            repositorio.guardar(Question.builder().id(creada.getId()).nombre("n").contexto(" ").enunciado("e")
+                    .opciones(creada.getOpciones()).respuestaCorrecta('B').justificacion("j").bibliografia("b")
+                    .estado(EstadoPregunta.BORRADOR).competencia(Competencia.INGLES).tema("t").subtema("s")
+                    .dificultad(creada.getDificultad()).autor(AUTOR).creadaEn(INICIO).actualizadaEn(INICIO).build());
+
+            assertThatThrownBy(() -> servicio.enviarARevision(creada.getId(), AUTOR)).isInstanceOf(QuestionValidationException.class);
+            assertThat(servicio.obtener(creada.getId()).getEstado()).isEqualTo(EstadoPregunta.BORRADOR);
+            assertThat(ciclo.llamadas()).containsExactly("registrar");
+        }
+
+        @Test
+        @DisplayName("si el ciclo de vida está caído, la pregunta sigue en Borrador")
+        void cicloCaido() {
+            Question creada = borrador();
+            ciclo.caer();
+
+            assertThatThrownBy(() -> servicio.enviarARevision(creada.getId(), AUTOR)).isInstanceOf(DependenciaNoDisponibleException.class);
+            assertThat(servicio.obtener(creada.getId()).getEstado()).isEqualTo(EstadoPregunta.BORRADOR);
         }
 
         @Test
         @DisplayName("una pregunta que no existe lanza QuestionNotFoundException")
         void noExistente() {
-            assertThatThrownBy(() -> servicio.enviarARevision("no-existe", AUTOR))
-                    .isInstanceOf(QuestionNotFoundException.class);
+            assertThatThrownBy(() -> servicio.enviarARevision("no-existe", AUTOR)).isInstanceOf(QuestionNotFoundException.class);
         }
     }
 
     @Nested
-    @DisplayName("Reacción a review.reviewers-assigned")
-    class RevisoresAsignados {
+    @DisplayName("Reacción a question.state-changed")
+    class AlCambiarElEstado {
 
         @Test
-        @DisplayName("la pregunta pasa de Pendiente de revisión a En revisión, sin usuario responsable")
-        void pasaAEnRevision() {
+        @DisplayName("la copia toma el estado nuevo, con su versión y su secuencia")
+        void actualizaLaCopia() {
+            Question enRevision = enEstado(pendiente(), EstadoPregunta.EN_REVISION);
+
+            assertThat(enRevision.getEstado()).isEqualTo(EstadoPregunta.EN_REVISION);
+            assertThat(enRevision.getEstadoSecuencia()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("un aviso repetido o atrasado no hace retroceder la copia")
+        void ignoraLoViejo() {
             Question pendiente = pendiente();
+            Question aprobada = enEstado(enEstado(pendiente, EstadoPregunta.EN_REVISION), EstadoPregunta.APROBADA);
 
-            servicio.aplicarRevisoresAsignados("evento-1", pendiente.getId());
+            servicio.alCambiarElEstado(pendiente.getId(), EstadoPregunta.EN_REVISION, 1, 3);
+            servicio.alCambiarElEstado(pendiente.getId(), EstadoPregunta.APROBADA, 1, 4);
 
-            assertThat(servicio.obtener(pendiente.getId()).getEstado()).isEqualTo(EstadoPregunta.EN_REVISION);
-            CambioEstado ultimo = servicio.historial(pendiente.getId()).getLast();
-            assertThat(ultimo.desde()).isEqualTo(EstadoPregunta.PENDIENTE_REVISION);
-            assertThat(ultimo.hacia()).isEqualTo(EstadoPregunta.EN_REVISION);
-            assertThat(ultimo.cambiadoPor()).isNull();
-            assertThat(eventos.publicados()).containsExactly(
-                    new QuestionStateChanged(pendiente.getId(), "PENDIENTE_REVISION", "EN_REVISION", null));
+            assertThat(servicio.obtener(aprobada.getId()).getEstado()).isEqualTo(EstadoPregunta.APROBADA);
+            assertThat(servicio.obtener(aprobada.getId()).getEstadoSecuencia()).isEqualTo(4);
         }
 
         @Test
-        @DisplayName("es idempotente: un evento ya procesado no vuelve a aplicarse")
-        void esIdempotente() {
-            Question primera = pendiente();
-            Question segunda = servicio.crearBorrador(ContenidoDePrueba.valido().build(), AUTOR);
-            servicio.enviarARevision(segunda.getId(), AUTOR);
+        @DisplayName("un aviso de una pregunta que no se conoce se ignora sin fallar")
+        void preguntaDesconocida() {
+            servicio.alCambiarElEstado("no-existe", EstadoPregunta.APROBADA, 1, 4);
 
-            servicio.aplicarRevisoresAsignados("evento-1", primera.getId());
-            servicio.aplicarRevisoresAsignados("evento-1", segunda.getId());
-
-            assertThat(servicio.obtener(primera.getId()).getEstado()).isEqualTo(EstadoPregunta.EN_REVISION);
-            assertThat(servicio.obtener(segunda.getId()).getEstado()).isEqualTo(EstadoPregunta.PENDIENTE_REVISION);
+            assertThat(repositorio.cantidad()).isZero();
         }
 
         @Test
-        @DisplayName("si la pregunta no está pendiente, el evento se ignora")
-        void ignoraUnEstadoInesperado() {
-            Question creada = borrador();
+        @DisplayName("una pregunta rechazada deja de ser editable y solo vuelve a serlo al reabrirla")
+        void editabilidad() {
+            Question rechazada = rechazada();
 
-            servicio.aplicarRevisoresAsignados("evento-1", creada.getId());
-
-            assertThat(servicio.obtener(creada.getId()).getEstado()).isEqualTo(EstadoPregunta.BORRADOR);
-            assertThat(eventos.publicados()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("si la pregunta no existe, el evento se ignora sin fallar")
-        void ignoraUnaPreguntaInexistente() {
-            servicio.aplicarRevisoresAsignados("evento-1", "no-existe");
-
-            assertThat(eventos.publicados()).isEmpty();
-        }
-    }
-
-    @Nested
-    @DisplayName("Reacción a review.completed")
-    class RevisionCompletada {
-
-        private Question enRevision() {
-            Question pendiente = pendiente();
-            servicio.aplicarRevisoresAsignados("asignacion", pendiente.getId());
-            return servicio.obtener(pendiente.getId());
-        }
-
-        @Test
-        @DisplayName("aprobada: de En revisión a Aprobada")
-        void aprobada() {
-            Question pregunta = enRevision();
-
-            servicio.aplicarRevisionCompletada("evento-2", pregunta.getId(), true);
-
-            assertThat(servicio.obtener(pregunta.getId()).getEstado()).isEqualTo(EstadoPregunta.APROBADA);
-            assertThat(eventos.publicados()).contains(
-                    new QuestionStateChanged(pregunta.getId(), "EN_REVISION", "APROBADA", null));
-        }
-
-        @Test
-        @DisplayName("rechazada: de En revisión a Rechazada")
-        void rechazada() {
-            Question pregunta = enRevision();
-
-            servicio.aplicarRevisionCompletada("evento-2", pregunta.getId(), false);
-
-            assertThat(servicio.obtener(pregunta.getId()).getEstado()).isEqualTo(EstadoPregunta.RECHAZADA);
-        }
-
-        @Test
-        @DisplayName("la pregunta rechazada puede volver a Borrador para corregirse")
-        void rechazadaVuelveABorrador() {
-            Question pregunta = enRevision();
-            servicio.aplicarRevisionCompletada("evento-2", pregunta.getId(), false);
-
-            Question rechazada = servicio.obtener(pregunta.getId());
-
-            assertThat(rechazada.getEstado().puedePasarA(EstadoPregunta.BORRADOR)).isTrue();
-        }
-
-        @Test
-        @DisplayName("solo aplica si la pregunta está En revisión")
-        void soloDesdeEnRevision() {
-            Question pendiente = pendiente();
-
-            servicio.aplicarRevisionCompletada("evento-2", pendiente.getId(), true);
-
-            assertThat(servicio.obtener(pendiente.getId()).getEstado()).isEqualTo(EstadoPregunta.PENDIENTE_REVISION);
-        }
-
-        @Test
-        @DisplayName("es idempotente: el mismo evento no se aplica dos veces")
-        void esIdempotente() {
-            Question pregunta = enRevision();
-
-            servicio.aplicarRevisionCompletada("evento-2", pregunta.getId(), true);
-            long publicadosAntes = eventos.publicados().size();
-            servicio.aplicarRevisionCompletada("evento-2", pregunta.getId(), true);
-
-            assertThat(eventos.publicados()).hasSize((int) publicadosAntes);
+            assertThat(rechazada.esEditable()).isFalse();
+            assertThatThrownBy(() -> servicio.actualizarContenido(rechazada.getId(), ContenidoDePrueba.valido().build(), AUTOR))
+                    .isInstanceOf(OperacionNoPermitidaException.class);
+            assertThat(servicio.reabrirParaCorregir(rechazada.getId(), AUTOR).esEditable()).isTrue();
         }
     }
 
@@ -487,43 +445,17 @@ class QuestionApplicationServiceTest {
     @DisplayName("Reabrir una pregunta rechazada")
     class Reabrir {
 
-        private Question rechazada() {
-            Question pendiente = pendiente();
-            servicio.aplicarRevisoresAsignados("asignada-" + pendiente.getId(), pendiente.getId());
-            servicio.aplicarRevisionCompletada("completa-" + pendiente.getId(), pendiente.getId(), false);
-            eventos = new RecordingEventPublisher();
-            servicio = nuevoServicio(eventos);
-            return servicio.obtener(pendiente.getId());
-        }
-
         @Test
-        @DisplayName("vuelve a Borrador como una versión nueva")
+        @DisplayName("vuelve a Borrador como una versión nueva, con la secuencia que informó el ciclo de vida")
         void vuelveABorradorComoVersionNueva() {
             Question rechazada = rechazada();
-            reloj.avanzar(Duration.ofHours(2));
 
             Question reabierta = servicio.reabrirParaCorregir(rechazada.getId(), AUTOR);
 
             assertThat(reabierta.getEstado()).isEqualTo(EstadoPregunta.BORRADOR);
             assertThat(reabierta.getVersion()).isEqualTo(2);
-            assertThat(reabierta.getCreadaEn()).isEqualTo(rechazada.getCreadaEn());
-            assertThat(reabierta.getActualizadaEn()).isEqualTo(INICIO.plus(Duration.ofHours(2)));
-            CambioEstado ultimo = servicio.historial(rechazada.getId()).getLast();
-            assertThat(ultimo).isEqualTo(new CambioEstado(EstadoPregunta.RECHAZADA, EstadoPregunta.BORRADOR,
-                    AUTOR, INICIO.plus(Duration.ofHours(2))));
-        }
-
-        @Test
-        @DisplayName("publica question.state-changed y question.reopened con la versión nueva")
-        void publicaLosEventos() {
-            Question rechazada = rechazada();
-
-            servicio.reabrirParaCorregir(rechazada.getId(), AUTOR);
-
-            assertThat(eventos.tipos()).containsExactly("question.state-changed", "question.reopened");
-            assertThat(eventos.publicados()).containsExactly(
-                    new QuestionStateChanged(rechazada.getId(), "RECHAZADA", "BORRADOR", AUTOR),
-                    new QuestionReopened(rechazada.getId(), AUTOR, 2));
+            assertThat(reabierta.getEstadoSecuencia()).isEqualTo(5);
+            assertThat(servicio.obtener(rechazada.getId()).getVersion()).isEqualTo(2);
         }
 
         @Test
@@ -531,56 +463,31 @@ class QuestionApplicationServiceTest {
         void soloElAutor() {
             Question rechazada = rechazada();
 
-            assertThatThrownBy(() -> servicio.reabrirParaCorregir(rechazada.getId(), OTRO))
-                    .isInstanceOf(AccesoDenegadoException.class);
+            assertThatThrownBy(() -> servicio.reabrirParaCorregir(rechazada.getId(), OTRO)).isInstanceOf(AccesoDenegadoException.class);
             assertThat(servicio.obtener(rechazada.getId()).getEstado()).isEqualTo(EstadoPregunta.RECHAZADA);
-            assertThat(eventos.publicados()).isEmpty();
         }
 
         @Test
         @DisplayName("solo se reabre una pregunta Rechazada")
         void soloDesdeRechazada() {
             Question creada = borrador();
-            Question pendiente = pendiente();
 
-            assertThatThrownBy(() -> servicio.reabrirParaCorregir(creada.getId(), AUTOR))
-                    .isInstanceOf(OperacionNoPermitidaException.class).hasMessageContaining("Rechazada");
-            assertThatThrownBy(() -> servicio.reabrirParaCorregir(pendiente.getId(), AUTOR))
-                    .isInstanceOf(OperacionNoPermitidaException.class);
-            assertThatThrownBy(() -> servicio.reabrirParaCorregir("no-existe", AUTOR))
-                    .isInstanceOf(QuestionNotFoundException.class);
+            assertThatThrownBy(() -> servicio.reabrirParaCorregir(creada.getId(), AUTOR)).isInstanceOf(OperacionNoPermitidaException.class);
         }
 
         @Test
-        @DisplayName("después de reabrirla se puede editar y reenviar a revisión con la versión nueva")
+        @DisplayName("después de reabrirla se puede editar y reenviar a revisión; cada reapertura sube la versión")
         void sePuedeEditarYReenviar() {
             Question rechazada = rechazada();
             servicio.reabrirParaCorregir(rechazada.getId(), AUTOR);
-
-            Question editada = servicio.actualizarContenido(rechazada.getId(),
-                    ContenidoDePrueba.valido().nombre("Versión corregida").build(), AUTOR);
-            eventos = new RecordingEventPublisher();
-            servicio = nuevoServicio(eventos);
+            servicio.actualizarContenido(rechazada.getId(), ContenidoDePrueba.valido().nombre("Corregida").build(), AUTOR);
             servicio.enviarARevision(rechazada.getId(), AUTOR);
-
-            assertThat(editada.getNombre()).isEqualTo("Versión corregida");
-            assertThat(editada.getVersion()).isEqualTo(2);
-            assertThat(eventos.publicados()).contains(
-                    new QuestionSubmitted(rechazada.getId(), AUTOR, "Versión corregida", "LECTURA_CRITICA", 2));
-        }
-
-        @Test
-        @DisplayName("cada reapertura sube la versión")
-        void cadaReaperturaSubeLaVersion() {
-            Question rechazada = rechazada();
-            servicio.reabrirParaCorregir(rechazada.getId(), AUTOR);
-            servicio.enviarARevision(rechazada.getId(), AUTOR);
-            servicio.aplicarRevisoresAsignados("asignada-2", rechazada.getId());
-            servicio.aplicarRevisionCompletada("completa-2", rechazada.getId(), false);
+            enEstado(enEstado(servicio.obtener(rechazada.getId()), EstadoPregunta.EN_REVISION), EstadoPregunta.RECHAZADA);
 
             Question segunda = servicio.reabrirParaCorregir(rechazada.getId(), AUTOR);
 
             assertThat(segunda.getVersion()).isEqualTo(3);
+            assertThat(segunda.getNombre()).isEqualTo("Corregida");
         }
     }
 
@@ -588,68 +495,32 @@ class QuestionApplicationServiceTest {
     @DisplayName("Publicar una pregunta aprobada (administrador)")
     class Publicar {
 
-        private Question aprobada() {
-            Question pendiente = pendiente();
-            servicio.aplicarRevisoresAsignados("asignada-" + pendiente.getId(), pendiente.getId());
-            servicio.aplicarRevisionCompletada("completa-" + pendiente.getId(), pendiente.getId(), true);
-            eventos = new RecordingEventPublisher();
-            servicio = nuevoServicio(eventos);
-            return servicio.obtener(pendiente.getId());
-        }
-
         @Test
-        @DisplayName("pasa de Aprobada a Publicada y lo registra en el historial con el administrador")
+        @DisplayName("pasa de Aprobada a Publicada")
         void publica() {
             Question aprobada = aprobada();
-            reloj.avanzar(Duration.ofDays(1));
 
-            Question publicada = servicio.publicar(aprobada.getId(), "admin-1");
+            Question publicada = servicio.publicar(aprobada.getId());
 
             assertThat(publicada.getEstado()).isEqualTo(EstadoPregunta.PUBLICADA);
-            assertThat(servicio.historial(aprobada.getId()).getLast()).isEqualTo(new CambioEstado(
-                    EstadoPregunta.APROBADA, EstadoPregunta.PUBLICADA, "admin-1", INICIO.plus(Duration.ofDays(1))));
+            assertThat(servicio.obtener(aprobada.getId()).getEstado()).isEqualTo(EstadoPregunta.PUBLICADA);
         }
 
         @Test
-        @DisplayName("publica question.state-changed y question.published")
-        void publicaLosEventos() {
-            Question aprobada = aprobada();
-
-            servicio.publicar(aprobada.getId(), "admin-1");
-
-            assertThat(eventos.publicados()).containsExactly(
-                    new QuestionStateChanged(aprobada.getId(), "APROBADA", "PUBLICADA", "admin-1"),
-                    QuestionPublished.de(servicio.obtener(aprobada.getId()), "admin-1"));
-        }
-
-        @Test
-        @DisplayName("solo se publica una pregunta Aprobada")
+        @DisplayName("solo se publica una pregunta Aprobada, y una sola vez")
         void soloDesdeAprobada() {
-            Question creada = borrador();
             Question pendiente = pendiente();
+            assertThatThrownBy(() -> servicio.publicar(pendiente.getId())).isInstanceOf(OperacionNoPermitidaException.class);
 
-            assertThatThrownBy(() -> servicio.publicar(creada.getId(), "admin-1"))
-                    .isInstanceOf(OperacionNoPermitidaException.class).hasMessageContaining("Aprobada");
-            assertThatThrownBy(() -> servicio.publicar(pendiente.getId(), "admin-1"))
-                    .isInstanceOf(OperacionNoPermitidaException.class);
-            assertThat(eventos.publicados()).isEmpty();
-        }
-
-        @Test
-        @DisplayName("una pregunta ya publicada no se publica otra vez")
-        void noSePublicaDosVeces() {
-            Question aprobada = aprobada();
-            servicio.publicar(aprobada.getId(), "admin-1");
-
-            assertThatThrownBy(() -> servicio.publicar(aprobada.getId(), "admin-1"))
-                    .isInstanceOf(OperacionNoPermitidaException.class);
+            Question aprobada = enEstado(enEstado(pendiente, EstadoPregunta.EN_REVISION), EstadoPregunta.APROBADA);
+            servicio.publicar(aprobada.getId());
+            assertThatThrownBy(() -> servicio.publicar(aprobada.getId())).isInstanceOf(OperacionNoPermitidaException.class);
         }
 
         @Test
         @DisplayName("una pregunta que no existe lanza QuestionNotFoundException")
         void noExistente() {
-            assertThatThrownBy(() -> servicio.publicar("no-existe", "admin-1"))
-                    .isInstanceOf(QuestionNotFoundException.class);
+            assertThatThrownBy(() -> servicio.publicar("no-existe")).isInstanceOf(QuestionNotFoundException.class);
         }
     }
 

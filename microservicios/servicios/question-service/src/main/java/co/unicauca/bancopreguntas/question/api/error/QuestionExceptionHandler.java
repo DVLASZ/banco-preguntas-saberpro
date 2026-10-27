@@ -2,6 +2,7 @@ package co.unicauca.bancopreguntas.question.api.error;
 
 import co.unicauca.bancopreguntas.platform.api.ApiError;
 import co.unicauca.bancopreguntas.question.domain.AccesoDenegadoException;
+import co.unicauca.bancopreguntas.question.domain.DependenciaNoDisponibleException;
 import co.unicauca.bancopreguntas.question.domain.OperacionNoPermitidaException;
 import co.unicauca.bancopreguntas.question.domain.QuestionNotFoundException;
 import co.unicauca.bancopreguntas.question.domain.validation.QuestionValidationException;
@@ -46,6 +47,11 @@ public class QuestionExceptionHandler {
     @ExceptionHandler(OperacionNoPermitidaException.class)
     ResponseEntity<ApiError> alNoPermitirseLaOperacion(OperacionNoPermitidaException e) {
         return respuesta(HttpStatus.CONFLICT, ApiError.de("OPERACION_NO_PERMITIDA", e.getMessage()));
+    }
+
+    @ExceptionHandler(DependenciaNoDisponibleException.class)
+    ResponseEntity<ApiError> alFallarOtroServicio(DependenciaNoDisponibleException e) {
+        return respuesta(HttpStatus.SERVICE_UNAVAILABLE, ApiError.de("SERVICIO_NO_DISPONIBLE", e.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

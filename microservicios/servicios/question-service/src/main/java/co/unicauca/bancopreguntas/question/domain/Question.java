@@ -10,7 +10,7 @@ import java.time.Instant;
  * dificultad). Los demás campos de contenido (contexto, justificación,
  * bibliografía, subtema) y el autor son opcionales aquí: que una pregunta
  * los tenga completos lo exige el
- * {@link co.unicauca.bancopreguntas.question.domain.validation.QuestionValidator}
+ * servicio de validación (validation-service)
  * cuando el autor la guarda o la envía a revisión (HU03, RF-08 a RF-13).
  */
 public class Question {
@@ -23,7 +23,7 @@ public class Question {
     private final char respuestaCorrecta;
     private final String justificacion;
     private final String bibliografia;
-    private EstadoPregunta estado;
+    private final EstadoPregunta estado;
     private final Competencia competencia;
     private final String tema;
     private final String subtema;
@@ -32,20 +32,21 @@ public class Question {
     private final Instant creadaEn;
     private final Instant actualizadaEn;
     private final int version;
+    private final int estadoSecuencia;
 
     /** Constructor con los campos básicos; el contenido extendido queda vacío. */
     public Question(String id, String nombre, String enunciado, QuestionDistractors opciones,
                      char respuestaCorrecta, EstadoPregunta estado,
                      Competencia competencia, String tema, Dificultad dificultad) {
         this(id, nombre, "", enunciado, opciones, respuestaCorrecta, "", "", estado,
-                competencia, tema, "", dificultad, "", null, null, 1);
+                competencia, tema, "", dificultad, "", null, null, 1, 0);
     }
 
     private Question(String id, String nombre, String contexto, String enunciado,
                       QuestionDistractors opciones, char respuestaCorrecta, String justificacion,
                       String bibliografia, EstadoPregunta estado, Competencia competencia,
                       String tema, String subtema, Dificultad dificultad, String autor,
-                      Instant creadaEn, Instant actualizadaEn, int version) {
+                      Instant creadaEn, Instant actualizadaEn, int version, int estadoSecuencia) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("El id de la pregunta es obligatorio");
         }
@@ -91,9 +92,13 @@ public class Question {
         if (version < 1) {
             throw new IllegalArgumentException("La versión de la pregunta debe ser al menos 1");
         }
+        if (estadoSecuencia < 0) {
+            throw new IllegalArgumentException("La secuencia del estado no puede ser negativa");
+        }
         this.creadaEn = creadaEn;
         this.actualizadaEn = actualizadaEn;
         this.version = version;
+        this.estadoSecuencia = estadoSecuencia;
     }
 
     private static String textoOVacio(String texto) {
@@ -142,13 +147,6 @@ public class Question {
         return estado;
     }
 
-    public void setEstado(EstadoPregunta nuevoEstado) {
-        if (nuevoEstado == null) {
-            throw new IllegalArgumentException("El nuevo estado es obligatorio");
-        }
-        this.estado = nuevoEstado;
-    }
-
     public Competencia getCompetencia() {
         return competencia;
     }
@@ -189,87 +187,45 @@ public class Question {
     }
 
     /**
-     * Devuelve una copia de la pregunta en el nuevo estado, si la transición es válida (RF-15).
-     * La entidad original no se modifica.
-     *
-     * @throws OperacionNoPermitidaException si el estado actual no puede pasar al nuevo
+     * Número del último cambio de estado de lifecycle-service que esta copia ya aplicó. Sirve para ignorar avisos
+     * repetidos o atrasados: solo se acepta un cambio con una secuencia mayor.
      */
-    public Question conEstado(EstadoPregunta nuevoEstado, Instant ahora) {
-        if (!fase().puedePasarA(nuevoEstado)) {
-            throw new OperacionNoPermitidaException(
-                    "No se puede pasar una pregunta de " + estado + " a " + nuevoEstado);
+    public int getEstadoSecuencia() {
+        return estadoSecuencia;
+    }
+
+    /**
+     * Copia de la pregunta con el estado, la versión y la secuencia que informó lifecycle-service. La entidad original
+     * no se modifica; si el cambio no es más nuevo que lo que ya se aplicó, devuelve la misma pregunta.
+     */
+    public Question conEstado(EstadoPregunta nuevoEstado, int nuevaVersion, int secuencia, Instant ahora) {
+        if (nuevoEstado == null) {
+            throw new IllegalArgumentException("El nuevo estado es obligatorio");
+        }
+        if (secuencia <= estadoSecuencia) {
+            return this;
         }
         return Question.builder()
                 .id(id).nombre(nombre).contexto(contexto).enunciado(enunciado).opciones(opciones)
                 .respuestaCorrecta(respuestaCorrecta).justificacion(justificacion)
                 .bibliografia(bibliografia).estado(nuevoEstado).competencia(competencia)
                 .tema(tema).subtema(subtema).dificultad(dificultad).autor(autor)
-                .creadaEn(creadaEn).actualizadaEn(ahora).version(version)
+                .creadaEn(creadaEn).actualizadaEn(ahora).version(Math.max(nuevaVersion, 1))
+                .estadoSecuencia(secuencia)
                 .build();
-    }
-
-    /**
-     * Devuelve la pregunta rechazada al estado Borrador para que el autor la corrija, como una versión
-     * nueva (la versión sube en uno). La entidad original no se modifica.
-     *
-     * @throws OperacionNoPermitidaException si la pregunta no está en un estado desde el que pueda volver a Borrador
-     */
-    public Question reabrir(Instant ahora) {
-        EstadoPregunta destino = fase().reabrir();
-        return Question.builder()
-                .id(id).nombre(nombre).contexto(contexto).enunciado(enunciado).opciones(opciones)
-                .respuestaCorrecta(respuestaCorrecta).justificacion(justificacion)
-                .bibliografia(bibliografia).estado(destino).competencia(competencia)
-                .tema(tema).subtema(subtema).dificultad(dificultad).autor(autor)
-                .creadaEn(creadaEn).actualizadaEn(ahora).version(version + 1)
-                .build();
-    }
-
-    // ------------------------------------------------------------------ ciclo de vida (patrón State)
-
-    /** La fase en la que está la pregunta: ella decide qué operaciones admite. */
-    public FaseDePregunta fase() {
-        return estado.fase();
     }
 
     /** Si el autor todavía puede modificar el contenido (solo en Borrador). */
     public boolean esEditable() {
-        return fase().editable();
+        return estado.editable();
     }
 
     /** @throws OperacionNoPermitidaException si la pregunta ya no se puede modificar */
     public void exigirEditable() {
-        fase().exigirEditable();
-    }
-
-    /** Copia de la pregunta enviada a revisión. @throws OperacionNoPermitidaException si no está en Borrador */
-    public Question enviarARevision(Instant ahora) {
-        return conEstado(fase().enviarARevision(), ahora);
-    }
-
-    /** Copia de la pregunta con la revisión iniciada. @throws OperacionNoPermitidaException si no está Pendiente de revisión */
-    public Question iniciarRevision(Instant ahora) {
-        return conEstado(fase().iniciarRevision(), ahora);
-    }
-
-    /** Copia de la pregunta aprobada. @throws OperacionNoPermitidaException si no está En revisión */
-    public Question aprobar(Instant ahora) {
-        return conEstado(fase().aprobar(), ahora);
-    }
-
-    /** Copia de la pregunta rechazada. @throws OperacionNoPermitidaException si no está En revisión */
-    public Question rechazar(Instant ahora) {
-        return conEstado(fase().rechazar(), ahora);
-    }
-
-    /** Copia de la pregunta publicada. @throws OperacionNoPermitidaException si no está Aprobada */
-    public Question publicar(Instant ahora) {
-        return conEstado(fase().publicar(), ahora);
-    }
-
-    /** Copia de la pregunta archivada; se puede desde cualquier estado (RNF-16). */
-    public Question archivar(Instant ahora) {
-        return conEstado(fase().archivar(), ahora);
+        if (!esEditable()) {
+            throw new OperacionNoPermitidaException(
+                    "Solo se puede modificar una pregunta en estado Borrador; esta está " + estado);
+        }
     }
 
     @Override
@@ -296,6 +252,7 @@ public class Question {
         private Instant creadaEn;
         private Instant actualizadaEn;
         private int version = 1;
+        private int estadoSecuencia;
 
         private Builder() {
         }
@@ -385,10 +342,15 @@ public class Question {
             return this;
         }
 
+        public Builder estadoSecuencia(int estadoSecuencia) {
+            this.estadoSecuencia = estadoSecuencia;
+            return this;
+        }
+
         public Question build() {
             return new Question(id, nombre, contexto, enunciado, opciones, respuestaCorrecta,
                     justificacion, bibliografia, estado, competencia, tema, subtema, dificultad, autor,
-                    creadaEn, actualizadaEn, version);
+                    creadaEn, actualizadaEn, version, estadoSecuencia);
         }
     }
 }

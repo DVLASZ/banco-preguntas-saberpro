@@ -73,6 +73,9 @@ public class QuestionEntity {
     @Column(name = "question_version", nullable = false)
     private int questionVersion = 1;
 
+    @Column(name = "estado_secuencia", nullable = false)
+    private int estadoSecuencia;
+
     protected QuestionEntity() {
         // requerido por JPA
     }
@@ -117,4 +120,6 @@ public class QuestionEntity {
     public void setActualizadaEn(Instant actualizadaEn) { this.actualizadaEn = actualizadaEn; }
     public int getQuestionVersion() { return questionVersion; }
     public void setQuestionVersion(int questionVersion) { this.questionVersion = questionVersion; }
+    public int getEstadoSecuencia() { return estadoSecuencia; }
+    public void setEstadoSecuencia(int estadoSecuencia) { this.estadoSecuencia = estadoSecuencia; }
 }

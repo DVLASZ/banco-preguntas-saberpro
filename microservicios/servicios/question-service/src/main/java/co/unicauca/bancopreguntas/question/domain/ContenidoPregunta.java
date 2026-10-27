@@ -3,9 +3,8 @@ package co.unicauca.bancopreguntas.question.domain;
 /**
  * Datos de una pregunta tal como los diligencia el Autor (o llegan por la
  * API): todo son textos crudos, sin validar. Se separa de {@link Question}
- * para poder validar la estructura y reportar <b>todos</b> los campos
- * inválidos de una vez, en vez de fallar en el primero al construir la
- * entidad.
+ * para que validation-service pueda revisar la estructura y reportar <b>todos</b> los
+ * campos inválidos de una vez, en vez de fallar en el primero al construir la entidad.
  */
 public record ContenidoPregunta(
         String nombre,

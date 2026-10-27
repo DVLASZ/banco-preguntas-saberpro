@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * La pregunta no cumple la validación estructural (HU03). Extiende
+ * La pregunta no cumple la validación estructural (HU03), según validation-service. Extiende
  * {@link IllegalArgumentException} para que quien ya atrapaba esa excepción
  * siga funcionando, y expone cada {@link Violacion} para resaltar los campos.
  */

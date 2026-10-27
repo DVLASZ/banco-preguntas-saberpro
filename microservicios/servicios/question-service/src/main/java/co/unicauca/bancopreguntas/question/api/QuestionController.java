@@ -8,6 +8,7 @@ import co.unicauca.bancopreguntas.question.api.dto.QuestionRequest;
 import co.unicauca.bancopreguntas.question.api.dto.QuestionResponse;
 import co.unicauca.bancopreguntas.question.application.QuestionApplicationService;
 import co.unicauca.bancopreguntas.question.domain.Competencia;
+import co.unicauca.bancopreguntas.question.domain.DependenciaNoDisponibleException;
 import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
 import co.unicauca.bancopreguntas.question.domain.Question;
@@ -16,6 +17,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +46,8 @@ import java.net.URI;
 @Validated
 @Tag(name = "Preguntas", description = "Creación, consulta y ciclo de vida de las preguntas del banco")
 public class QuestionController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(QuestionController.class);
 
     private final QuestionApplicationService preguntas;
 
@@ -114,7 +119,17 @@ public class QuestionController {
         if (!puedeVerTodas && !pregunta.getAutor().equals(usuario.id())) {
             throw new ForbiddenException("Solo el autor de la pregunta puede consultarla");
         }
-        return QuestionResponse.de(pregunta, preguntas.historial(id));
+        return QuestionResponse.de(pregunta, historialODegradado(id));
+    }
+
+    /** El historial de estados; si el servicio de ciclo de vida no responde, la pregunta se muestra sin él. */
+    private java.util.List<co.unicauca.bancopreguntas.question.domain.CambioEstado> historialODegradado(String id) {
+        try {
+            return preguntas.historial(id);
+        } catch (DependenciaNoDisponibleException e) {
+            LOG.warn("No se pudo consultar el historial de la pregunta {}: {}", id, e.getMessage());
+            return null;
+        }
     }
 
     @PutMapping("/{id}")
@@ -128,7 +143,7 @@ public class QuestionController {
 
     @PostMapping("/{id}/submit")
     @Operation(summary = "Enviar a revisión: de Borrador a Pendiente de revisión (HU-02). Rol AUTHOR.",
-            description = "Aplica de nuevo la validación estructural y publica el evento question.submitted.")
+            description = "Aplica de nuevo la validación estructural; el servicio de ciclo de vida publica question.submitted.")
     public QuestionResponse enviarARevision(AuthenticatedUser usuario, @PathVariable String id) {
         usuario.requireAnyRole(Roles.AUTHOR);
         return QuestionResponse.de(preguntas.enviarARevision(id, usuario.id()));
@@ -136,7 +151,7 @@ public class QuestionController {
 
     @PostMapping("/{id}/reopen")
     @Operation(summary = "Reabrir una pregunta rechazada para corregirla: vuelve a Borrador como una versión nueva. Rol AUTHOR.",
-            description = "Publica question.reopened, con el que el servicio de revisión cierra la ronda abierta.")
+            description = "El servicio de ciclo de vida publica question.reopened, con el que el servicio de revisión cierra la ronda abierta.")
     public QuestionResponse reabrir(AuthenticatedUser usuario, @PathVariable String id) {
         usuario.requireAnyRole(Roles.AUTHOR);
         return QuestionResponse.de(preguntas.reabrirParaCorregir(id, usuario.id()));
@@ -144,9 +159,9 @@ public class QuestionController {
 
     @PostMapping("/{id}/publish")
     @Operation(summary = "Publicar una pregunta aprobada: de Aprobada a Publicada. Rol ADMIN.",
-            description = "Publica el evento question.published.")
+            description = "El servicio de ciclo de vida publica el evento question.published.")
     public QuestionResponse publicar(AuthenticatedUser usuario, @PathVariable String id) {
         usuario.requireAnyRole(Roles.ADMIN);
-        return QuestionResponse.de(preguntas.publicar(id, usuario.id()));
+        return QuestionResponse.de(preguntas.publicar(id));
     }
 }

@@ -1,10 +1,9 @@
 package co.unicauca.bancopreguntas.question.infrastructure.config;
 
 import co.unicauca.bancopreguntas.question.application.QuestionApplicationService;
-import co.unicauca.bancopreguntas.question.application.port.DomainEventPublisher;
-import co.unicauca.bancopreguntas.question.application.port.ProcessedEvents;
+import co.unicauca.bancopreguntas.question.application.port.CicloDeVidaDePreguntas;
 import co.unicauca.bancopreguntas.question.application.port.QuestionRepository;
-import co.unicauca.bancopreguntas.question.domain.validation.QuestionValidator;
+import co.unicauca.bancopreguntas.question.application.port.ValidadorDeContenido;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,17 +15,10 @@ import java.util.UUID;
 public class ApplicationConfig {
 
     @Bean
-    QuestionValidator questionValidator() {
-        return QuestionValidator.porDefecto();
-    }
-
-    @Bean
     QuestionApplicationService questionApplicationService(QuestionRepository repositorio,
-                                                          DomainEventPublisher eventos,
-                                                          ProcessedEvents procesados,
-                                                          QuestionValidator validador,
+                                                          ValidadorDeContenido validador,
+                                                          CicloDeVidaDePreguntas ciclo,
                                                           Clock reloj) {
-        return new QuestionApplicationService(repositorio, eventos, procesados, validador, reloj,
-                () -> UUID.randomUUID().toString());
+        return new QuestionApplicationService(repositorio, validador, ciclo, reloj, () -> UUID.randomUUID().toString());
     }
 }

@@ -31,6 +31,7 @@ final class QuestionMapper {
                 .creadaEn(e.getCreadaEn())
                 .actualizadaEn(e.getActualizadaEn())
                 .version(e.getQuestionVersion())
+                .estadoSecuencia(e.getEstadoSecuencia())
                 .build();
     }
 
@@ -56,6 +57,7 @@ final class QuestionMapper {
         destino.setCreadaEn(p.getCreadaEn());
         destino.setActualizadaEn(p.getActualizadaEn());
         destino.setQuestionVersion(p.getVersion());
+        destino.setEstadoSecuencia(p.getEstadoSecuencia());
         return destino;
     }
 }

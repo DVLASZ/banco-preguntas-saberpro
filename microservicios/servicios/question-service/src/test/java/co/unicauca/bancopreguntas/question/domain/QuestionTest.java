@@ -64,22 +64,6 @@ class QuestionTest {
     }
 
     @Test
-    void setEstado_cambiaElEstadoActual() {
-        Question pregunta = preguntaValida('A', EstadoPregunta.BORRADOR);
-
-        pregunta.setEstado(EstadoPregunta.PUBLICADA);
-
-        assertEquals(EstadoPregunta.PUBLICADA, pregunta.getEstado());
-    }
-
-    @Test
-    void setEstado_rechazaEstadoNulo() {
-        Question pregunta = preguntaValida('A', EstadoPregunta.BORRADOR);
-
-        assertThrows(IllegalArgumentException.class, () -> pregunta.setEstado(null));
-    }
-
-    @Test
     void constructorBasico_dejaVacioElContenidoExtendidoYElAutor() {
         Question pregunta = preguntaValida('A', EstadoPregunta.BORRADOR);
 

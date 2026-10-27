@@ -8,36 +8,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Colas propias de este servicio, con las que escucha al servicio de revisión. El exchange común lo
- * declara el módulo {@code bp-platform}.
+ * Cola propia de este servicio, con la que escucha los cambios de estado que informa lifecycle-service. El exchange
+ * común lo declara el módulo {@code bp-platform}.
  */
 @Configuration
 public class RabbitTopology {
 
-    public static final String QUEUE_REVIEWERS_ASSIGNED = "question.q.reviewers-assigned";
-    public static final String QUEUE_REVIEW_COMPLETED = "question.q.review-completed";
-    public static final String KEY_REVIEWERS_ASSIGNED = "review.reviewers-assigned";
-    public static final String KEY_REVIEW_COMPLETED = "review.completed";
+    public static final String QUEUE_STATE_CHANGED = "question.q.state-changed";
+    public static final String KEY_STATE_CHANGED = "question.state-changed";
 
     @Bean
-    Queue reviewersAssignedQueue() {
-        return QueueBuilder.durable(QUEUE_REVIEWERS_ASSIGNED).build();
+    Queue stateChangedQueue() {
+        return QueueBuilder.durable(QUEUE_STATE_CHANGED).build();
     }
 
     @Bean
-    Queue reviewCompletedQueue() {
-        return QueueBuilder.durable(QUEUE_REVIEW_COMPLETED).build();
-    }
-
-    @Bean
-    Binding reviewersAssignedBinding(Queue reviewersAssignedQueue) {
-        return new Binding(reviewersAssignedQueue.getName(), Binding.DestinationType.QUEUE,
-                EventTopology.EXCHANGE, KEY_REVIEWERS_ASSIGNED, null);
-    }
-
-    @Bean
-    Binding reviewCompletedBinding(Queue reviewCompletedQueue) {
-        return new Binding(reviewCompletedQueue.getName(), Binding.DestinationType.QUEUE,
-                EventTopology.EXCHANGE, KEY_REVIEW_COMPLETED, null);
+    Binding stateChangedBinding(Queue stateChangedQueue) {
+        return new Binding(stateChangedQueue.getName(), Binding.DestinationType.QUEUE,
+                EventTopology.EXCHANGE, KEY_STATE_CHANGED, null);
     }
 }

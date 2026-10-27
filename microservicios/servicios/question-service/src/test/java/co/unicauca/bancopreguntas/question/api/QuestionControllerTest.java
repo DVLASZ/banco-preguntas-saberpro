@@ -6,6 +6,7 @@ import co.unicauca.bancopreguntas.question.domain.AccesoDenegadoException;
 import co.unicauca.bancopreguntas.question.domain.CambioEstado;
 import co.unicauca.bancopreguntas.question.domain.Competencia;
 import co.unicauca.bancopreguntas.question.domain.Dificultad;
+import co.unicauca.bancopreguntas.question.domain.DependenciaNoDisponibleException;
 import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
 import co.unicauca.bancopreguntas.question.domain.OperacionNoPermitidaException;
@@ -424,7 +425,7 @@ class QuestionControllerTest {
     @Test
     @DisplayName("POST /api/questions/{id}/publish publica una pregunta aprobada (solo ADMIN)")
     void publica() throws Exception {
-        when(servicio.publicar("Q-1", ADMIN)).thenReturn(pregunta("Q-1", EstadoPregunta.PUBLICADA));
+        when(servicio.publicar("Q-1")).thenReturn(pregunta("Q-1", EstadoPregunta.PUBLICADA));
 
         mvc.perform(comoAdmin(post("/api/questions/Q-1/publish")))
                 .andExpect(status().isOk())
@@ -436,12 +437,34 @@ class QuestionControllerTest {
     @Test
     @DisplayName("publicar una pregunta que no está aprobada responde 409")
     void publicarSinAprobar() throws Exception {
-        when(servicio.publicar("Q-1", ADMIN))
+        when(servicio.publicar("Q-1"))
                 .thenThrow(new OperacionNoPermitidaException("Solo se puede publicar una pregunta Aprobada"));
 
         mvc.perform(comoAdmin(post("/api/questions/Q-1/publish")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.codigo").value("OPERACION_NO_PERMITIDA"));
+    }
+
+    @Test
+    @DisplayName("si el servicio de ciclo de vida no responde, la pregunta se devuelve sin historial")
+    void historialDegradado() throws Exception {
+        when(servicio.obtener("Q-1")).thenReturn(pregunta("Q-1", EstadoPregunta.BORRADOR));
+        when(servicio.historial("Q-1")).thenThrow(new DependenciaNoDisponibleException("ciclo de vida caído", null));
+
+        mvc.perform(comoAutor(get("/api/questions/Q-1")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("Q-1"))
+                .andExpect(jsonPath("$.historialEstados").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("si otro servicio del que depende una operación no responde, se informa 503")
+    void dependenciaCaida() throws Exception {
+        when(servicio.reabrirParaCorregir("Q-1", AUTOR)).thenThrow(new DependenciaNoDisponibleException("ciclo de vida caído", null));
+
+        mvc.perform(comoAutor(post("/api/questions/Q-1/reopen")))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.codigo").value("SERVICIO_NO_DISPONIBLE"));
     }
 
     // ---------------------------------------------------------------- errores

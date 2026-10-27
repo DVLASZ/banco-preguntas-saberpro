@@ -66,3 +66,17 @@ eureka:
     instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 15
+
+question:
+  lifecycle:
+    # Dónde está lifecycle-service, que mueve las preguntas entre estados y lleva su historial.
+    url: ${LIFECYCLE_SERVICE_URL:http://localhost:8094}
+  validation:
+    # Dónde está validation-service, que revisa la estructura del contenido.
+    url: ${VALIDATION_SERVICE_URL:http://localhost:8095}
+
+bancopreguntas:
+  events:
+    outbox:
+      # Este servicio solo escucha eventos: los de las preguntas los publica lifecycle-service, así que no tiene bandeja de salida.
+      enabled: false

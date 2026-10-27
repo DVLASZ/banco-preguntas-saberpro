@@ -1,10 +1,9 @@
 package co.unicauca.bancopreguntas.question.domain;
 
 /**
- * Estados por los que puede pasar una pregunta del banco de preguntas.
- * Corresponde exactamente al ciclo de vida definido en RF-14 del proyecto
- * de curso. Es el identificador del estado (se guarda y viaja en los eventos); lo que se puede hacer en cada
- * uno, incluidas las transiciones válidas (RF-15), lo decide su {@link FaseDePregunta} (patrón State).
+ * Estados por los que puede pasar una pregunta del banco de preguntas. Corresponde al ciclo de vida definido en
+ * RF-14 del proyecto de curso. Este servicio solo guarda una copia del estado (para listar, filtrar y saber si la
+ * pregunta todavía se puede editar); quien decide las transiciones válidas (RF-15) es lifecycle-service.
  */
 public enum EstadoPregunta {
     BORRADOR("Borrador"),
@@ -21,18 +20,9 @@ public enum EstadoPregunta {
         this.etiqueta = etiqueta;
     }
 
-    /**
-     * Indica si una pregunta en este estado puede pasar al estado destino
-     * (RF-15). Cualquier pregunta puede archivarse, porque RNF-16 prohíbe
-     * eliminarlas físicamente.
-     */
-    public boolean puedePasarA(EstadoPregunta destino) {
-        return fase().puedePasarA(destino);
-    }
-
-    /** El comportamiento de este estado (patrón State): qué se puede hacer con una pregunta que está en él. */
-    public FaseDePregunta fase() {
-        return FaseDePregunta.de(this);
+    /** Solo en Borrador el autor puede modificar el contenido (RF-06). */
+    public boolean editable() {
+        return this == BORRADOR;
     }
 
     @Override

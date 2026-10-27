@@ -14,8 +14,9 @@ public class OpenApiConfig {
         return new OpenAPI().info(new Info()
                 .title("question-service")
                 .version("0.1.0")
-                .description("Preguntas, validación estructural y ciclo de vida del Banco de Preguntas Saber Pro "
-                        + "(HU-01, HU-02 y HU-03). Las peticiones indican el usuario en la cabecera X-User-Id; "
-                        + "en el sistema completo la propaga el API Gateway."));
+                .description("Contenido de las preguntas del Banco de Preguntas Saber Pro (HU-01, HU-02 y HU-03): crear, "
+                        + "modificar, consultar y filtrar. La validación estructural la hace validation-service y los estados "
+                        + "los lleva lifecycle-service; aquí queda una copia del estado. Las peticiones indican el usuario en la "
+                        + "cabecera X-User-Id; en el sistema completo la propaga el API Gateway."));
     }
 }

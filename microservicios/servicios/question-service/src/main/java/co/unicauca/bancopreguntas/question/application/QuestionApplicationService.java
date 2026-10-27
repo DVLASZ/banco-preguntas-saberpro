@@ -1,24 +1,18 @@
 package co.unicauca.bancopreguntas.question.application;
 
-import co.unicauca.bancopreguntas.question.application.port.DomainEventPublisher;
-import co.unicauca.bancopreguntas.question.application.port.ProcessedEvents;
+import co.unicauca.bancopreguntas.question.application.port.CicloDeVidaDePreguntas;
+import co.unicauca.bancopreguntas.question.application.port.EstadoDeCiclo;
 import co.unicauca.bancopreguntas.question.application.port.QuestionRepository;
+import co.unicauca.bancopreguntas.question.application.port.ValidadorDeContenido;
 import co.unicauca.bancopreguntas.question.domain.AccesoDenegadoException;
 import co.unicauca.bancopreguntas.question.domain.CambioEstado;
 import co.unicauca.bancopreguntas.question.domain.ContenidoPregunta;
 import co.unicauca.bancopreguntas.question.domain.EstadoPregunta;
-import co.unicauca.bancopreguntas.question.domain.FaseDePregunta;
 import co.unicauca.bancopreguntas.question.domain.FiltroPreguntas;
-import co.unicauca.bancopreguntas.question.domain.OperacionNoPermitidaException;
 import co.unicauca.bancopreguntas.question.domain.Pagina;
 import co.unicauca.bancopreguntas.question.domain.Question;
 import co.unicauca.bancopreguntas.question.domain.QuestionDistractors;
 import co.unicauca.bancopreguntas.question.domain.QuestionNotFoundException;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionPublished;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionReopened;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionStateChanged;
-import co.unicauca.bancopreguntas.question.domain.event.QuestionSubmitted;
-import co.unicauca.bancopreguntas.question.domain.validation.QuestionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,16 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Casos de uso de la gestión de preguntas (HU-01, HU-02 y HU-03) y reacción a los eventos del
- * servicio de revisión. Coordina el dominio y los puertos; no conoce ni la base de datos ni el broker.
+ * Casos de uso de la gestión de preguntas (HU-01, HU-02 y HU-03): guarda y consulta el contenido de las preguntas.
+ * Para revisar la estructura del contenido usa validation-service y para mover una pregunta de estado usa
+ * lifecycle-service, a través de puertos; no conoce ni la base de datos ni el otro servicio.
  *
- * <p>Ciclo de vida (RF-14 y RF-15): el autor crea siempre un {@code BORRADOR}, solo lo modifica mientras
- * lo sea (RF-06) y lo envía a revisión. Que pase a {@code EN_REVISION} y luego a {@code APROBADA} o
- * {@code RECHAZADA} lo deciden los eventos del servicio de revisión, no una llamada directa.
+ * <p>Ciclo de vida (RF-14 y RF-15): el autor crea siempre un {@code BORRADOR}, solo lo modifica mientras lo sea
+ * (RF-06) y lo envía a revisión. Que pase a {@code EN_REVISION} y luego a {@code APROBADA} o {@code RECHAZADA} lo
+ * deciden los eventos del servicio de revisión, que lifecycle-service aplica y avisa con {@code question.state-changed};
+ * este servicio guarda una copia del estado para poder listar y filtrar.
  */
 @Transactional
 public class QuestionApplicationService {
@@ -43,26 +38,23 @@ public class QuestionApplicationService {
     private static final Logger LOG = LoggerFactory.getLogger(QuestionApplicationService.class);
 
     private final QuestionRepository repositorio;
-    private final DomainEventPublisher eventos;
-    private final ProcessedEvents procesados;
-    private final QuestionValidator validador;
+    private final ValidadorDeContenido validador;
+    private final CicloDeVidaDePreguntas ciclo;
     private final Clock reloj;
     private final Supplier<String> generadorDeId;
 
-    public QuestionApplicationService(QuestionRepository repositorio, DomainEventPublisher eventos,
-                                      ProcessedEvents procesados, QuestionValidator validador,
-                                      Clock reloj, Supplier<String> generadorDeId) {
+    public QuestionApplicationService(QuestionRepository repositorio, ValidadorDeContenido validador,
+                                      CicloDeVidaDePreguntas ciclo, Clock reloj, Supplier<String> generadorDeId) {
         this.repositorio = repositorio;
-        this.eventos = eventos;
-        this.procesados = procesados;
         this.validador = validador;
+        this.ciclo = ciclo;
         this.reloj = reloj;
         this.generadorDeId = generadorDeId;
     }
 
     /**
-     * Crea una pregunta a nombre de un autor, siempre en {@code BORRADOR} (HU-01). Antes de grabarla
-     * aplica la validación estructural: si falla, no se guarda nada.
+     * Crea una pregunta a nombre de un autor, siempre en {@code BORRADOR} (HU-01). Antes de grabarla aplica la
+     * validación estructural y la registra en el ciclo de vida: si algo falla, no se guarda nada.
      *
      * @throws co.unicauca.bancopreguntas.question.domain.validation.QuestionValidationException
      *         con todos los campos que incumplen
@@ -74,10 +66,10 @@ public class QuestionApplicationService {
         validador.validarOLanzar(contenido);
         Instant ahora = reloj.instant();
         String id = generadorDeId.get();
-        Question pregunta = construir(id, contenido, EstadoPregunta.BORRADOR, autor.trim(), ahora, ahora, 1);
-        Question guardada = repositorio.guardar(pregunta);
-        repositorio.registrarCambioEstado(id, new CambioEstado(null, EstadoPregunta.BORRADOR, autor.trim(), ahora));
-        return guardada;
+        EstadoDeCiclo registrada = ciclo.registrar(id);
+        Question pregunta = construir(id, contenido, registrada.estado(), autor.trim(), ahora, ahora,
+                registrada.version(), registrada.secuencia());
+        return repositorio.guardar(pregunta);
     }
 
     @Transactional(readOnly = true)
@@ -85,10 +77,11 @@ public class QuestionApplicationService {
         return repositorio.buscarPorId(id).orElseThrow(() -> new QuestionNotFoundException(id));
     }
 
+    /** El historial de estados de la pregunta, que lleva lifecycle-service. */
     @Transactional(readOnly = true)
     public List<CambioEstado> historial(String id) {
         obtener(id);
-        return repositorio.historial(id);
+        return ciclo.historial(id);
     }
 
     /**
@@ -132,103 +125,62 @@ public class QuestionApplicationService {
         actual.exigirEditable();
         validador.validarOLanzar(contenido);
         Question modificada = construir(id, contenido, actual.getEstado(), actual.getAutor(),
-                actual.getCreadaEn(), reloj.instant(), actual.getVersion());
+                actual.getCreadaEn(), reloj.instant(), actual.getVersion(), actual.getEstadoSecuencia());
         return repositorio.guardar(modificada);
     }
 
     /**
-     * El autor envía su borrador a revisión (HU-02): se vuelve a aplicar la validación estructural y,
-     * si la pasa, la pregunta queda en {@code PENDIENTE_REVISION} y se publica {@code question.submitted}.
+     * El autor envía su borrador a revisión (HU-02): se vuelve a aplicar la validación estructural y, si la pasa,
+     * lifecycle-service la deja en {@code PENDIENTE_REVISION} y publica {@code question.submitted}.
      */
     public Question enviarARevision(String id, String usuario) {
         Question actual = obtener(id);
         exigirAutor(actual, usuario);
-        EstadoPregunta destino = actual.fase().enviarARevision();   // la fase rechaza si no es un borrador
+        actual.exigirEditable();
         validador.validarOLanzar(ContenidoPregunta.de(actual));
-        Question enviada = cambiarEstado(actual, destino, usuario.trim());
-        eventos.publicar(new QuestionSubmitted(id, enviada.getAutor(), enviada.getNombre(),
-                enviada.getCompetencia().name(), enviada.getVersion()));
-        return enviada;
+        return aplicar(actual, ciclo.enviarARevision(actual));
     }
 
     /**
-     * El autor reabre su pregunta rechazada para corregirla: vuelve a {@code BORRADOR} como una versión
-     * nueva y se publica {@code question.reopened}, con el que el servicio de revisión cierra la ronda que
+     * El autor reabre su pregunta rechazada para corregirla: vuelve a {@code BORRADOR} como una versión nueva y
+     * lifecycle-service publica {@code question.reopened}, con el que el servicio de revisión cierra la ronda que
      * seguía abierta a observaciones.
      */
     public Question reabrirParaCorregir(String id, String usuario) {
         Question actual = obtener(id);
         exigirAutor(actual, usuario);
-        Instant ahora = reloj.instant();
-        Question reabierta = repositorio.guardar(actual.reabrir(ahora));
-        repositorio.registrarCambioEstado(id,
-                new CambioEstado(actual.getEstado(), reabierta.getEstado(), usuario.trim(), ahora));
-        eventos.publicar(new QuestionStateChanged(id, actual.getEstado().name(),
-                reabierta.getEstado().name(), usuario.trim()));
-        eventos.publicar(new QuestionReopened(id, reabierta.getAutor(), reabierta.getVersion()));
-        return reabierta;
+        return aplicar(actual, ciclo.reabrir(id));
     }
 
     /**
-     * El administrador publica una pregunta aprobada (de {@code APROBADA} a {@code PUBLICADA}) y se
-     * publica {@code question.published}.
+     * El administrador publica una pregunta aprobada (de {@code APROBADA} a {@code PUBLICADA}); lifecycle-service
+     * publica {@code question.published} con el contenido de la pregunta.
      */
-    public Question publicar(String id, String administrador) {
+    public Question publicar(String id) {
         Question actual = obtener(id);
-        Question publicada = cambiarEstado(actual, actual.fase().publicar(), administrador.trim());
-        eventos.publicar(QuestionPublished.de(publicada, administrador.trim()));
-        return publicada;
+        return aplicar(actual, ciclo.publicar(actual));
     }
 
     /**
-     * Reacción a {@code review.reviewers-assigned}: el administrador asignó revisores y la pregunta
-     * pasa a {@code EN_REVISION}. Es idempotente: un evento repetido se ignora.
+     * Reacción a {@code question.state-changed}: lifecycle-service cambió el estado de la pregunta (por ejemplo, la
+     * revisión la aprobó) y esta copia se actualiza. Un aviso repetido o atrasado, con una secuencia que ya se aplicó,
+     * se ignora; por eso no necesita llevar registro de eventos procesados.
      */
-    public void aplicarRevisoresAsignados(String eventId, String preguntaId) {
-        if (!procesados.registrarSiEsNuevo(eventId)) {
-            LOG.debug("Evento {} ya procesado; se ignora", eventId);
-            return;
-        }
-        aplicarCambioPorEvento(preguntaId, FaseDePregunta::iniciarRevision);
-    }
-
-    /**
-     * Reacción a {@code review.completed}: la revisión terminó y la pregunta pasa de {@code EN_REVISION}
-     * a {@code APROBADA} o {@code RECHAZADA}. Es idempotente.
-     */
-    public void aplicarRevisionCompletada(String eventId, String preguntaId, boolean aprobada) {
-        if (!procesados.registrarSiEsNuevo(eventId)) {
-            LOG.debug("Evento {} ya procesado; se ignora", eventId);
-            return;
-        }
-        aplicarCambioPorEvento(preguntaId, aprobada ? FaseDePregunta::aprobar : FaseDePregunta::rechazar);
-    }
-
-    /** Aplica el cambio que pide un evento; si la fase actual de la pregunta no lo admite, el evento se ignora. */
-    private void aplicarCambioPorEvento(String preguntaId, Function<FaseDePregunta, EstadoPregunta> transicion) {
+    public void alCambiarElEstado(String preguntaId, EstadoPregunta hacia, int version, int secuencia) {
         Question pregunta = repositorio.buscarPorId(preguntaId).orElse(null);
         if (pregunta == null) {
-            LOG.warn("Llegó un evento para la pregunta {}, que no existe; se ignora", preguntaId);
+            LOG.warn("Llegó un cambio de estado de la pregunta {}, que no existe; se ignora", preguntaId);
             return;
         }
-        EstadoPregunta nuevo;
-        try {
-            nuevo = transicion.apply(pregunta.fase());
-        } catch (OperacionNoPermitidaException e) {
-            LOG.warn("La pregunta {} está en {} y no admite el cambio que pide el evento; se ignora",
-                    preguntaId, pregunta.getEstado());
-            return;
+        Question actualizada = pregunta.conEstado(hacia, version, secuencia, reloj.instant());
+        if (actualizada != pregunta) {
+            repositorio.guardar(actualizada);
         }
-        cambiarEstado(pregunta, nuevo, null);
     }
 
-    private Question cambiarEstado(Question pregunta, EstadoPregunta nuevo, String usuario) {
-        Instant ahora = reloj.instant();
-        EstadoPregunta anterior = pregunta.getEstado();
-        Question actualizada = repositorio.guardar(pregunta.conEstado(nuevo, ahora));
-        repositorio.registrarCambioEstado(pregunta.getId(), new CambioEstado(anterior, nuevo, usuario, ahora));
-        eventos.publicar(new QuestionStateChanged(pregunta.getId(), anterior.name(), nuevo.name(), usuario));
-        return actualizada;
+    /** Guarda en la copia el estado que informó lifecycle-service y devuelve la pregunta actualizada. */
+    private Question aplicar(Question pregunta, EstadoDeCiclo nuevo) {
+        return repositorio.guardar(pregunta.conEstado(nuevo.estado(), nuevo.version(), nuevo.secuencia(), reloj.instant()));
     }
 
     private Pagina<Question> buscar(String autor, FiltroPreguntas filtro, int pagina, int tamano) {
@@ -253,7 +205,7 @@ public class QuestionApplicationService {
     }
 
     private static Question construir(String id, ContenidoPregunta c, EstadoPregunta estado, String autor,
-                                      Instant creadaEn, Instant actualizadaEn, int version) {
+                                      Instant creadaEn, Instant actualizadaEn, int version, int secuencia) {
         return Question.builder()
                 .id(id)
                 .nombre(c.nombre().trim())
@@ -273,6 +225,7 @@ public class QuestionApplicationService {
                 .creadaEn(creadaEn)
                 .actualizadaEn(actualizadaEn)
                 .version(version)
+                .estadoSecuencia(secuencia)
                 .build();
     }
 }
