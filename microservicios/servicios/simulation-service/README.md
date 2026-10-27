@@ -10,7 +10,6 @@ Permite al estudiante practicar con simulacros armados al azar con preguntas pub
 | **Puerto** | 8086 (`SIMULATION_SERVICE_PORT`) |
 | **Base de datos** | PostgreSQL `simulation_db` (puerto 5438 en local), con migraciones de Flyway |
 | **Swagger** | `http://localhost:8080/docs/simulation-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-simulation-service.json`](../../../docs/corte-2/api/openapi/openapi-simulation-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/simulation-service.postman_collection.json) |
 | **Pruebas** | 88 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad

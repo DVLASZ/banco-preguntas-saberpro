@@ -3,24 +3,24 @@
 Segunda iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
 corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../docs/corte-2/README.md).
 
-## Estado: 10 servicios publicados, 14 en implementación
+## Servicios
 
-Esta documentación describe la arquitectura de **14 microservicios** que se está
-implementando. El código publicado hoy en el repositorio corresponde a la primera distribución, de **7 servicios**, más tres servicios de la nueva distribución: `email-service` (el correo ya
-salió de `notification-service`, que publica `notification.created`), `audit-service` (la auditoría salió de `history-service`) y
-`validation-service` (la validación estructural, sin estado); la nueva
-distribución divide varios de ellos para que cada uno tenga una sola responsabilidad (ver la tabla del [README de los servicios](servicios/README.md)). Ya está implementada y verificada de punta a punta en local y el código se irá publicando por
-partes; mientras tanto, lo que no está en el repositorio aparece en esta documentación como texto, sin enlace.
+La solución son **diez microservicios** que se comunican por eventos en RabbitMQ, detrás de un API Gateway, cada uno con su propia base de
+datos PostgreSQL (menos `validation-service`, que no guarda datos). Dos servicios del primer diseño, `simulation-service` y `tracking-service`
+(simulacros y seguimiento académico), siguen en el repositorio pero son del tercer corte y no forman parte de esta entrega.
 
-| Servicio publicado hoy (primera distribución, 7) | En la nueva distribución (14) |
+| Servicio | Qué hace |
 |---|---|
-| `question-service` | `question-service` (contenido), `validation-service` (reglas de calidad, ya publicado) y `lifecycle-service` (estados y su historial) |
-| `review-service` | `assignment-service` (asignación de revisores) y `evaluation-service` (evaluación y unanimidad) |
-| `notification-service` | `notification-service` (bandeja) y `email-service` (correo, ya publicado) |
-| `history-service` | `history-service` (línea de tiempo de cada pregunta) y `audit-service` (auditoría de acciones e inicios de sesión, ya publicado) |
-| `user-service` | `user-service` |
-| `simulation-service` | `catalog-service` (preguntas publicadas y selección) y `simulation-service` (simulacros) |
-| `tracking-service` | `statistics-service` (historial y estadísticas) y `report-service` (reporte del grupo) |
+| `user-service` | Sincroniza los usuarios y roles de Keycloak y publica los eventos de acceso |
+| `question-service` | Contenido de las preguntas: crear, modificar, consultar y filtrar (HU-01 y HU-03) |
+| `validation-service` | Reglas de calidad de una pregunta, sin estado |
+| `lifecycle-service` | Estados de la pregunta, transiciones, historial de estados y sus eventos (HU-02) |
+| `assignment-service` | Rondas de revisión, asignación de 1 a 3 revisores y bandeja del revisor (HU-04) |
+| `evaluation-service` | Evaluaciones de los revisores y decisión por unanimidad (HU-05) |
+| `notification-service` | Bandeja de avisos de cada usuario |
+| `email-service` | Correo simulado de cada aviso, con reintentos y registro |
+| `history-service` | Línea de tiempo de cada pregunta |
+| `audit-service` | Auditoría de acciones e inicios de sesión |
 
 ## Organización de la carpeta
 
@@ -32,15 +32,17 @@ microservicios/
 ├── plataforma/
 │   └── bp-platform/              Biblioteca común: seguridad JWT, sobre de eventos, Outbox, errores, OpenAPI
 ├── servicios/                    Servicios de negocio (cada uno con su base de datos)
-│   ├── question-service/         Preguntas, validación estructural y ciclo de vida
-│   ├── review-service/           Asignación de revisores, rondas, unanimidad y reasignación automática
+│   ├── question-service/         Contenido de las preguntas
+│   ├── lifecycle-service/        Estados y ciclo de vida de la pregunta
+│   ├── assignment-service/       Asignación de revisores y bandeja del revisor
+│   ├── evaluation-service/       Evaluación de los revisores y unanimidad
 │   ├── notification-service/     Bandeja de notificaciones
 │   ├── email-service/            Correo simulado de cada notificación
 │   ├── history-service/          Historial por pregunta
 │   ├── audit-service/            Auditoría de acciones e inicios de sesión
 │   ├── validation-service/       Validación estructural de preguntas (sin estado)
-│   ├── simulation-service/       Catálogo de preguntas publicadas y simulacros con tiempo y calificación
-│   ├── tracking-service/         Historial de simulacros, estadísticas, fortalezas y debilidades y reporte del grupo
+│   ├── simulation-service/       (primer diseño, tercer corte) Simulacros
+│   ├── tracking-service/         (primer diseño, tercer corte) Seguimiento académico
 │   └── user-service/             Usuarios de Keycloak y eventos de acceso
 ├── infraestructura/              Piezas que sostienen a los servicios
 │   ├── api-gateway/              Entrada única, autorización, circuit breaker
@@ -50,24 +52,24 @@ microservicios/
 └── pruebas-de-carga/             Script k6 de escalabilidad
 ```
 
-Pruebas de lo publicado hoy (`./mvnw test`, 5 min 55 s; no necesitan Docker):
+Pruebas (`./mvnw test`, no necesitan Docker):
 
 | Módulo | Pruebas |
 |---|---|
 | [bp-platform](plataforma/bp-platform/) | 70 |
-| [question-service](servicios/question-service/) | 174 |
-| [review-service](servicios/review-service/) | 102 |
-| [notification-service](servicios/notification-service/) | 91 |
+| [question-service](servicios/question-service/) | 141 |
+| [validation-service](servicios/validation-service/) | 53 |
+| [lifecycle-service](servicios/lifecycle-service/) | 99 |
+| [assignment-service](servicios/assignment-service/) | 96 |
+| [evaluation-service](servicios/evaluation-service/) | 107 |
+| [notification-service](servicios/notification-service/) | 85 |
 | [email-service](servicios/email-service/) | 38 |
 | [history-service](servicios/history-service/) | 54 |
 | [audit-service](servicios/audit-service/) | 38 |
-| [validation-service](servicios/validation-service/) | 53 |
-| [simulation-service](servicios/simulation-service/) | 88 |
-| [tracking-service](servicios/tracking-service/) | 61 |
 | [user-service](servicios/user-service/) | 62 |
-| [api-gateway](infraestructura/api-gateway/) | 22 |
+| [api-gateway](infraestructura/api-gateway/) | 25 |
 | [discovery-server](infraestructura/discovery-server/) | 3 |
-| [../frontend](../frontend/) (Angular) | 162 |
+| [../frontend](../frontend/) (Angular) | 166 |
 
 Infraestructura externa: PostgreSQL 16 por servicio, RabbitMQ (panel http://localhost:15672), Keycloak
 (http://localhost:8180) y `edge` (nginx) como único punto de entrada en el puerto 8080.
@@ -97,7 +99,7 @@ Usuarios de prueba (solo entorno local), definidos en [`infraestructura/keycloak
 `admin`, `autor1`, `autor2` y `revisor1` a `revisor5`. La clave de desarrollo está en ese archivo.
 
 Para depurar un servicio desde el IDE se publican sus puertos con
-`docker compose -f docker-compose.yml -f docker-compose.debug.yml up -d` (8081 a 8085).
+`docker compose -f docker-compose.yml -f docker-compose.debug.yml up -d` (8081 a 8096).
 
 ### Réplicas
 
@@ -110,7 +112,7 @@ Las réplicas se registran solas en Eureka y `edge` reparte entre las del gatewa
 ## Variables
 
 Ver [`.env.example`](.env.example). Las principales: `SECURITY_MODE` (`jwt` por defecto; `headers` solo para
-pruebas), `KEYCLOAK_PUBLIC_URL`, `GATEWAY_ALLOWED_ORIGINS`, `REVIEW_MAX_REVIEWERS`.
+pruebas), `KEYCLOAK_PUBLIC_URL`, `GATEWAY_ALLOWED_ORIGINS`, `ASSIGNMENT_MAX_REVIEWERS`.
 
 ## Pruebas
 
@@ -135,7 +137,7 @@ docker run --rm -i -e PW=<clave de prueba> -e VUS=600 -e HOLD=1m \
 ```
 
 Resultados y análisis en [`04 · Escalabilidad`](../docs/corte-2/04-escalabilidad.md): 600 usuarios,
-0 % de error, p95 de 18 ms a ritmo humano y 692 ms en estrés (1 128 peticiones/s).
+0 % de error, p95 de 30 ms a ritmo humano y 826 ms en estrés (921 peticiones/s).
 
 ## Probar el API a mano
 
@@ -156,13 +158,15 @@ Swagger agregado de todos los servicios a través del gateway: `http://localhost
 |---|---|---|
 | question | `POST/GET /api/questions`, `GET/PUT /api/questions/{id}`, `POST …/{id}/submit`, `…/reopen` | Autor |
 | question | `GET /api/questions/all`, `GET …/pending-review`, `POST …/{id}/publish` | Administrador |
-| review | `GET /api/reviews/pending-assignment`, `POST /api/reviews/{id}/assignments` | Administrador |
-| review | `GET /api/reviews/assigned`, `POST /api/reviews/{id}/evaluations` | Revisor |
-| review | `GET /api/reviews/config`, `GET /api/reviews/{id}` | Todos |
+| assignment | `GET /api/reviews/pending-assignment`, `POST /api/reviews/{id}/assignments` | Administrador |
+| assignment | `GET /api/reviews/assigned` | Revisor |
+| assignment | `GET /api/reviews/config` | Todos |
+| evaluation | `POST /api/reviews/{id}/evaluations` | Revisor |
+| evaluation | `GET /api/reviews/{id}` | Todos |
 | notification | `GET /api/notifications`, `…/unread-count`, `POST …/{id}/read`, `…/read-all` | Todos |
-| notification | `GET /api/notifications/emails` | Administrador |
+| email | `GET /api/emails` | Administrador |
 | history | `GET /api/history/questions/{id}`, `/me` | Todos |
-| history | `GET /api/history/audit` | Administrador |
+| audit | `GET /api/audit` | Administrador |
 | user | `GET /api/users/me` (todos), `GET /api/users`, `POST /api/users/sync` (administrador) | — |
 
 ## Organización de cada servicio
@@ -176,4 +180,4 @@ api/              Controlador REST, DTOs y manejo de errores
 
 ## Pendiente (corte 3)
 
-Arquitectura hexagonal/DDD formal en un servicio, HU-06 y pitch.
+DDD formal en un servicio, simulacros y seguimiento académico, el documento final y la sustentación.

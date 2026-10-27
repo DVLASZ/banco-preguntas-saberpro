@@ -8,7 +8,7 @@ Convierte lo que ocurre en la revisión en avisos de la bandeja de cada usuario 
 | **Base de datos** | PostgreSQL `notification_db` (puerto 5436 en local), con migraciones de Flyway |
 | **Swagger** | `http://localhost:8080/docs/notification-service/v3/api-docs` (a través del gateway) |
 | **Contrato exportado** | [`openapi-notification-service.json`](../../../docs/corte-2/api/openapi/openapi-notification-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/notification-service.postman_collection.json) |
-| **Pruebas** | 91 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| **Pruebas** | 85 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
