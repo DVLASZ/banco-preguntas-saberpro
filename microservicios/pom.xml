@@ -21,7 +21,8 @@
     <modules>
         <module>plataforma/bp-platform</module>
         <module>servicios/question-service</module>
-        <module>servicios/review-service</module>
+        <module>servicios/assignment-service</module>
+        <module>servicios/evaluation-service</module>
         <module>servicios/notification-service</module>
         <module>servicios/email-service</module>
         <module>servicios/audit-service</module>
