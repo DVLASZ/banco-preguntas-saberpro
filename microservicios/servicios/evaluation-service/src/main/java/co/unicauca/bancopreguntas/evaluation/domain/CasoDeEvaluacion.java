@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class CasoDeEvaluacion {
 
     /** Longitud máxima de una observación. */
-    public static final int MAXIMO_DE_OBSERVACION = 4000;
+    public static final int MAXIMO_DE_OBSERVACION = Observacion.MAXIMO;
 
     private final String id;
     private final String preguntaId;
@@ -189,13 +189,11 @@ public class CasoDeEvaluacion {
         if (decision == null) {
             throw new RevisionInvalidaException("La decisión es obligatoria");
         }
-        String texto = observacion == null || observacion.isBlank() ? null : observacion.trim();
-        if (decision == Decision.RECHAZAR && texto == null) {
+        Optional<Observacion> comentario = Observacion.de(observacion);
+        if (decision == Decision.RECHAZAR && comentario.isEmpty()) {
             throw new RevisionInvalidaException("Debes escribir una observación para rechazar la pregunta");
         }
-        if (texto != null && texto.length() > MAXIMO_DE_OBSERVACION) {
-            throw new RevisionInvalidaException("La observación no puede superar " + MAXIMO_DE_OBSERVACION + " caracteres");
-        }
+        String texto = comentario.map(Observacion::texto).orElse(null);
         RondaDeEvaluacion ronda = rondaActual();
         if (revisorId == null || !ronda.tieneRevisor(revisorId)) {
             throw new AccesoNoPermitidoException("No estás asignado como revisor de esta pregunta");
