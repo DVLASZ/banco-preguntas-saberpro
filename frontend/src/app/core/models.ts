@@ -1,6 +1,6 @@
 /** Tipos de los datos que intercambia el API. Los nombres coinciden con los de los servicios. */
 
-export type Rol = 'ADMIN' | 'AUTHOR' | 'REVIEWER';
+export type Rol = 'ADMIN' | 'AUTHOR' | 'REVIEWER' | 'TEACHER' | 'STUDENT';
 
 export type EstadoPregunta =
   | 'BORRADOR'
@@ -238,4 +238,142 @@ export interface FiltroAuditoria {
   preguntaId?: string;
   page?: number;
   size?: number;
+}
+
+// ---------------------------------------------------------------- simulacros y seguimiento
+
+/** Cuántas preguntas publicadas hay disponibles para armar simulacros (catalog-service). */
+export interface ResumenCatalogo {
+  total: number;
+  porCompetencia: Record<string, number>;
+  porDificultad: Record<string, number>;
+}
+
+export interface CriteriosSimulacro {
+  competencias: Competencia[];
+  dificultades: Dificultad[];
+  cantidad: number;
+  duracionMinutos: number;
+}
+
+export type EstadoSimulacro = 'EN_CURSO' | 'FINALIZADO' | 'EXPIRADO';
+
+/** Una pregunta del simulacro; la respuesta correcta solo llega cuando el simulacro terminó. */
+export interface ItemSimulacro {
+  orden: number;
+  preguntaId: string;
+  competencia: string;
+  tema: string;
+  dificultad: string;
+  contexto: string;
+  enunciado: string;
+  opcionA: string;
+  opcionB: string;
+  opcionC: string;
+  opcionD: string;
+  respuesta?: string;
+  respuestaCorrecta?: string;
+  acertada?: boolean;
+}
+
+export interface AciertosCompetencia {
+  competencia: string;
+  correctas: number;
+  total: number;
+  porcentaje: number;
+}
+
+export interface ResultadoSimulacro {
+  total: number;
+  correctas: number;
+  incorrectas: number;
+  sinResponder: number;
+  puntaje: number;
+  porCompetencia: AciertosCompetencia[];
+}
+
+export interface Simulacro {
+  id: string;
+  estudianteId: string;
+  estado: EstadoSimulacro;
+  iniciadoEn: string;
+  venceEn: string;
+  finalizadoEn?: string;
+  segundosRestantes: number;
+  duracionMinutos: number;
+  totalPreguntas: number;
+  respondidas: number;
+  preguntas: ItemSimulacro[];
+  resultado?: ResultadoSimulacro;
+}
+
+export interface ResumenSimulacro {
+  id: string;
+  estado: EstadoSimulacro;
+  iniciadoEn: string;
+  finalizadoEn?: string;
+  totalPreguntas: number;
+  respondidas: number;
+  duracionMinutos: number;
+  puntaje?: number;
+}
+
+export interface EntradaSeguimiento {
+  simulacroId: string;
+  iniciadoEn: string;
+  finalizadoEn: string;
+  duracionSegundos: number;
+  expirado: boolean;
+  total: number;
+  correctas: number;
+  incorrectas: number;
+  sinResponder: number;
+  puntaje: number;
+  porCompetencia: AciertosCompetencia[];
+}
+
+export type Tendencia = 'MEJORANDO' | 'ESTABLE' | 'BAJANDO' | 'SIN_DATOS';
+
+export interface Estadisticas {
+  estudianteId: string;
+  simulacros: number;
+  expirados: number;
+  puntajePromedio: number;
+  mejorPuntaje: number;
+  peorPuntaje: number;
+  ultimoPuntaje?: number;
+  ultimoSimulacro?: string;
+  tiempoPromedioSegundos: number;
+  tendencia: Tendencia;
+  porCompetencia: AciertosCompetencia[];
+}
+
+export interface Fortalezas {
+  estudianteId: string;
+  umbralFortaleza: number;
+  umbralDebilidad: number;
+  minimoDePreguntas: number;
+  fortalezas: AciertosCompetencia[];
+  debilidades: AciertosCompetencia[];
+  intermedias: AciertosCompetencia[];
+  sinDatosSuficientes: AciertosCompetencia[];
+}
+
+export interface FilaEstudiante {
+  estudianteId: string;
+  simulacros: number;
+  promedio: number;
+  mejorPuntaje: number;
+  ultimoPuntaje: number;
+  tendencia: Tendencia;
+  debilidades: string[];
+}
+
+export interface ReporteGrupo {
+  generadoEn: string;
+  estudiantes: number;
+  simulacros: number;
+  promedioGeneral: number;
+  porCompetencia: AciertosCompetencia[];
+  estudiantesDetalle: FilaEstudiante[];
 }

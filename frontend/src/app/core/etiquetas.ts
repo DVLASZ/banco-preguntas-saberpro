@@ -139,3 +139,33 @@ export function diaRelativo(iso: string, ahora: Date = new Date()): string {
   }
   return largo;
 }
+
+// ---------------------------------------------------------------- simulacros y seguimiento
+
+export const TENDENCIAS: Record<string, { texto: string; tono: Tono }> = {
+  MEJORANDO: { texto: 'Mejorando', tono: 'verde' },
+  ESTABLE: { texto: 'Estable', tono: 'azul' },
+  BAJANDO: { texto: 'Bajando', tono: 'rojo' },
+  SIN_DATOS: { texto: 'Sin datos', tono: 'gris' },
+};
+
+export const ESTADOS_SIMULACRO: Record<string, { texto: string; tono: Tono }> = {
+  EN_CURSO: { texto: 'En curso', tono: 'azul' },
+  FINALIZADO: { texto: 'Finalizado', tono: 'verde' },
+  EXPIRADO: { texto: 'Tiempo agotado', tono: 'ambar' },
+};
+
+/** Segundos como reloj: «45:07» o «1:05:00». */
+export function reloj(segundos: number): string {
+  const total = Math.max(0, Math.floor(segundos));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const dos = (n: number) => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${dos(m)}:${dos(s)}` : `${dos(m)}:${dos(s)}`;
+}
+
+/** Un porcentaje con un decimal: «72,5 %». */
+export function porcentaje(valor: number | null | undefined): string {
+  return valor === null || valor === undefined ? '—' : `${valor.toLocaleString('es-CO', { maximumFractionDigits: 1 })} %`;
+}
