@@ -14,6 +14,12 @@ export function paginaDeInicio(roles: readonly string[]): string {
   if (roles.includes('ADMIN')) {
     return '/asignar';
   }
+  if (roles.includes('STUDENT')) {
+    return '/simulacros';
+  }
+  if (roles.includes('TEACHER')) {
+    return '/reporte';
+  }
   return '/sin-acceso';
 }
 
