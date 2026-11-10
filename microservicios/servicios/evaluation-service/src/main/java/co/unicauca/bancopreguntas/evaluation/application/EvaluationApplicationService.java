@@ -1,5 +1,8 @@
 package co.unicauca.bancopreguntas.evaluation.application;
 
+import co.unicauca.bancopreguntas.evaluation.application.port.in.ConsultarRevision;
+import co.unicauca.bancopreguntas.evaluation.application.port.in.EvaluarPregunta;
+import co.unicauca.bancopreguntas.evaluation.application.port.in.ReaccionarAEventosDeRevision;
 import co.unicauca.bancopreguntas.evaluation.application.port.DomainEventPublisher;
 import co.unicauca.bancopreguntas.evaluation.application.port.EvaluationRepository;
 import co.unicauca.bancopreguntas.evaluation.application.port.ProcessedEvents;
@@ -29,7 +32,7 @@ import java.util.function.Supplier;
  * assignment-service. Coordina el dominio y los puertos; no conoce ni la base de datos ni el broker.
  */
 @Transactional
-public class EvaluationApplicationService {
+public class EvaluationApplicationService implements EvaluarPregunta, ConsultarRevision, ReaccionarAEventosDeRevision {
 
     private static final Logger LOG = LoggerFactory.getLogger(EvaluationApplicationService.class);
 
@@ -57,6 +60,7 @@ public class EvaluationApplicationService {
      * Reacción a {@code question.submitted}: el autor envió una versión de la pregunta. Abre el caso si es la primera
      * vez y empieza una ronda, que espera a los revisores que asigne assignment-service. Es idempotente.
      */
+    @Override
     public void alEnviarseUnaPregunta(String eventId, String preguntaId, String autorId, String titulo,
                                       String competencia, int version) {
         if (!procesados.registrarSiEsNuevo(eventId)) {
@@ -71,6 +75,7 @@ public class EvaluationApplicationService {
      * que puedan evaluar. Si el aviso llega antes que el del envío de la pregunta, la ronda se abre con los datos que
      * trae el propio evento. Es idempotente.
      */
+    @Override
     public void alAsignarseRevisores(String eventId, String preguntaId, String autorId, String titulo, String competencia,
                                      int version, int ronda, List<String> revisores, String asignadoPor,
                                      boolean automatica, Instant ocurridoEn) {
@@ -96,6 +101,7 @@ public class EvaluationApplicationService {
      * Reacción a {@code question.reopened}: el autor reabrió la pregunta rechazada para corregirla, así que la ronda que
      * seguía abierta a observaciones se cierra. Es idempotente.
      */
+    @Override
     public void alReabrirseUnaPregunta(String eventId, String preguntaId) {
         if (!procesados.registrarSiEsNuevo(eventId)) {
             LOG.debug("Evento {} ya procesado; se ignora", eventId);
@@ -133,6 +139,7 @@ public class EvaluationApplicationService {
      * Un revisor envía su evaluación (HU-05). Publica {@code review.evaluation-submitted} y, si con ella se decide la
      * ronda, {@code review.completed}.
      */
+    @Override
     public ResultadoDeEvaluacion evaluar(String preguntaId, String revisorId, Decision decision, String observacion) {
         CasoDeEvaluacion caso = repositorio.buscarPorPreguntaIdParaActualizar(preguntaId)
                 .orElseThrow(() -> new CasoNoEncontradoException(preguntaId));
@@ -160,6 +167,7 @@ public class EvaluationApplicationService {
      * detalle de las rondas ya decididas.
      */
     @Transactional(readOnly = true)
+    @Override
     public VistaDelCaso caso(String preguntaId, Observador observador) {
         CasoDeEvaluacion caso = repositorio.buscarPorPreguntaId(preguntaId)
                 .orElseThrow(() -> new CasoNoEncontradoException(preguntaId));
