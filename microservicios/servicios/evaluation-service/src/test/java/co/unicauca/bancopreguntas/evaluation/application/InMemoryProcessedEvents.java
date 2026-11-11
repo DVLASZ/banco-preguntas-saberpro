@@ -1,6 +1,6 @@
 package co.unicauca.bancopreguntas.evaluation.application;
 
-import co.unicauca.bancopreguntas.evaluation.application.port.ProcessedEvents;
+import co.unicauca.bancopreguntas.evaluation.application.port.out.ProcessedEvents;
 
 import java.util.HashSet;
 import java.util.Set;

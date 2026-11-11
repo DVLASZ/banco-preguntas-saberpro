@@ -1,6 +1,6 @@
 package co.unicauca.bancopreguntas.evaluation.application;
 
-import co.unicauca.bancopreguntas.evaluation.application.port.EvaluationRepository;
+import co.unicauca.bancopreguntas.evaluation.application.port.out.EvaluationRepository;
 import co.unicauca.bancopreguntas.evaluation.domain.CasoDeEvaluacion;
 
 import java.util.LinkedHashMap;

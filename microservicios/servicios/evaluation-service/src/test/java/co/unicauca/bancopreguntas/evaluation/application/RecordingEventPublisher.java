@@ -1,6 +1,6 @@
 package co.unicauca.bancopreguntas.evaluation.application;
 
-import co.unicauca.bancopreguntas.evaluation.application.port.DomainEventPublisher;
+import co.unicauca.bancopreguntas.evaluation.application.port.out.DomainEventPublisher;
 import co.unicauca.bancopreguntas.evaluation.domain.event.DomainEvent;
 
 import java.util.ArrayList;

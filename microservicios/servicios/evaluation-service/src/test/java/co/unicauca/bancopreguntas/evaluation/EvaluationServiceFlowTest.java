@@ -1,7 +1,7 @@
 package co.unicauca.bancopreguntas.evaluation;
 
-import co.unicauca.bancopreguntas.evaluation.infrastructure.messaging.AssignmentEventsListener;
-import co.unicauca.bancopreguntas.evaluation.infrastructure.messaging.QuestionEventsListener;
+import co.unicauca.bancopreguntas.evaluation.adapter.in.messaging.AssignmentEventsListener;
+import co.unicauca.bancopreguntas.evaluation.adapter.in.messaging.QuestionEventsListener;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
