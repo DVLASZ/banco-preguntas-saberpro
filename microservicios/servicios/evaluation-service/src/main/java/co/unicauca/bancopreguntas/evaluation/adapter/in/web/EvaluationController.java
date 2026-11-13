@@ -3,7 +3,8 @@ package co.unicauca.bancopreguntas.evaluation.adapter.in.web;
 import co.unicauca.bancopreguntas.evaluation.adapter.in.web.dto.EvaluationRequest;
 import co.unicauca.bancopreguntas.evaluation.adapter.in.web.dto.EvaluationResultResponse;
 import co.unicauca.bancopreguntas.evaluation.adapter.in.web.dto.ReviewResponse;
-import co.unicauca.bancopreguntas.evaluation.application.EvaluationApplicationService;
+import co.unicauca.bancopreguntas.evaluation.application.port.in.ConsultarRevision;
+import co.unicauca.bancopreguntas.evaluation.application.port.in.EvaluarPregunta;
 import co.unicauca.bancopreguntas.evaluation.domain.Observador;
 import co.unicauca.bancopreguntas.platform.security.AuthenticatedUser;
 import co.unicauca.bancopreguntas.platform.security.Roles;
@@ -28,10 +29,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Evaluaciones", description = "Evaluación de preguntas por los revisores y consulta de la revisión")
 public class EvaluationController {
 
-    private final EvaluationApplicationService evaluaciones;
+    private final EvaluarPregunta evaluar;
+    private final ConsultarRevision consultar;
 
-    public EvaluationController(EvaluationApplicationService evaluaciones) {
-        this.evaluaciones = evaluaciones;
+    public EvaluationController(EvaluarPregunta evaluar, ConsultarRevision consultar) {
+        this.evaluar = evaluar;
+        this.consultar = consultar;
     }
 
     @GetMapping("/{questionId}")
@@ -39,7 +42,7 @@ public class EvaluationController {
             description = "El administrador y los revisores ven todo; el autor ve el detalle de las rondas ya decididas.")
     public ReviewResponse revision(AuthenticatedUser usuario, @PathVariable String questionId) {
         usuario.requireAnyRole(Roles.ADMIN, Roles.AUTHOR, Roles.REVIEWER);
-        return ReviewResponse.de(evaluaciones.caso(questionId,
+        return ReviewResponse.de(consultar.caso(questionId,
                 new Observador(usuario.id(), usuario.hasRole(Roles.ADMIN))));
     }
 
@@ -52,6 +55,6 @@ public class EvaluationController {
                                             @Valid @RequestBody EvaluationRequest solicitud) {
         usuario.requireAnyRole(Roles.REVIEWER);
         return EvaluationResultResponse.de(
-                evaluaciones.evaluar(questionId, usuario.id(), solicitud.decision(), solicitud.observacion()));
+                evaluar.evaluar(questionId, usuario.id(), solicitud.decision(), solicitud.observacion()));
     }
 }

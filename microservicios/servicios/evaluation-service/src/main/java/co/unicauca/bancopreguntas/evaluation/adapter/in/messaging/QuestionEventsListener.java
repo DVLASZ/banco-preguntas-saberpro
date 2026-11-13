@@ -3,7 +3,7 @@ package co.unicauca.bancopreguntas.evaluation.adapter.in.messaging;
 import co.unicauca.bancopreguntas.evaluation.config.RabbitTopology;
 import co.unicauca.bancopreguntas.platform.events.IncomingEvent;
 import co.unicauca.bancopreguntas.platform.events.IncomingEventParser;
-import co.unicauca.bancopreguntas.evaluation.application.EvaluationApplicationService;
+import co.unicauca.bancopreguntas.evaluation.application.port.in.ReaccionarAEventosDeRevision;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionEventsListener {
 
-    private final EvaluationApplicationService evaluaciones;
+    private final ReaccionarAEventosDeRevision evaluaciones;
     private final IncomingEventParser lector;
 
-    public QuestionEventsListener(EvaluationApplicationService evaluaciones, IncomingEventParser lector) {
+    public QuestionEventsListener(ReaccionarAEventosDeRevision evaluaciones, IncomingEventParser lector) {
         this.evaluaciones = evaluaciones;
         this.lector = lector;
     }

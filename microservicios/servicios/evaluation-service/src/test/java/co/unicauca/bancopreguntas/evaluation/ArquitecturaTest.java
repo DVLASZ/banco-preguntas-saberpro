@@ -74,6 +74,12 @@ class ArquitecturaTest {
                     .because("un puerto es un contrato, no una implementación");
 
     @ArchTest
+    static final ArchRule los_adaptadores_de_entrada_llaman_a_los_puertos_y_no_al_servicio =
+            noClasses().that().resideInAPackage(ADAPTADORES_DE_ENTRADA)
+                    .should().dependOnClassesThat().haveSimpleName("EvaluationApplicationService")
+                    .because("quien dirige la aplicación lo hace por un puerto de entrada");
+
+    @ArchTest
     static final ArchRule los_adaptadores_de_salida_no_dependen_de_los_de_entrada =
             noClasses().that().resideInAPackage(ADAPTADORES_DE_SALIDA)
                     .should().dependOnClassesThat().resideInAPackage(ADAPTADORES_DE_ENTRADA);
