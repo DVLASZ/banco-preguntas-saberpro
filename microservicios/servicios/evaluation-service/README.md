@@ -8,7 +8,7 @@ Recibe la evaluación de cada revisor, decide la ronda por unanimidad y publica 
 | **Base de datos** | PostgreSQL `evaluation_db` (puerto 5446 en local), con migraciones de Flyway |
 | **Swagger** | `http://localhost:8080/docs/evaluation-service/v3/api-docs` (a través del gateway) |
 | **Contrato exportado** | [`openapi-evaluation-service.json`](../../../docs/corte-2/api/openapi/openapi-evaluation-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
-| **Pruebas** | 107 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| **Pruebas** | 121 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
@@ -58,11 +58,20 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ```
 src/main/java/co/unicauca/bancopreguntas/evaluation/
-├── api/              Controlador REST, DTO y manejo de errores
-├── application/      Casos de uso y puertos (interfaces que el dominio necesita)
-├── domain/           Reglas de negocio y eventos; no depende de Spring ni de la base de datos
-└── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
+├── domain/                   Agregado, objetos de valor, política de decisión y eventos; no depende de Spring
+├── application/
+│   ├── port/in/              Puertos de entrada (casos de uso que ofrece el servicio)
+│   ├── port/out/             Puertos de salida (repositorio, publicación de eventos, eventos procesados)
+│   └── EvaluationApplicationService   Implementa los puertos de entrada y usa los de salida
+├── adapter/
+│   ├── in/web/               API REST
+│   ├── in/messaging/         Listeners de RabbitMQ
+│   ├── out/persistence/      JPA y PostgreSQL
+│   └── out/messaging/        Publicación de eventos
+└── config/                   Armado de los objetos y topología de RabbitMQ
 ```
+
+Es el servicio con arquitectura hexagonal y DDD del tercer corte. El diseño completo está en [hexagonal y DDD](../../../docs/corte-3/hexagonal-y-ddd.md).
 
 **Patrones de diseño que usa:** Strategy (`PoliticaDeDecision` y `Unanimidad`), Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
