@@ -1,0 +1,122 @@
+<div class="pagina">
+  @if (cargando() && !simulacro()) {
+    <div class="esqueleto" style="height: 220px"></div>
+  } @else if (simulacro(); as s) {
+    <header class="pagina-cabecera">
+      <div>
+        <h1>Simulacro</h1>
+        <p class="subtitulo">
+          <bp-insignia [texto]="estados[s.estado].texto" [tono]="estados[s.estado].tono" />
+          · {{ s.totalPreguntas }} preguntas · {{ s.duracionMinutos }} minutos
+        </p>
+      </div>
+      @if (enCurso()) {
+        <div class="reloj" [class.urgente]="urgente()" role="timer" aria-label="Tiempo restante">
+          <bp-icono nombre="info" [tamano]="18" /> {{ reloj(restantes()) }}
+        </div>
+      } @else {
+        <a class="boton" routerLink="/simulacros"><bp-icono nombre="flecha-izq" [tamano]="16" /> Mis simulacros</a>
+      }
+    </header>
+
+    @if (error(); as mensaje) {
+      <div class="aviso error" role="alert"><div><strong>Algo salió mal</strong><p>{{ mensaje }}</p></div></div>
+    }
+
+    @if (enCurso()) {
+      <div class="presentacion">
+        <nav class="mapa" aria-label="Preguntas del simulacro">
+          @for (p of s.preguntas; track p.preguntaId; let i = $index) {
+            <button type="button" [class.actual]="i === actual()" [class.respondida]="!!p.respuesta" (click)="ir(i)"
+                    [attr.aria-label]="'Pregunta ' + (i + 1) + (p.respuesta ? ', respondida' : ', sin responder')">
+              {{ i + 1 }}
+            </button>
+          }
+        </nav>
+
+        @if (pregunta(); as p) {
+          <article class="tarjeta pregunta">
+            <div class="meta">Pregunta {{ actual() + 1 }} de {{ s.totalPreguntas }} · {{ textoCompetencia(p.competencia) }} · {{ textoDificultad(p.dificultad) }}</div>
+            @if (p.contexto) { <p class="contexto">{{ p.contexto }}</p> }
+            <h2>{{ p.enunciado }}</h2>
+            <div class="opciones" role="radiogroup" [attr.aria-label]="'Opciones de la pregunta ' + (actual() + 1)">
+              @for (l of letras; track l) {
+                <button type="button" role="radio" class="opcion-simulacro" [class.elegida]="p.respuesta === l"
+                        [attr.aria-checked]="p.respuesta === l" [disabled]="guardando()" (click)="elegir(l)">
+                  <b>{{ l }}</b><span>{{ textoDe(p, l) }}</span>
+                </button>
+              }
+            </div>
+            <div class="navegacion">
+              <button type="button" class="boton" [disabled]="actual() === 0" (click)="ir(actual() - 1)"><bp-icono nombre="flecha-izq" [tamano]="16" /> Anterior</button>
+              @if (actual() < s.preguntas.length - 1) {
+                <button type="button" class="boton" (click)="ir(actual() + 1)">Siguiente <bp-icono nombre="flecha-der" [tamano]="16" /></button>
+              }
+              <span class="espacio"></span>
+              <span class="suave">{{ respondidas() }} de {{ s.totalPreguntas }} respondidas</span>
+              <button type="button" class="boton primario" (click)="confirmando.set(true)">Finalizar simulacro</button>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (confirmando()) {
+        <div class="aviso" role="alertdialog" aria-label="Confirmar el fin del simulacro">
+          <div>
+            <strong>¿Finalizar el simulacro?</strong>
+            <p>
+              @if (sinResponder() > 0) { Tienes {{ sinResponder() }} pregunta(s) sin responder; contarán como incorrectas. } @else { Ya respondiste todas las preguntas. }
+              Al finalizar se califica y ya no podrás cambiar tus respuestas.
+            </p>
+          </div>
+          <button type="button" class="boton chico" (click)="confirmando.set(false)">Seguir</button>
+          <button type="button" class="boton chico primario" [disabled]="guardando()" (click)="finalizar()">Sí, finalizar</button>
+        </div>
+      }
+    } @else if (s.resultado; as r) {
+      <section class="rejilla-estadisticas" aria-label="Resultado">
+        <div class="estadistica azul"><div><div class="valor">{{ r.puntaje }}</div><div class="etiqueta">Puntaje sobre 100</div></div></div>
+        <div class="estadistica verde"><div><div class="valor">{{ r.correctas }}</div><div class="etiqueta">Correctas</div></div></div>
+        <div class="estadistica ambar"><div><div class="valor">{{ r.incorrectas }}</div><div class="etiqueta">Incorrectas</div></div></div>
+        <div class="estadistica"><div><div class="valor">{{ r.sinResponder }}</div><div class="etiqueta">Sin responder</div></div></div>
+      </section>
+
+      <section class="tarjeta">
+        <h2 class="seccion">Por competencia</h2>
+        @for (c of r.porCompetencia; track c.competencia) {
+          <div class="barra-fila">
+            <span>{{ textoCompetencia(c.competencia) }}</span>
+            <div class="barra" role="img" [attr.aria-label]="porcentaje(c.porcentaje)"><i [style.width.%]="c.porcentaje"></i></div>
+            <span class="suave">{{ c.correctas }}/{{ c.total }} · {{ porcentaje(c.porcentaje) }}</span>
+          </div>
+        }
+      </section>
+
+      <h2 class="seccion">Revisión de tus respuestas</h2>
+      @for (p of s.preguntas; track p.preguntaId; let i = $index) {
+        <article class="tarjeta revision" [class.acierto]="p.acertada" [class.fallo]="!p.acertada">
+          <div class="meta">
+            Pregunta {{ i + 1 }} · {{ textoCompetencia(p.competencia) }} ·
+            @if (p.acertada) { <strong class="ok">Correcta</strong> } @else if (p.respuesta) { <strong class="mal">Incorrecta</strong> } @else { <strong class="mal">Sin responder</strong> }
+          </div>
+          @if (p.contexto) { <p class="contexto">{{ p.contexto }}</p> }
+          <h3>{{ p.enunciado }}</h3>
+          <ul class="opciones-revision">
+            @for (l of letras; track l) {
+              <li [class.correcta]="p.respuestaCorrecta === l" [class.elegida-mal]="p.respuesta === l && p.respuestaCorrecta !== l">
+                <b>{{ l }}</b> {{ textoDe(p, l) }}
+                @if (p.respuestaCorrecta === l) { <em>respuesta correcta</em> }
+                @if (p.respuesta === l && p.respuestaCorrecta !== l) { <em>tu respuesta</em> }
+              </li>
+            }
+          </ul>
+        </article>
+      }
+    }
+  } @else if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar el simulacro</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  }
+</div>
