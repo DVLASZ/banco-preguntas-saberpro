@@ -1,0 +1,96 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>{{ estudianteId() ? 'Seguimiento de ' + estudianteId() : 'Mi progreso' }}</h1>
+      <p class="subtitulo">Resultados de los simulacros, fortalezas y debilidades por competencia.</p>
+    </div>
+    @if (estudianteId()) {
+      <a class="boton" routerLink="/reporte"><bp-icono nombre="flecha-izq" [tamano]="16" /> Reporte del grupo</a>
+    } @else {
+      <a class="boton primario" routerLink="/simulacros">Nuevo simulacro</a>
+    }
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar el seguimiento</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (cargando() && !resumen()) {
+    <div class="esqueleto" style="height: 160px"></div>
+  } @else if (resumen(); as r) {
+    @if (sinDatos()) {
+      <div class="tarjeta vacio">Todavía no hay simulacros terminados, así que no hay estadísticas que mostrar.</div>
+    } @else {
+      <section class="rejilla-estadisticas" aria-label="Resumen">
+        <div class="estadistica azul"><div><div class="valor">{{ r.puntajePromedio }}</div><div class="etiqueta">Puntaje promedio</div></div></div>
+        <div class="estadistica verde"><div><div class="valor">{{ r.mejorPuntaje }}</div><div class="etiqueta">Mejor puntaje</div></div></div>
+        <div class="estadistica"><div><div class="valor">{{ r.simulacros }}</div><div class="etiqueta">Simulacros ({{ r.expirados }} por tiempo)</div></div></div>
+        <div class="estadistica">
+          <div>
+            <div class="valor"><bp-insignia [texto]="(tendencias[r.tendencia] ?? tendencias['SIN_DATOS']).texto" [tono]="(tendencias[r.tendencia] ?? tendencias['SIN_DATOS']).tono" /></div>
+            <div class="etiqueta">Tendencia · tiempo medio {{ reloj(r.tiempoPromedioSegundos) }}</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="dos-columnas">
+        <section class="tarjeta">
+          <h2 class="seccion">Aciertos por competencia</h2>
+          @for (c of r.porCompetencia; track c.competencia) {
+            <div class="barra-fila">
+              <span>{{ textoCompetencia(c.competencia) }}</span>
+              <div class="barra" role="img" [attr.aria-label]="porcentaje(c.porcentaje)"><i [style.width.%]="barra(c)"></i></div>
+              <span class="suave">{{ c.correctas }}/{{ c.total }} · {{ porcentaje(c.porcentaje) }}</span>
+            </div>
+          }
+        </section>
+
+        @if (competencias(); as f) {
+          <section class="tarjeta">
+            <h2 class="seccion">Fortalezas y debilidades</h2>
+            <h3 class="verde">Fortalezas <small>(desde {{ f.umbralFortaleza }} %)</small></h3>
+            <ul>
+              @for (c of f.fortalezas; track c.competencia) { <li>{{ textoCompetencia(c.competencia) }} · {{ porcentaje(c.porcentaje) }}</li> }
+              @empty { <li class="suave">Aún no hay competencias en este nivel.</li> }
+            </ul>
+            <h3 class="rojo">Por reforzar <small>(menos de {{ f.umbralDebilidad }} %)</small></h3>
+            <ul>
+              @for (c of f.debilidades; track c.competencia) { <li>{{ textoCompetencia(c.competencia) }} · {{ porcentaje(c.porcentaje) }}</li> }
+              @empty { <li class="suave">Ninguna por ahora.</li> }
+            </ul>
+            @if (f.sinDatosSuficientes.length) {
+              <p class="suave nota">Faltan al menos {{ f.minimoDePreguntas }} preguntas para valorar:
+                @for (c of f.sinDatosSuficientes; track c.competencia; let ultimo = $last) {{{ textoCompetencia(c.competencia) }}{{ ultimo ? '.' : ', ' }}}
+              </p>
+            }
+          </section>
+        }
+      </div>
+
+      <h2 class="seccion">Historial de simulacros</h2>
+      <div class="tabla">
+        <table>
+          <thead><tr><th>Fecha</th><th>Puntaje</th><th>Correctas</th><th>Incorrectas</th><th>Sin responder</th><th>Duración</th></tr></thead>
+          <tbody>
+            @for (h of historial()?.contenido; track h.simulacroId) {
+              <tr>
+                <td>{{ fechaHora(h.finalizadoEn) }}</td>
+                <td><strong>{{ h.puntaje }}</strong> / 100 @if (h.expirado) { <bp-insignia texto="Tiempo agotado" tono="ambar" /> }</td>
+                <td>{{ h.correctas }} de {{ h.total }}</td>
+                <td>{{ h.incorrectas }}</td>
+                <td>{{ h.sinResponder }}</td>
+                <td class="suave">{{ reloj(h.duracionSegundos) }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="vacio">Sin simulacros terminados.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (historial(); as h) {
+          <bp-paginacion [pagina]="h.pagina" [tamano]="h.tamano" [total]="h.totalElementos" elementos="simulacros" (cambia)="irA($event)" />
+        }
+      </div>
+    }
+  }
+</div>
