@@ -30,9 +30,12 @@ export const OPCIONES: readonly Opcion[] = [
   { ruta: '/notificaciones', icono: 'campana', texto: 'Notificaciones', roles: ['ADMIN', 'AUTHOR', 'REVIEWER'], contador: 'notificaciones' },
   { ruta: '/historial', icono: 'flujo', texto: 'Historial', roles: ['ADMIN', 'AUTHOR', 'REVIEWER'] },
   { ruta: '/auditoria', icono: 'escudo', texto: 'Auditoría', roles: ['ADMIN'] },
+  { ruta: '/simulacros', icono: 'preguntas', texto: 'Simulacros', roles: ['STUDENT'] },
+  { ruta: '/progreso', icono: 'flujo', texto: 'Mi progreso', roles: ['STUDENT'] },
+  { ruta: '/reporte', icono: 'usuarios', texto: 'Reporte del grupo', roles: ['TEACHER', 'ADMIN'] },
 ];
 
-const ETIQUETA_ROL: Record<string, string> = { ADMIN: 'Administrador', AUTHOR: 'Autor', REVIEWER: 'Revisor' };
+const ETIQUETA_ROL: Record<string, string> = { ADMIN: 'Administrador', AUTHOR: 'Autor', REVIEWER: 'Revisor', TEACHER: 'Docente', STUDENT: 'Estudiante' };
 
 /** El marco de las pantallas con sesión: barra lateral, barra superior y avisos. */
 @Component({
@@ -61,9 +64,15 @@ export class Marco {
     return OPCIONES.filter((o) => o.roles.some((r) => roles.includes(r)));
   });
 
+  /** La bandeja de notificaciones es de los roles del banco de preguntas; estudiantes y docentes no la tienen. */
+  protected readonly conNotificaciones = computed(() => {
+    const roles = this.usuario()?.roles ?? [];
+    return ['ADMIN', 'AUTHOR', 'REVIEWER'].some((r) => roles.includes(r));
+  });
+
   protected readonly etiquetaDeRol = computed(() => {
     const roles = this.usuario()?.roles ?? [];
-    const conocidas = ['ADMIN', 'AUTHOR', 'REVIEWER'].filter((r) => roles.includes(r)).map((r) => ETIQUETA_ROL[r]);
+    const conocidas = ['ADMIN', 'AUTHOR', 'REVIEWER', 'TEACHER', 'STUDENT'].filter((r) => roles.includes(r)).map((r) => ETIQUETA_ROL[r]);
     return conocidas.length ? conocidas.join(' · ') : 'Sin rol';
   });
 
@@ -120,7 +129,9 @@ export class Marco {
     if (!this.auth.autenticado()) {
       return;
     }
-    this.notificaciones.refrescarNoLeidas().pipe(catchError(() => of(null))).subscribe();
+    if (this.conNotificaciones()) {
+      this.notificaciones.refrescarNoLeidas().pipe(catchError(() => of(null))).subscribe();
+    }
     if (this.auth.tieneAlgunRol('ADMIN')) {
       this.reviews
         .pendientesDeAsignacion(0, 1)

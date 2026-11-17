@@ -77,7 +77,39 @@ export const routes: Routes = [
         data: { titulo: 'Bandeja del revisor' },
         loadComponent: () => import('./features/review/evaluar').then((m) => m.Evaluar),
       },
-      // Todos los roles
+      // Estudiante
+      {
+        path: 'simulacros',
+        canActivate: [rolGuard('STUDENT')],
+        data: { titulo: 'Simulacros' },
+        loadComponent: () => import('./features/student/simulacros').then((m) => m.Simulacros),
+      },
+      {
+        path: 'simulacros/:id',
+        canActivate: [rolGuard('STUDENT')],
+        data: { titulo: 'Simulacro' },
+        loadComponent: () => import('./features/student/simulacro').then((m) => m.Simulacro),
+      },
+      {
+        path: 'progreso',
+        canActivate: [rolGuard('STUDENT')],
+        data: { titulo: 'Mi progreso' },
+        loadComponent: () => import('./features/student/seguimiento').then((m) => m.Seguimiento),
+      },
+      // Docente (y administrador)
+      {
+        path: 'reporte',
+        canActivate: [rolGuard('TEACHER', 'ADMIN')],
+        data: { titulo: 'Reporte del grupo' },
+        loadComponent: () => import('./features/teacher/reporte-grupo').then((m) => m.ReporteGrupo),
+      },
+      {
+        path: 'estudiantes/:id',
+        canActivate: [rolGuard('TEACHER', 'ADMIN')],
+        data: { titulo: 'Seguimiento del estudiante' },
+        loadComponent: () => import('./features/student/seguimiento').then((m) => m.Seguimiento),
+      },
+      // Todos los roles del banco de preguntas
       {
         path: 'notificaciones',
         canActivate: [rolGuard('ADMIN', 'AUTHOR', 'REVIEWER')],

@@ -44,13 +44,15 @@
       </div>
       <div class="derecha">
         <span class="fecha">{{ hoy }}</span>
-        <a class="campana" routerLink="/notificaciones" [attr.aria-label]="'Notificaciones: ' + notificaciones.noLeidas() + ' sin leer'">
-          <bp-icono nombre="campana" [tamano]="20" />
-          @if (notificaciones.noLeidas() > 0) {
-            <i></i>
-          }
-        </a>
-        <span class="divisor"></span>
+        @if (conNotificaciones()) {
+          <a class="campana" routerLink="/notificaciones" [attr.aria-label]="'Notificaciones: ' + notificaciones.noLeidas() + ' sin leer'">
+            <bp-icono nombre="campana" [tamano]="20" />
+            @if (notificaciones.noLeidas() > 0) {
+              <i></i>
+            }
+          </a>
+          <span class="divisor"></span>
+        }
         @if (usuario(); as u) {
           <div class="persona">
             <bp-avatar [nombre]="u.nombre" />

@@ -57,11 +57,11 @@ describe('Marco', () => {
     expect(reviews.pendientesDeAsignacion).not.toHaveBeenCalled();
   });
 
-  it('el administrador ve asignar, publicar, auditoría y el número por asignar', () => {
+  it('el administrador ve asignar, publicar, auditoría, el reporte del grupo y el número por asignar', () => {
     roles = ['ADMIN'];
     const f = crear();
 
-    expect(textos(f)).toEqual(['Asignar revisores', 'Publicar preguntas', 'Notificaciones', 'Historial', 'Auditoría']);
+    expect(textos(f)).toEqual(['Asignar revisores', 'Publicar preguntas', 'Notificaciones', 'Historial', 'Auditoría', 'Reporte del grupo']);
     expect(f.nativeElement.textContent).toContain('8');
     expect(reviews.bandeja).not.toHaveBeenCalled();
   });
@@ -85,6 +85,15 @@ describe('Marco', () => {
 
     expect(crear().nativeElement.querySelector('.campana i')).toBeNull();
     noLeidas.set(3);
+  });
+
+  it.each([['STUDENT'], ['TEACHER']])('el rol %s no tiene campana ni consulta notificaciones (su servicio no se lo permite)', (rol) => {
+    roles = [rol];
+
+    const f = crear();
+
+    expect(f.nativeElement.querySelector('.campana')).toBeNull();
+    expect(notificaciones.refrescarNoLeidas).not.toHaveBeenCalled();
   });
 
   it('cuando algo cambia, refresca los contadores', () => {
