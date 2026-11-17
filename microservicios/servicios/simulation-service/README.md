@@ -1,8 +1,5 @@
 # simulation-service · Simulacros
 
-> **Primera distribución (7 servicios).** Este README describe el servicio tal como está publicado hoy. En la nueva distribución, de 14
-> servicios, se divide en `catalog-service` (preguntas publicadas y selección) y `simulation-service` (simulacros); ver el [README de los servicios](../README.md).
-
 Permite al estudiante practicar con simulacros armados al azar con preguntas publicadas, con tiempo límite y calificación automática.
 
 | | |

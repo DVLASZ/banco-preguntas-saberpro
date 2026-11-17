@@ -1,8 +1,5 @@
 # tracking-service · Seguimiento académico
 
-> **Primera distribución (7 servicios).** Este README describe el servicio tal como está publicado hoy. En la nueva distribución, de 14
-> servicios, se divide en `statistics-service` (historial y estadísticas) y `report-service` (reporte del grupo); ver el [README de los servicios](../README.md).
-
 Convierte los resultados de los simulacros en historial, estadísticas, fortalezas y debilidades por competencia, y en el reporte del grupo para el docente.
 
 | | |

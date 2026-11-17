@@ -1,8 +1,5 @@
 # user-service · Usuarios
 
-> **Primera distribución (7 servicios).** Este README describe el servicio tal como está publicado hoy. En la nueva distribución, de 14
-> servicios, se mantiene igual en la nueva distribución; ver el [README de los servicios](../README.md).
-
 Mantiene el directorio de usuarios del banco, sincronizado desde Keycloak, y avisa de los inicios de sesión.
 
 | | |
