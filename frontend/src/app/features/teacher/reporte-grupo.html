@@ -1,0 +1,70 @@
+<div class="pagina">
+  <header class="pagina-cabecera">
+    <div>
+      <h1>Reporte del grupo</h1>
+      <p class="subtitulo">
+        Cómo les va a los estudiantes en los simulacros.
+        @if (reporte(); as r) { Generado el {{ fechaHora(r.generadoEn) }}. }
+      </p>
+    </div>
+    <button type="button" class="boton primario" [disabled]="descargando() || !reporte()" (click)="descargarCsv()">
+      <bp-icono nombre="publicar" [tamano]="16" /> Descargar CSV
+    </button>
+  </header>
+
+  @if (error(); as mensaje) {
+    <div class="aviso error" role="alert">
+      <div><strong>No se pudo cargar el reporte</strong><p>{{ mensaje }}</p></div>
+      <button type="button" class="boton chico" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (cargando() && !reporte()) {
+    <div class="esqueleto" style="height: 160px"></div>
+  } @else if (reporte(); as r) {
+    <section class="rejilla-estadisticas" aria-label="Resumen del grupo">
+      <div class="estadistica azul"><div><div class="valor">{{ r.estudiantes }}</div><div class="etiqueta">Estudiantes</div></div></div>
+      <div class="estadistica verde"><div><div class="valor">{{ r.simulacros }}</div><div class="etiqueta">Simulacros presentados</div></div></div>
+      <div class="estadistica ambar"><div><div class="valor">{{ r.promedioGeneral }}</div><div class="etiqueta">Promedio general</div></div></div>
+    </section>
+
+    @if (r.estudiantes === 0) {
+      <div class="tarjeta vacio">Todavía ningún estudiante ha terminado un simulacro.</div>
+    } @else {
+      <section class="tarjeta">
+        <h2 class="seccion">Aciertos del grupo por competencia</h2>
+        @for (c of r.porCompetencia; track c.competencia) {
+          <div class="barra-fila">
+            <span>{{ textoCompetencia(c.competencia) }}</span>
+            <div class="barra" role="img" [attr.aria-label]="porcentaje(c.porcentaje)"><i [style.width.%]="c.porcentaje"></i></div>
+            <span class="suave">{{ c.correctas }}/{{ c.total }} · {{ porcentaje(c.porcentaje) }}</span>
+          </div>
+        }
+      </section>
+
+      <div class="cabecera-tabla">
+        <h2 class="seccion">Estudiantes</h2>
+        <form class="buscar" (ngSubmit)="buscar()">
+          <input type="text" name="buscado" placeholder="Ver a un estudiante por su usuario" [(ngModel)]="buscado" aria-label="Usuario del estudiante" />
+          <button type="submit" class="boton chico">Ver</button>
+        </form>
+      </div>
+      <div class="tabla">
+        <table>
+          <thead><tr><th>Estudiante</th><th>Simulacros</th><th>Promedio</th><th>Mejor</th><th>Último</th><th>Tendencia</th><th>Por reforzar</th></tr></thead>
+          <tbody>
+            @for (e of r.estudiantesDetalle; track e.estudianteId) {
+              <tr class="clicable" (click)="abrir(e.estudianteId)">
+                <td><a [routerLink]="['/estudiantes', e.estudianteId]" (click)="$event.stopPropagation()">{{ e.estudianteId }}</a></td>
+                <td>{{ e.simulacros }}</td>
+                <td><strong>{{ e.promedio }}</strong></td>
+                <td>{{ e.mejorPuntaje }}</td>
+                <td>{{ e.ultimoPuntaje }}</td>
+                <td><bp-insignia [texto]="(tendencias[e.tendencia] ?? tendencias['SIN_DATOS']).texto" [tono]="(tendencias[e.tendencia] ?? tendencias['SIN_DATOS']).tono" /></td>
+                <td class="suave">{{ e.debilidades.length ? e.debilidades.map(textoCompetencia).join(', ') : '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
