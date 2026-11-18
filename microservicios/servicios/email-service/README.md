@@ -6,7 +6,7 @@ Envía (de forma simulada) un correo por cada aviso creado y deja un registro qu
 |---|---|
 | **Puerto** | 8090 (`EMAIL_SERVICE_PORT`) |
 | **Base de datos** | PostgreSQL `email_db` (puerto 5440 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8090/swagger-ui.html` (directo; el gateway lo expone en la nueva distribución) |
+| **Swagger** | `http://localhost:8080/docs/email-service/v3/api-docs` (a través del gateway) |
 | **Pruebas** | 38 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad

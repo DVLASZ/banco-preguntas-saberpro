@@ -6,7 +6,7 @@ Guarda una entrada de auditoría por cada acción relevante: cambios de las preg
 |---|---|
 | **Puerto** | 8091 (`AUDIT_SERVICE_PORT`) |
 | **Base de datos** | PostgreSQL `audit_db` (puerto 5441 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8091/swagger-ui.html` (directo; el gateway lo expone en la nueva distribución) |
+| **Swagger** | `http://localhost:8080/docs/audit-service/v3/api-docs` (a través del gateway) |
 | **Pruebas** | 38 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
