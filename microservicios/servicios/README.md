@@ -26,9 +26,10 @@ servicio llamado vuelva a comprobar el rol:
 | [`email-service`](email-service/) | Correo simulado por cada aviso, con reintentos y registro | 8090 |
 | [`history-service`](history-service/) | Línea de tiempo de cada pregunta (HU-06) | 8085 |
 | [`audit-service`](audit-service/) | Auditoría de acciones e inicios de sesión | 8091 |
+| [`simulation-service`](simulation-service/) | Simulacros al azar con tiempo y calificación automática (RF-21 a RF-24) | 8086 |
+| [`tracking-service`](tracking-service/) | Historial, estadísticas, fortalezas, debilidades y reporte del grupo (RF-25 a RF-28) | 8087 |
 
-`simulation-service` y `tracking-service` siguen en esta carpeta desde el primer diseño. Son de simulacros y seguimiento académico, que
-corresponden al tercer corte, y no forman parte de esta entrega.
+Los dos últimos son del tercer corte y los usan los roles `STUDENT` y `TEACHER`. Ver [simulacros y seguimiento](../../docs/corte-3/simulacros-y-seguimiento.md).
 
 Todos comparten la biblioteca de [`../plataforma/bp-platform`](../plataforma/bp-platform/) y siguen la estructura
 descrita en [convenciones](../../docs/general/convenciones.md). Cómo se llegó a esta división y por qué: [decisiones y SOLID](../../docs/corte-2/10-decisiones-y-solid.md).

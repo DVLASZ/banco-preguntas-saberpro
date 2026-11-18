@@ -1,13 +1,13 @@
 # Microservicios del Banco de Preguntas Saber Pro
 
-Segunda iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
-corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../docs/corte-2/README.md).
+Segunda y tercera iteración: la solución distribuida con microservicios orientados a eventos. El monolito del primer
+corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../docs/corte-2/README.md) y [`docs/corte-3`](../docs/corte-3/README.md).
 
 ## Servicios
 
-La solución son **diez microservicios** que se comunican por eventos en RabbitMQ, detrás de un API Gateway, cada uno con su propia base de
-datos PostgreSQL (menos `validation-service`, que no guarda datos). Dos servicios del primer diseño, `simulation-service` y `tracking-service`
-(simulacros y seguimiento académico), siguen en el repositorio pero son del tercer corte y no forman parte de esta entrega.
+La solución son **doce microservicios** que se comunican por eventos en RabbitMQ, detrás de un API Gateway, cada uno con su propia base de
+datos PostgreSQL (menos `validation-service`, que no guarda datos). Diez son del banco de preguntas y dos, `simulation-service` y `tracking-service`,
+son de simulacros y seguimiento académico (tercer corte). `evaluation-service` está organizado como arquitectura hexagonal con DDD.
 
 | Servicio | Qué hace |
 |---|---|
@@ -41,8 +41,8 @@ microservicios/
 │   ├── history-service/          Historial por pregunta
 │   ├── audit-service/            Auditoría de acciones e inicios de sesión
 │   ├── validation-service/       Validación estructural de preguntas (sin estado)
-│   ├── simulation-service/       (primer diseño, tercer corte) Simulacros
-│   ├── tracking-service/         (primer diseño, tercer corte) Seguimiento académico
+│   ├── simulation-service/       Simulacros de los estudiantes
+│   ├── tracking-service/         Seguimiento académico y reporte del grupo
 │   └── user-service/             Usuarios de Keycloak y eventos de acceso
 ├── infraestructura/              Piezas que sostienen a los servicios
 │   ├── api-gateway/              Entrada única, autorización, circuit breaker
@@ -180,4 +180,4 @@ api/              Controlador REST, DTOs y manejo de errores
 
 ## Pendiente (corte 3)
 
-DDD formal en un servicio, simulacros y seguimiento académico, el documento final y la sustentación.
+El documento final en PDF y la sustentación.
