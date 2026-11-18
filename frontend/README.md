@@ -10,14 +10,14 @@ Gateway y se autentica con Keycloak. Las pantallas siguen los prototipos de
 src/app/core/        Configuración en tiempo de ejecución, modelos, servicios de API y autenticación (PKCE, guardias, interceptor)
 src/app/layout/      Marco de la aplicación (menú por rol, avisos)
 src/app/ui/          Componentes visuales reutilizables (icono, insignia, avatar, paginación, avisos)
-src/app/features/    Pantallas: login, preguntas, revisión, administración, historial, notificaciones
+src/app/features/    Pantallas: login, preguntas, revisión, administración, historial, notificaciones, simulacros y reporte del grupo
 public/config.json   Direcciones del API y de Keycloak (se lee al arrancar; no hace falta recompilar para cambiarlas)
 ```
 
 ## Autenticación
 
 *Authorization Code con PKCE* contra el realm `bancopreguntas` de Keycloak. El token se envía al gateway en
-cada petición; las rutas y el menú dependen del rol (`ADMIN`, `AUTHOR`, `REVIEWER`) que trae el token, y el
+cada petición; las rutas y el menú dependen del rol (`ADMIN`, `AUTHOR`, `REVIEWER`, `STUDENT` y `TEACHER`) que trae el token, y el
 servidor vuelve a comprobarlo.
 
 ## Ejecutar
