@@ -7,7 +7,7 @@ Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 
 > Estado: la iteración está implementada y verificada: 10 microservicios pequeños, gateway, Keycloak, frontend Angular con las
 > pantallas de autor, revisor y administrador, Docker Compose y pruebas de carga. Para el tercer corte quedan el rediseño con DDD de un
 > servicio, el documento final, la prueba de usabilidad y la sustentación. Los simulacros y el seguimiento académico también son del
-> tercer corte: `simulation-service` y `tracking-service` siguen como estaban en el primer diseño y no forman parte de esta entrega.
+> tercer corte: ver [la documentación del tercer corte](../corte-3/README.md).
 
 | Documento | Contenido |
 |---|---|
