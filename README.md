@@ -5,7 +5,18 @@ Saber Pro. Proyecto de curso de Ingeniería de Software II, Universidad del Cauc
 
 Los autores redactan preguntas de selección múltiple que el sistema valida estructuralmente; un administrador asigna de 1 a 3 revisores;
 los revisores evalúan y la pregunta se aprueba por unanimidad; el administrador publica las aprobadas. Cada paso genera notificaciones (con
-correo simulado) y queda en un historial.
+correo simulado) y queda en un historial que el autor puede leer para mejorar su pregunta. Con las preguntas publicadas, los estudiantes presentan
+simulacros con tiempo y calificación automática, y los docentes ven el desempeño del grupo.
+
+## Roles
+
+| Rol | Qué hace |
+|---|---|
+| Autor | Redacta, envía a revisión, lee las observaciones y corrige sus preguntas |
+| Revisor | Evalúa las preguntas que le asignaron |
+| Administrador | Asigna de 1 a 3 revisores, publica las aprobadas y consulta la auditoría |
+| Estudiante | Presenta simulacros y ve su progreso, sus fortalezas y sus debilidades |
+| Docente | Ve el seguimiento de los estudiantes y el reporte del grupo |
 
 ## Tecnología
 
@@ -21,8 +32,9 @@ correo simulado) y queda en un historial.
 ## Arquitectura
 
 Microservicios orientados a eventos: cada servicio tiene su propia base de datos y se comunican por RabbitMQ a través de un API Gateway. Son
-**diez servicios pequeños**, cada uno con una sola responsabilidad: usuarios, preguntas, validación, ciclo de vida, asignación de revisores,
-evaluación, notificaciones, correo, historial y auditoría.
+**doce servicios pequeños**, cada uno con una sola responsabilidad: usuarios, preguntas, validación, ciclo de vida, asignación de revisores,
+evaluación, notificaciones, correo, historial, auditoría, simulacros y seguimiento. `evaluation-service` está organizado con arquitectura hexagonal
+y DDD.
 
 ```mermaid
 flowchart LR
@@ -35,14 +47,15 @@ flowchart LR
   GW --> EM["email-service"]
   GW --> H["history-service"]
   GW --> AU["audit-service"]
+  GW --> SI["simulation-service"]
+  GW --> TR["tracking-service"]
   Q -- "REST (interno)" --> V["validation-service"]
   Q -- "REST (interno)" --> L["lifecycle-service"]
-  L & A & E & N & U -- eventos --> MQ{{"RabbitMQ"}}
-  MQ --> Q & L & A & E & N & EM & H & AU
+  L & A & E & N & U & SI -- eventos --> MQ{{"RabbitMQ"}}
+  MQ --> Q & L & A & E & N & EM & H & AU & SI & TR
 ```
 
-El diseño completo está en la [documentación del segundo corte](docs/corte-2/README.md). Los simulacros y el seguimiento académico (`simulation-service` y
-`tracking-service`, del primer diseño) son del tercer corte y no forman parte de esta entrega.
+El diseño está en la [documentación del segundo corte](docs/corte-2/README.md) y la del [tercer corte](docs/corte-3/README.md).
 
 ## Estructura del repositorio
 
@@ -82,7 +95,7 @@ Más detalles en el [README del monolito](monolito/README.md).
 | [`docs/general`](docs/general/README.md) | Visión general, flujo de trabajo, convenciones, respuestas de los docentes y enunciados |
 | [`docs/corte-1`](docs/corte-1/README.md) | Monolito: historias de usuario, C4, patrones, pruebas |
 | [`docs/corte-2`](docs/corte-2/README.md) | Microservicios: contextos y eventos, arquitectura, patrones, prototipos y contratos de la API |
-| [`docs/corte-3`](docs/corte-3/README.md) | Alcance del tercer corte |
+| [`docs/corte-3`](docs/corte-3/README.md) | Hexagonal y DDD, seguridad, simulacros y seguimiento, y cobertura de pruebas |
 
 ## Estado
 
@@ -90,7 +103,7 @@ Más detalles en el [README del monolito](monolito/README.md).
 |---|---|
 | 1. Monolito | Entregado |
 | 2. Microservicios | Entregado: diez servicios, gateway, frontend web, Docker Compose y pruebas de carga |
-| 3. DDD en un servicio, simulacros y seguimiento, documento final y sustentación | Pendiente |
+| 3. Hexagonal y DDD, seguridad, simulacros y seguimiento | Construido. Faltan el documento final en PDF y la sustentación |
 
 ## Autores
 
