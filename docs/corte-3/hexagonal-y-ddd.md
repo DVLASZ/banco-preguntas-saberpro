@@ -89,6 +89,13 @@ evaluation/
 La clase `config.ApplicationConfig` es el único lugar que conoce todas las piezas: crea el servicio de aplicación y le entrega los adaptadores que
 implementan los puertos.
 
+### Vista C4 de nivel 3
+
+El mismo servicio visto como componentes del modelo C4. Se ve qué entra por el gateway y por RabbitMQ, qué puertos atraviesa, dónde vive el dominio y
+por dónde salen los datos y los eventos. Los dos RabbitMQ del dibujo son el mismo broker, separados para que las flechas no se crucen.
+
+![C4 nivel 3 de evaluation-service](img/diagramas/c4-nivel-3-evaluation-service.png)
+
 ## Cómo se protege
 
 `ArquitecturaTest` usa ArchUnit y falla el build si alguien rompe la forma del hexágono. Comprueba, entre otras cosas, que el dominio no depende de
