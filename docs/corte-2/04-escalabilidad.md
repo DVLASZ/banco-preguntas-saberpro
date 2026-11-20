@@ -17,7 +17,7 @@ del primer corte se mantiene gracias a la separación en servicios y a la comuni
 | Medida | Tiempo de respuesta (p95), tasa de error y peticiones por segundo |
 | Resultado esperado | Con 500 usuarios concurrentes, p95 de las consultas menor a 3 s (RNF-17) y error menor al 1 % |
 
-**Por qué la arquitectura lo permite:** los servicios no guardan estado de sesión (el token es autocontenido),
+**Por qué la arquitectura lo hace posible:** los servicios no guardan estado de sesión (el token es autocontenido),
 cada uno tiene su base de datos y el trabajo lento (correo, trazabilidad) sale del camino de la petición mediante
 eventos. Las réplicas se registran solas en Eureka y el gateway las reparte.
 
@@ -56,7 +56,7 @@ usuarios; el cuello de botella pasa a ser el CPU compartido.
 
 | Hallazgo | Causa | Corrección |
 |---|---|---|
-| Consultas de preguntas muy lentas con muchas filas | El filtro opcional con `OR … IS NULL` impedía usar índices | Búsqueda dinámica con consulta construida según los filtros + índices `(autor, fecha, id)`, `(fecha, id)` y `(estado, fecha, id)` (migración `question V3`) |
+| Consultas de preguntas muy lentas con muchas filas | El filtro opcional con `OR ... IS NULL` impedía usar índices | Búsqueda dinámica con consulta construida según los filtros + índices `(autor, fecha, id)`, `(fecha, id)` y `(estado, fecha, id)` (migración `question V3`) |
 | El gateway rechazaba llamadas sanas con carga | El *bulkhead* por defecto admite 25 llamadas simultáneas | Tope de 1000 con espera máxima de 200 ms |
 | Errores por agotamiento de puertos en `edge` | Una conexión nueva por petición hacia el gateway | Upstream con `keepalive` |
 | `edge` descartaba réplicas sanas | Tomaba los `503` del circuit breaker como réplica caída | Solo `error` y `timeout` activan el reintento; `max_fails=3 fail_timeout=3s` |
@@ -68,7 +68,7 @@ sistema sigue respondiendo sin errores), pero en esta máquina **no mejora** el 
 comparten los mismos 16 CPU, así que más réplicas solo reparten el mismo cómputo y añaden cambios de contexto.
 La escalabilidad horizontal tiene sentido cuando cada réplica dispone de recursos propios (varios nodos). Es un
 resultado honesto de la medición y se explica en la sustentación; el diseño (servicios sin estado, base por
-servicio, balanceo y descubrimiento) es el que permite ese escalado en un entorno con más hardware.
+servicio, balanceo y descubrimiento) es el que hace posible ese escalado en un entorno con más hardware.
 
 ## Tolerancia a fallos (extra)
 

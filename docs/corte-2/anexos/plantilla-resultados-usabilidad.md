@@ -1,8 +1,8 @@
 # Plantilla de resultados de la prueba de usabilidad
 
 Para llenar después de aplicar la prueba descrita en [prueba-de-usabilidad.md](prueba-de-usabilidad.md). Solo hay que
-reemplazar los `___` con datos **reales**; con esto se actualiza la sección «Resultados» de [06 · Prototipos](../06-prototipos.md).
-Si una persona no autoriza que se publique su nombre, anotar «Participante n».
+reemplazar los `___` con datos **reales**; con esto se actualiza la sección "Resultados" de [06 · Prototipos](../06-prototipos.md).
+Si una persona no autoriza que se publique su nombre, anotar "Participante n".
 
 ## 1. Datos de la aplicación
 
@@ -24,7 +24,7 @@ Si una persona no autoriza que se publique su nombre, anotar «Participante n».
 
 ## 3. Éxito por tarea
 
-(«Completó» = sin ayuda; el tiempo es el promedio de quienes la completaron.)
+("Completó" = sin ayuda; el tiempo es el promedio de quienes la completaron.)
 
 | Tarea | Personas que la hicieron | Completaron | Con ayuda | No completaron | Tiempo promedio | Errores totales |
 |---|---|---|---|---|---|---|

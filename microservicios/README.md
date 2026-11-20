@@ -156,18 +156,18 @@ Swagger agregado de todos los servicios a través del gateway: `http://localhost
 
 | Servicio | Ruta | Rol |
 |---|---|---|
-| question | `POST/GET /api/questions`, `GET/PUT /api/questions/{id}`, `POST …/{id}/submit`, `…/reopen` | Autor |
-| question | `GET /api/questions/all`, `GET …/pending-review`, `POST …/{id}/publish` | Administrador |
+| question | `POST/GET /api/questions`, `GET/PUT /api/questions/{id}`, `POST .../{id}/submit`, `.../reopen` | Autor |
+| question | `GET /api/questions/all`, `GET .../pending-review`, `POST .../{id}/publish` | Administrador |
 | assignment | `GET /api/reviews/pending-assignment`, `POST /api/reviews/{id}/assignments` | Administrador |
 | assignment | `GET /api/reviews/assigned` | Revisor |
 | assignment | `GET /api/reviews/config` | Todos |
 | evaluation | `POST /api/reviews/{id}/evaluations` | Revisor |
 | evaluation | `GET /api/reviews/{id}` | Todos |
-| notification | `GET /api/notifications`, `…/unread-count`, `POST …/{id}/read`, `…/read-all` | Todos |
+| notification | `GET /api/notifications`, `.../unread-count`, `POST .../{id}/read`, `.../read-all` | Todos |
 | email | `GET /api/emails` | Administrador |
 | history | `GET /api/history/questions/{id}`, `/me` | Todos |
 | audit | `GET /api/audit` | Administrador |
-| user | `GET /api/users/me` (todos), `GET /api/users`, `POST /api/users/sync` (administrador) | — |
+| user | `GET /api/users/me` (todos), `GET /api/users`, `POST /api/users/sync` (administrador) | - |
 
 ## Organización de cada servicio
 

@@ -24,7 +24,7 @@ y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gatew
    `FallbackController` en lugar de dejar esperando), un bulkhead que limita las llamadas simultáneas y reintentos de las consultas
    GET cuando una réplica falla. El circuit breaker va por fuera y el reintento por dentro.
 5. **Trazabilidad y seguridad de las cabeceras.** `RequestIdFilter` da a cada petición un identificador `X-Request-Id` (el que traiga o
-   uno nuevo), lo envía al servicio y lo devuelve en la respuesta; además **descarta** las cabeceras `X-User-Id` y `X-User-Roles` que un
+   uno nuevo), lo envía al servicio y lo devuelve en la respuesta; también **descarta** las cabeceras `X-User-Id` y `X-User-Roles` que un
    cliente intente enviar, que solo valen entre servicios.
 6. **CORS.** Solo los orígenes de `GATEWAY_ALLOWED_ORIGINS`.
 

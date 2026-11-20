@@ -30,7 +30,7 @@ Documentos que aplican a todo el proyecto, en [`../general`](../general/README.m
 [consultas a los docentes](../general/consultas-a-docentes.md) con sus respuestas, la
 [reutilización del monolito](../general/reutilizacion-del-monolito.md) y los enunciados de la materia.
 
-Los diagramas están escritos en [Mermaid](https://mermaid.js.org/), que GitHub muestra directamente, y además
+Los diagramas están escritos en [Mermaid](https://mermaid.js.org/), que GitHub muestra directamente, y también
 exportados como imagen en [`img/diagramas`](img/diagramas/).
 
 ## Decisiones tomadas

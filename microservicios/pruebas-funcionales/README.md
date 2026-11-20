@@ -9,7 +9,7 @@ funcionan juntos.
 | Historia | Comprobaciones |
 |---|---|
 | Seguridad | Login con Keycloak, sin token 401, rol incorrecto 403 |
-| HU-01 | Crear pregunta válida en Borrador; la validación estructural rechaza dos preguntas directas, «todas las anteriores», falta de contexto y opciones repetidas |
+| HU-01 | Crear pregunta válida en Borrador; la validación estructural rechaza dos preguntas directas, "todas las anteriores", falta de contexto y opciones repetidas |
 | HU-02 | Enviar a revisión; no se puede enviar dos veces |
 | HU-03 | Listado propio con filtro y paginación |
 | HU-04 | 0 y 4 revisores se rechazan, el autor no puede ser revisor, con 2 la pregunta pasa a En revisión; avisos al revisor y al autor |
@@ -26,7 +26,7 @@ funcionan juntos.
 cd microservicios
 docker compose up -d --build          # espera a que todos los contenedores estén healthy
 python pruebas-funcionales/recorrido_funcional.py
-PRUEBA_TIEMPO=1 python pruebas-funcionales/recorrido_funcional.py   # además, el cierre por tiempo agotado (~100 s)
+PRUEBA_TIEMPO=1 python pruebas-funcionales/recorrido_funcional.py   # también, el cierre por tiempo agotado (~100 s)
 ```
 
 Solo usa la biblioteca estándar de Python 3. Lee la clave de desarrollo del realm

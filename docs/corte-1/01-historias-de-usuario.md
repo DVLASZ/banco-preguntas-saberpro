@@ -21,7 +21,7 @@ En todas, una **pregunta** tiene: nombre, contexto, pregunta directa, **cuatro
 opciones (A a D)** de las cuales una es la respuesta correcta, justificación de la
 respuesta, bibliografía, competencia, tema, subtema y nivel de dificultad.
 
-## HU-01 — Crear pregunta de selección múltiple
+## HU-01: Crear pregunta de selección múltiple
 
 **Como** autor de preguntas **quiero** crear una pregunta de selección múltiple con
 única respuesta **para** alimentar el banco de preguntas Saber Pro.
@@ -51,7 +51,7 @@ mostrarle al autor lo que debe corregir de una sola vez:
 | Sin "todas las anteriores" ni "ninguna de las anteriores" | RF-12 | `ExpresionesProhibidasRule` |
 | Longitud (3 a 250 caracteres) y estructura de las opciones | RF-13 | `LongitudYEstructuraOpcionesRule` |
 
-## HU-02 — Cambiar el estado de "Borrador" a "Pendiente de revisión"
+## HU-02: Cambiar el estado de "Borrador" a "Pendiente de revisión"
 
 **Como** autor de preguntas **quiero** cambiar el estado de mis preguntas a
 "Pendiente de revisión" **para** que el administrador asigne un revisor.
@@ -71,7 +71,7 @@ revisión (amarillo), En revisión (azul), Aprobada (verde azulado), Rechazada (
 Publicada (verde) y Archivada (pizarra). Las transiciones válidas entre estados
 están definidas en `EstadoPregunta.puedePasarA` (RF-14 y RF-15).
 
-## HU-03 — Listar preguntas creadas
+## HU-03: Listar preguntas creadas
 
 **Como** autor de preguntas **quiero** ver el listado de las preguntas que he creado
 **para** poder verlas o editarlas más adelante.
@@ -87,7 +87,7 @@ están definidas en `EstadoPregunta.puedePasarA` (RF-14 y RF-15).
 4. Solo se puede editar una pregunta si está en "Borrador"; en otros estados solo se
    puede ver.
 
-## HU-04 — Asignar revisor a preguntas pendientes de revisión
+## HU-04: Asignar revisor a preguntas pendientes de revisión
 
 **Como** administrador **quiero** asignar al menos un revisor a una pregunta
 "Pendiente de revisión" **para** que otro docente la revise. Una vez asignados los
@@ -104,7 +104,7 @@ revisores, el sistema envía un correo para notificarlos (simulado).
 4. El autor de la pregunta no se ofrece como revisor (no aparece en la lista de
    revisores disponibles).
 
-## Trazabilidad: criterio → código → prueba
+## Trazabilidad: criterio, código y prueba
 
 Cada criterio de aceptación está cubierto por pruebas unitarias automatizadas
 (módulo `modulo-preguntas`, salvo que se indique otro).

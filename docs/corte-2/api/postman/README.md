@@ -13,7 +13,7 @@ al crear, enviar, reabrir y publicar preguntas con la de `question-service`.
 | [`email-service`](email-service.postman_collection.json) | 9 |
 | [`history-service`](history-service.postman_collection.json) | 12 |
 | [`audit-service`](audit-service.postman_collection.json) | 9 |
-| **Total** | **200** peticiones con 314 verificaciones (las de «Sesión» y «Preparación» cuentan en cada colección) |
+| **Total** | **200** peticiones con 314 verificaciones (las de "Sesión" y "Preparación" cuentan en cada colección) |
 
 El entorno [`SaberPro_Local`](SaberPro_Local.postman_environment.json) define `baseUrl` (`http://localhost:8080`, el gateway),
 `keycloakUrl` (`http://localhost:8180`) y `password` (la clave de los usuarios de demostración). Cada colección empieza con una

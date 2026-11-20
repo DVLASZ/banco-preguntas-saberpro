@@ -61,7 +61,7 @@ Las siete clases `Fase*` de `lifecycle-service` (patrón State) se prueban a tra
 
 ## Otras pruebas que protegen el dominio
 
-- ArchUnit en cada servicio: el dominio no depende de Spring, de JPA ni de la mensajería. En `evaluation-service` además se comprueba el hexágono completo
+- ArchUnit en cada servicio: el dominio no depende de Spring, de JPA ni de la mensajería. En `evaluation-service` también se comprueba el hexágono completo
   (ver [hexagonal y DDD](hexagonal-y-ddd.md)).
 - `recorrido_funcional.py` recorre el sistema con tokens reales de Keycloak.
 - Las pruebas de API usan MockMvc, y las de persistencia usan PostgreSQL embebido, para que no dependan de un Docker encendido.

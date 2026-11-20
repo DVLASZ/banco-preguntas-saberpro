@@ -54,14 +54,14 @@ Cobertura del dominio: todas las clases del dominio de los diez servicios tienen
 |---|---|
 | `Question` | Construcción con Builder; solo se edita en Borrador; la copia del estado ignora una secuencia ya aplicada; la reapertura trae la versión nueva |
 | Casos de uso | Crear valida, registra en el ciclo de vida y guarda en Borrador; enviar, reabrir y publicar piden la transición y guardan el estado que informa lifecycle-service; solo el autor opera sus preguntas; si validation o lifecycle caen, no se guarda nada |
-| Clientes REST | `ValidadorRemoto` y `CicloDeVidaRemoto` con un servidor simulado: 403, 404 y 409 vuelven como las excepciones del dominio; un 5xx o una caída son «dependencia no disponible» |
+| Clientes REST | `ValidadorRemoto` y `CicloDeVidaRemoto` con un servidor simulado: 403, 404 y 409 vuelven como las excepciones del dominio; un 5xx o una caída son "dependencia no disponible" |
 | Mensajería | `question.state-changed` actualiza la copia; un aviso atrasado o repetido se ignora |
 
 ### validation-service
 
 | Elemento | Casos principales |
 |---|---|
-| Reglas de validación (7) | Una por requisito: campos obligatorios, contexto, una sola pregunta directa, cuatro opciones distintas, una respuesta correcta, expresiones prohibidas («todas/ninguna de las anteriores»), longitud y estructura |
+| Reglas de validación (7) | Una por requisito: campos obligatorios, contexto, una sola pregunta directa, cuatro opciones distintas, una respuesta correcta, expresiones prohibidas ("todas/ninguna de las anteriores"), longitud y estructura |
 | `ReglaPorOpcion` (Template Method) | El esqueleto recorre A a D, omite las vacías y se puede cambiar el gancho `omitir` |
 | `QuestionValidator` y API | Reporta todas las violaciones juntas, no solo la primera; siempre responde 200; exige rol AUTHOR o ADMIN |
 
@@ -91,7 +91,7 @@ Cobertura del dominio: todas las clases del dominio de los diez servicios tienen
 
 | Elemento | Casos principales |
 |---|---|
-| Destinatarios por evento | Cada evento genera los avisos de la tabla «Quién recibe qué» ([notificaciones](notificaciones-y-correos.md)) |
+| Destinatarios por evento | Cada evento genera los avisos de la tabla "Quién recibe qué" ([notificaciones](notificaciones-y-correos.md)) |
 | Factory Method | Cada `TipoNotificacion` tiene su creador concreto; los textos cambian según manual o automática, aprobada o rechazada, con o sin observaciones |
 | `notification.created` | Se publica por Outbox junto con el aviso |
 | Correo | Con un doble: reintento hasta que pasa, última excepción si no, conteo del registro y apilado de decoradores; si el correo falla, el aviso sigue en la bandeja |

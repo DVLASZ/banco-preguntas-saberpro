@@ -10,7 +10,7 @@
 | `corte-3` | Se crea al empezar el tercer corte |
 | Ramas personales | Cada integrante trabaja en una rama propia, con su identidad de Git, y no toca `main` |
 
-Los cambios se integran con Pull Request usando «Create a merge commit» o «Rebase and merge» (no «Squash»), para que
+Los cambios se integran con Pull Request usando "Create a merge commit" o "Rebase and merge" (no "Squash"), para que
 cada commit conserve a su autor.
 
 ## Commits

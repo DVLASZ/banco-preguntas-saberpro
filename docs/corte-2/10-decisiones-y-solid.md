@@ -1,6 +1,6 @@
 # 10 · Decisiones de arquitectura y SOLID
 
-Este documento responde al entregable «decisiones de arquitectura y su justificación» (tipo de aplicación, estilo y
+Este documento responde al entregable "decisiones de arquitectura y su justificación" (tipo de aplicación, estilo y
 tecnologías) y a la rúbrica de SOLID y buenas prácticas. Cada decisión dice **qué se decidió, por qué, qué alternativas se
 descartaron y qué se paga por ello**. Los nombres de clases son los del código.
 
@@ -11,7 +11,7 @@ proyectos separados que solo se comunican por HTTP/JSON.
 
 | | |
 |---|---|
-| Por qué | El enunciado del segundo corte exige frontend y backend separados y comunicados por API REST. Una web evita instalar nada en el equipo de los autores, los revisores y el administrador, y es lo que permite escalar el backend sin tocar el cliente |
+| Por qué | El enunciado del segundo corte exige frontend y backend separados y comunicados por API REST. Una web evita instalar nada en el equipo de los autores, los revisores y el administrador, y así se puede escalar el backend sin tocar el cliente |
 | Alternativas | La aplicación de escritorio Swing del primer corte (el docente Libardo aceptó también Swing o JavaFX, pero el foco de la iteración es el backend y una aplicación de escritorio no se despliega en contenedores); React en lugar de Angular |
 | Por qué Angular | Estructura por defecto (rutas, formularios, inyección de dependencias, pruebas) que acelera un proyecto de equipo; TypeScript detecta errores de contrato con la API en compilación |
 | Costo | Dos bases de código y dos conjuntos de pruebas (190 más de frontend); hay que mantener los modelos de TypeScript alineados con los DTO del backend, lo que se cubre con las colecciones de Postman y el recorrido funcional |
@@ -23,9 +23,9 @@ RabbitMQ como bus.
 
 | | |
 |---|---|
-| Por qué | El corte pide una solución distribuida y escalable. Cada contexto delimitado (usuarios, preguntas, validación, ciclo de vida, asignación, evaluación, notificaciones, correo, historial y auditoría) evoluciona y escala por separado; la comunicación por eventos desacopla productores y consumidores (notificaciones e historial se agregan sin tocar a quien produce los eventos) |
+| Por qué | El corte pide una solución distribuida y que escale. Cada contexto delimitado (usuarios, preguntas, validación, ciclo de vida, asignación, evaluación, notificaciones, correo, historial y auditoría) evoluciona y escala por separado; la comunicación por eventos desacopla productores y consumidores (notificaciones e historial se agregan sin tocar a quien produce los eventos) |
 | Alternativas | Monolito modular (más simple, pero no cumple el corte ni escala por partes); microservicios que se llaman siempre por REST (acopla disponibilidad: si revisión cae, preguntas no puede enviar; por eso las llamadas síncronas se limitan a dos, ver abajo); Saga, CQRS y Event Sourcing (los docentes los dejaron fuera de alcance) |
-| Costo | Consistencia eventual (la pregunta pasa a «En revisión» unos milisegundos después de asignar), más piezas que operar y pruebas más complejas |
+| Costo | Consistencia eventual (la pregunta pasa a "En revisión" unos milisegundos después de asignar), más piezas que operar y pruebas más complejas |
 | Cómo se mitiga | Patrón Outbox (no se pierden eventos), consumidores idempotentes (un evento repetido no duplica efectos), reintentos con cola de mensajes muertos, circuit breaker en el gateway; todo documentado en [08](08-implementacion-seguridad-y-resiliencia.md) |
 
 ### Cuántos servicios y por qué tan pequeños
@@ -59,17 +59,17 @@ hasta que el otro confirma); y el gateway no expone ninguno de los dos puntos in
 
 | Tecnología | Para qué | Por qué se eligió | Alternativas y desventajas |
 |---|---|---|---|
-| **Java 21 y Spring Boot 3.5** | Todos los servicios | Obligatorio según los docentes («Java con Spring Boot»); ecosistema maduro para REST, JPA, AMQP y seguridad; el dominio ya estaba escrito en Java en el primer corte | Quarkus o Micronaut arrancan más rápido, pero el equipo no los conoce. Desventaja: arranque de unos segundos y consumo de memoria mayor |
-| **Spring Data JPA y Flyway** | Persistencia y migraciones | JPA reduce el código repetitivo; Flyway versiona el esquema (`db/migration`) y asegura que cada entorno tenga el mismo | JDBC puro (más control, más código). Desventaja: JPA oculta consultas; por eso hay pruebas de persistencia sobre PostgreSQL real |
-| **PostgreSQL 16, una por servicio** | Datos | Confirmado por los docentes. Una base por servicio garantiza que ningún servicio lea las tablas de otro (bajo acoplamiento) | Una base compartida (más simple, pero acopla los servicios por el esquema). Desventaja: no hay joins entre servicios; se resuelve guardando solo identificadores y copiando lo mínimo que cada servicio necesita (`question_info`) |
-| **RabbitMQ 3.13** | Bus de eventos | Confirmado por los docentes; exchange *topic* con una cola por consumidor, entrega persistente, confirmaciones, colas de mensajes muertos y panel de administración | Kafka (más potente, mucho más pesado para este volumen). Desventaja: el orden estricto solo se garantiza por cola, no entre servicios |
+| **Java 21 y Spring Boot 3.5** | Todos los servicios | Obligatorio según los docentes ("Java con Spring Boot"); librerías maduras para REST, JPA, AMQP y seguridad; el dominio ya estaba escrito en Java en el primer corte | Quarkus o Micronaut arrancan más rápido, pero el equipo no los conoce. Desventaja: arranque de unos segundos y consumo de memoria mayor |
+| **Spring Data JPA y Flyway** | Persistencia y migraciones | JPA reduce el código repetitivo; Flyway versiona el esquema (`db/migration`) y hace que cada entorno tenga el mismo | JDBC puro (más control, más código). Desventaja: JPA oculta consultas; por eso hay pruebas de persistencia sobre PostgreSQL real |
+| **PostgreSQL 16, una por servicio** | Datos | Confirmado por los docentes. Una base por servicio hace que ningún servicio lea las tablas de otro (bajo acoplamiento) | Una base compartida (más simple, pero acopla los servicios por el esquema). Desventaja: no hay joins entre servicios; se resuelve guardando solo identificadores y copiando lo mínimo que cada servicio necesita (`question_info`) |
+| **RabbitMQ 3.13** | Bus de eventos | Confirmado por los docentes; exchange *topic* con una cola por consumidor, entrega persistente, confirmaciones, colas de mensajes muertos y panel de administración | Kafka (más potente, mucho más pesado para este volumen). Desventaja: el orden estricto solo se mantiene por cola, no entre servicios |
 | **Keycloak 26** | Identidad | Autenticación y roles son un problema resuelto: OAuth2/OpenID Connect con PKCE, JWT firmado, administración de usuarios y registro de eventos de acceso (que alimentan la auditoría). Evita guardar contraseñas en nuestros servicios (RNF-08) | Implementar el login en `user-service` con BCrypt (menos piezas, pero más código de seguridad propio y más riesgo). Desventaja: un contenedor más y configuración del realm |
 | **JWT validado dos veces** | Seguridad | El gateway valida y autoriza por rol, y cada servicio vuelve a validar firma y emisor y exige el rol: un error en una barrera no abre la operación (autorización redundante) | Confiar solo en el gateway (más simple, pero cualquiera que llegue a un servicio por la red interna se salta la seguridad) |
-| **Spring Cloud Gateway, Eureka y nginx (`edge`)** | Entrada única, descubrimiento y balanceo | El gateway centraliza token, roles, CORS y resiliencia; Eureka permite agregar réplicas sin cambiar configuración; `edge` reparte entre réplicas del gateway | Direcciones fijas en el gateway (más simple, no escala). Desventaja: más contenedores |
+| **Spring Cloud Gateway, Eureka y nginx (`edge`)** | Entrada única, descubrimiento y balanceo | El gateway centraliza token, roles, CORS y resiliencia; Eureka deja agregar réplicas sin cambiar configuración; `edge` reparte entre réplicas del gateway | Direcciones fijas en el gateway (más simple, no escala). Desventaja: más contenedores |
 | **Resilience4J** | Resiliencia | Circuit breaker, reintentos, límite de tiempo y bulkhead por servicio, integrados con el gateway | Sin protección: un servicio lento acumularía peticiones. Se ajustaron los valores con pruebas (el bulkhead por defecto rechazaba llamadas sanas bajo carga) |
-| **Patrón Outbox** | Mensajería confiable | Publicar tras el commit puede fallar si RabbitMQ está caído; el Outbox guarda el evento en la misma transacción y un relevo lo envía | Publicar directo (pierde eventos). Desventaja: una tabla y un proceso periódico más; entrega «al menos una vez», que se compensa con consumidores idempotentes |
+| **Patrón Outbox** | Mensajería confiable | Publicar tras el commit puede fallar si RabbitMQ está caído; el Outbox guarda el evento en la misma transacción y un relevo lo envía | Publicar directo (pierde eventos). Desventaja: una tabla y un proceso periódico más; entrega "al menos una vez", que se compensa con consumidores idempotentes |
 | **Angular, TypeScript y nginx** | Frontend | Ver sección 1 | React |
-| **Docker y Docker Compose** | Despliegue | El corte 3 pide empaquetar todo para levantarse con un comando; permite además probar réplicas (`--scale`) | Kubernetes (fuera de alcance según los docentes) |
+| **Docker y Docker Compose** | Despliegue | El corte 3 pide empaquetar todo para levantarse con un comando; sirve también para probar réplicas (`--scale`) | Kubernetes (fuera de alcance según los docentes) |
 | **JUnit 5, MockMvc, ArchUnit, PostgreSQL embebido** | Pruebas del backend | Las pruebas corren sin Docker: dominio y aplicación con dobles en memoria, persistencia sobre PostgreSQL real embebido, API con MockMvc, seguridad con tokens firmados en la prueba y arquitectura con ArchUnit | Testcontainers (exige Docker abierto para pasar la integración continua) |
 | **Vitest** | Pruebas del frontend | Integrado con Angular, rápido | Karma/Jasmine |
 | **k6, Postman y newman** | Carga y contrato | k6 mide escalabilidad (RNF-17 y RNF-18); las colecciones de Postman (pedidas por los docentes por módulo) se ejecutan automáticamente con newman | JMeter |
@@ -80,13 +80,13 @@ hasta que el otro confirma); y el gateway no expone ninguno de los dos puntos in
 
 | # | Decisión | Por qué | Alternativa descartada |
 |---|---|---|---|
-| D1 | **Arquitectura por capas con puertos y adaptadores** en todos los servicios (`api`, `application`, `domain`, `infrastructure`) | El dominio no depende de Spring ni de JPA; los casos de uso dependen de interfaces (puertos) que implementa la infraestructura. Facilita probar y cambiar tecnología (por ejemplo, el correo simulado por uno real) | Capas clásicas con el dominio acoplado a JPA |
+| D1 | **Arquitectura por capas con puertos y adaptadores** en todos los servicios (`api`, `application`, `domain`, `infrastructure`) | El dominio no depende de Spring ni de JPA; los casos de uso dependen de interfaces (puertos) que implementa la infraestructura. Es más fácil probar y cambiar tecnología (por ejemplo, el correo simulado por uno real) | Capas clásicas con el dominio acoplado a JPA |
 | D2 | **Biblioteca común `bp-platform`** (seguridad JWT, sobre de eventos, Outbox, manejo de errores, OpenAPI) | Evita repetir lo transversal en 10 servicios. Incluye la propagación de la identidad en las llamadas entre servicios. Solo contiene infraestructura, **nunca modelo de dominio**, para no acoplar los contextos | Copiar el código en cada servicio |
-| D3 | **Un solo rechazo cierra la ronda** y la pregunta queda Rechazada | Lo confirmó el docente (consulta 29: «con un rechazo la pregunta se devuelve»). Las observaciones que lleguen después se guardan marcadas como tardías | Esperar a que todos evalúen |
+| D3 | **Un solo rechazo cierra la ronda** y la pregunta queda Rechazada | Lo confirmó el docente (consulta 29: "con un rechazo la pregunta se devuelve"). Las observaciones que lleguen después se guardan marcadas como tardías | Esperar a que todos evalúen |
 | D4 | **Rondas por versión de la pregunta** (`review_round`) | Al corregir y reenviar, la pregunta nueva se revisa en una ronda nueva con los mismos revisores; el historial de rondas anteriores se conserva | Sobrescribir la revisión |
 | D5 | **Correo simulado** tras el puerto `EmailSender` (en `email-service`) | Lo rectificó el docente Libardo: enviar correo real en pruebas bloquea cuentas. Cambiar a SMTP real solo requiere otro adaptador | SMTP real con una cuenta de prueba |
 | D6 | **Historial (`history-service`) y auditoría (`audit-service`)**, alimentados solo por eventos | Es un consumidor puro: no afecta al flujo principal y se puede reconstruir | Que cada servicio guarde su propio historial |
-| D7 | **Máximo de revisores configurable** (`ASSIGNMENT_MAX_REVIEWERS`, por defecto 3) | Los docentes piden 1 a 3 «y si queda abierto a más no hay problema» | Valor fijo en el código |
+| D7 | **Máximo de revisores configurable** (`ASSIGNMENT_MAX_REVIEWERS`, por defecto 3) | Los docentes piden 1 a 3 "y si queda abierto a más no hay problema" | Valor fijo en el código |
 | D8 | **Identificadores de usuario = nombre de usuario de Keycloak** | Los servicios se refieren a las personas solo por identificador; no se necesita una tabla de usuarios en cada uno | UUID propio sincronizado en cada servicio |
 | D9 | **Borrado lógico** (nada se elimina físicamente) | RNF-16; mantiene la trazabilidad | Borrado físico |
 | D14 | **`question-service` guarda una copia del estado con su secuencia, y `lifecycle-service` es el dueño del estado** | Se puede listar y filtrar por estado sin llamar a otro servicio; el número de secuencia hace que un aviso repetido o atrasado no haga retroceder la copia | Consultar el estado en cada listado; compartir la base |
@@ -101,7 +101,7 @@ Cada clase tiene una razón para cambiar.
 | Ejemplo | Responsabilidad |
 |---|---|
 | `QuestionValidator` (en `validation-service`) y cada `*Rule` (`CamposObligatoriosRule`, `ContextoObligatorioRule`, `PreguntaDirectaUnicaRule`, `CuatroOpcionesRule`, `RespuestaCorrectaUnicaRule`, `ExpresionesProhibidasRule`, `LongitudYEstructuraOpcionesRule`) | El validador reúne las violaciones; cada regla comprueba una sola cosa de RF-08 a RF-13 |
-| `EstadoPregunta` y las clases `Fase…` (en `lifecycle-service`) | `EstadoPregunta` identifica el estado; cada fase (patrón State) conoce solo lo que se puede hacer en ese estado |
+| `EstadoPregunta` y las clases `Fase...` (en `lifecycle-service`) | `EstadoPregunta` identifica el estado; cada fase (patrón State) conoce solo lo que se puede hacer en ese estado |
 | `OutboxRelay` y `OutboxEventPublisher` | El primero reenvía los pendientes; el segundo solo guarda el evento en la transacción |
 | `QuestionApplicationService`, `AssignmentApplicationService`, `EvaluationApplicationService`, `LifecycleApplicationService` | Orquestan casos de uso; no tocan HTTP, SQL ni RabbitMQ |
 | `QuestionController` / `AssignmentController` / `EvaluationController` | Traducen HTTP a casos de uso y viceversa |
@@ -110,7 +110,7 @@ Cada clase tiene una razón para cambiar.
 
 Se agrega comportamiento nuevo sin modificar el código existente.
 
-| Para… | Basta con… | Sin tocar… |
+| Para... | Basta con... | Sin tocar... |
 |---|---|---|
 | Una regla de validación nueva | Una clase que implemente `ValidationRule` y agregarla en `QuestionValidator.porDefecto()` | Las demás reglas ni el servicio (`question-service` ni siquiera se entera) |
 | Un tipo de aviso nuevo | Una subclase de `CreadorDeAviso` (Factory Method), un valor en `TipoNotificacion` y su registro en `CreadoresDeAviso` | `NotificationApplicationService` |
@@ -143,7 +143,7 @@ Los puertos son pequeños y cada cliente depende solo de lo que usa.
 
 Los módulos de alto nivel (casos de uso) no dependen de los de bajo nivel (JPA, RabbitMQ); ambos dependen de abstracciones.
 
-- Los servicios de aplicación reciben sus puertos, el `Clock` y el generador de identificadores **por constructor**; `ApplicationConfig` de cada servicio los ensambla con los adaptadores (`JpaQuestionRepository`, `QuestionEventPublisher`…). Por eso las pruebas usan dobles en memoria y reloj manual.
+- Los servicios de aplicación reciben sus puertos, el `Clock` y el generador de identificadores **por constructor**; `ApplicationConfig` de cada servicio los ensambla con los adaptadores (`JpaQuestionRepository`, `QuestionEventPublisher`...). Por eso las pruebas usan dobles en memoria y reloj manual.
 - `ArquitecturaTest` (ArchUnit) **hace fallar la compilación** si el dominio depende de Spring, de JPA/Jackson/AMQP o de las capas de aplicación, infraestructura o API. La regla está en todos los servicios.
 
 ## 6. Buenas prácticas aplicadas

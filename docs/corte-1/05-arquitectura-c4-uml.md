@@ -17,7 +17,7 @@ Las tres capas de cada módulo:
 | Dominio (lógica de negocio) | `domain` | Entidades, reglas, servicios e interfaces (puertos) de los repositorios |
 | Acceso a datos | `access` | Implementaciones de los repositorios (memoria o SQLite) |
 
-Las capas se comunican en un solo sentido: presentación → dominio ← acceso a datos.
+Las capas se comunican en un solo sentido: presentación y acceso a datos dependen del dominio, y el dominio no depende de ninguno.
 El dominio define las interfaces y el acceso a datos las implementa (inversión de
 dependencias), de modo que el dominio no conoce ni Swing ni la base de datos.
 
@@ -54,7 +54,7 @@ Los diagramas C4 están en el archivo de diagrams.net
 **`03-TallerC4-SaberPro.drawio`**, con una página por nivel:
 [abrir el diagrama](https://app.diagrams.net/#G1P06v2Eww57q3xeCN8tEg0mBflO3VU5YR).
 
-### Nivel 1 — Contexto
+### Nivel 1: Contexto
 
 ![Diagrama C4 nivel 1: contexto](img/c4-nivel-1-contexto.png)
 
@@ -70,7 +70,7 @@ El **Sistema de Banco de Preguntas Saber Pro** lo usan cinco tipos de persona:
 | Docente | Genera simulacros y consulta reportes |
 | Estudiante | Presenta simulacros y consulta sus resultados |
 
-### Nivel 2 — Contenedores
+### Nivel 2: Contenedores
 
 ![Diagrama C4 nivel 2: contenedores](img/c4-nivel-2-contenedores.png)
 
@@ -89,7 +89,7 @@ El **Sistema de Banco de Preguntas Saber Pro** lo usan cinco tipos de persona:
 > `AsignacionRevisionRepository`, `SimulacroRepository`). Pasarlos a SQLite es cambiar
 > la implementación del repositorio (ver el escenario de modificabilidad).
 
-### Nivel 3 — Componentes
+### Nivel 3: Componentes
 
 ![Diagrama C4 nivel 3: componentes](img/c4-nivel-3-componentes.png)
 
@@ -117,9 +117,9 @@ del diagrama y las clases implementadas:
 | RevisionRepository | `AsignacionRevisionImplRepository` (memoria) | Implementado (HU-04) |
 | SimulacroRepository | `SimulacroImplRepository` (memoria) | Implementado (en memoria) |
 | ServicioCifrado | `Argon2PasswordHasher` | Implementado |
-| AuditLogger, SeguimientoService, ReporteService | — | No se implementan en esta iteración |
+| AuditLogger, SeguimientoService, ReporteService | - | No se implementan en esta iteración |
 
-### Nivel 4 — Clases (UML)
+### Nivel 4: Clases (UML)
 
 ![Diagrama C4 nivel 4: clases de la gestión de preguntas](img/c4-nivel-4-clases.png)
 
@@ -364,7 +364,7 @@ sequenceDiagram
 
 ### Congruencia entre los diagramas C4 y la implementación
 
-El diseño C4 y el código coinciden en lo esencial: el sistema es una aplicación monolítica
+El diseño C4 y el código coinciden en lo principal: el sistema es una aplicación monolítica
 en tres capas más una capa transversal; cada pantalla tiene un controlador que usa un
 servicio de dominio, este usa un repositorio a través de una interfaz y un validador
 independiente; y el ciclo de vida tiene los mismos siete estados. Las diferencias, con su
@@ -372,7 +372,7 @@ motivo, son las siguientes.
 
 | Nivel | El diagrama muestra | La implementación | Motivo |
 |---|---|---|---|
-| 1 | Cinco personas usan el sistema | Igual: cinco roles con sus ventanas | — |
+| 1 | Cinco personas usan el sistema | Igual: cinco roles con sus ventanas | - |
 | 2 | Las personas usan el sistema por HTTPS | Es una aplicación de escritorio: la interfaz es Swing y no hay red | El diseño inicial no distinguía escritorio de web; el enlace HTTPS solo aplica al microservicio REST |
 | 2 | Una base SQLite guarda usuarios, preguntas, revisiones y simulacros | SQLite guarda solo los usuarios; preguntas, asignaciones y simulacros están en memoria detrás de interfaces | Se priorizó la lógica de negocio del primer corte; cambiar el repositorio no afecta al resto (ver modificabilidad) |
 | 2 | No aparece el microservicio REST | El módulo `modulo-api-rest` (Spring Boot, JPA y H2) es un contenedor aparte | Se construyó después, en el Taller 6 |
@@ -387,7 +387,7 @@ motivo, son las siguientes.
 | 4 | `IPreguntaRepository`: `save`, `findById`, `findByFiltros`, `update` | `QuestionRepository`: `crear`, `actualizar`, `obtenerPorId`, `obtenerTodas`, `generarNuevoId` | Los filtros y la paginación se hacen en el servicio (decisión D9) |
 | 4 | `PreguntaRepository` con una conexión SQLite | `QuestionImplRepository` en memoria (y `QuestionJpaAdapter` en el microservicio) | Ver el nivel 2 |
 | 4 | `PreguntaController`: crear, editar, enviar a revisión | `RedaccionPreguntaController` y `MisPreguntasController`, cada uno con su vista por una interfaz | Se aplicó MVC con vistas intercambiables para poder probar la lógica de las ventanas |
-| 4 | `EstadoPregunta` con siete valores | Idéntico | — |
+| 4 | `EstadoPregunta` con siete valores | Idéntico | - |
 
 ## 3. Vista de ejecución
 

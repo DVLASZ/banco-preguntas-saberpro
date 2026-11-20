@@ -34,7 +34,7 @@ flowchart LR
 | `frontend` | 4200 | Aplicación Angular servida por nginx; la dirección del gateway y de Keycloak se lee de `config.json` en tiempo de ejecución |
 | `edge` | 8080 | nginx que reparte las peticiones entre las réplicas del gateway (con *keepalive* hacia ellas y reintento ante una réplica caída) |
 | `api-gateway` | interno | Spring Cloud Gateway: enrutamiento por Eureka, validación del token, autorización por rol, circuit breaker, reintentos, CORS |
-| `discovery-server` | 8761 | Eureka: registro y descubrimiento; permite añadir réplicas sin cambiar configuración |
+| `discovery-server` | 8761 | Eureka: registro y descubrimiento; sirve para añadir réplicas sin cambiar configuración |
 | `keycloak` | 8180 | Proveedor de identidad (realm `bancopreguntas` con usuarios y roles de prueba precargados) |
 | `user-service` | interno | Sincroniza usuarios desde Keycloak y consulta los eventos de acceso |
 | `question-service` | interno | HU-01 a HU-03: contenido de las preguntas; usa validation y lifecycle por REST |
@@ -47,10 +47,10 @@ flowchart LR
 | `history-service` | interno | Línea de tiempo de cada pregunta |
 | `audit-service` | interno | Auditoría de acciones e inicios de sesión |
 | `rabbitmq` | 5672 / 15672 | Bus de eventos |
-| `postgres-*` ×9 | 5433–5446 | Una instancia de PostgreSQL 16 por servicio con datos (todos menos validation) |
+| `postgres-*` ×9 | 5433 a 5446 | Una instancia de PostgreSQL 16 por servicio con datos (todos menos validation) |
 
 Los servicios no publican puertos al exterior: se entra solo por `edge`. El archivo
-`docker-compose.debug.yml` los publica (8081–8087 y 8090–8096) para depurar desde el IDE.
+`docker-compose.debug.yml` los publica (8081 a 8087 y 8090 a 8096) para depurar desde el IDE.
 
 Réplicas: `docker compose up -d --scale question-service=3 --scale api-gateway=2`.
 
@@ -60,7 +60,7 @@ Réplicas: `docker compose up -d --scale question-service=3 --scale api-gateway=
 gateway. Cada servicio vuelve a validar la firma (clave pública de Keycloak, `jwk-set-uri` interno) y el
 emisor (`issuer-uri`), de modo que no depende de que el gateway sea el único camino.
 
-**Autorización redundante.** El gateway aplica una tabla de reglas (`RoleRules`: método + camino → roles) y, además,
+**Autorización redundante.** El gateway aplica una tabla de reglas (`RoleRules`: método y camino, con los roles que pueden usarlo) y, también,
 cada controlador exige el rol de su operación (`requireAnyRole`). Un error en una barrera no abre la operación.
 
 | Rol | Puede |
@@ -77,7 +77,7 @@ compose arranca en `jwt` por defecto (`SECURITY_MODE`).
 los consulta periódicamente y publica `auth.login-succeeded` / `auth.login-failed`, que `audit-service`
 guarda. Un administrador los ve en la pantalla de auditoría.
 
-**Identidad entre servicios.** Las dos llamadas REST entre servicios (question → validation y question → lifecycle) pasan la identidad de quien hizo la petición: `bp-platform` copia el token (`Authorization`) y las
+**Identidad entre servicios.** Las dos llamadas REST entre servicios (de question a validation y de question a lifecycle) pasan la identidad de quien hizo la petición: `bp-platform` copia el token (`Authorization`) y las
 cabeceras de identidad al `RestClient`, así que el servicio llamado vuelve a validar el token y a exigir el rol, y nadie gana
 permisos por pasar por un servicio intermedio. El gateway no tiene rutas hacia validation ni lifecycle. Solo se manda el token a servicios internos (nombres sin puntos), nunca a un servidor externo.
 
@@ -110,9 +110,9 @@ Un relevo (`OutboxRelay`) lee los pendientes cada 0,5 s y los publica en orden; 
 los deja y reintenta. La entrega es *al menos una vez* y los consumidores son idempotentes, así que el efecto
 neto es *exactamente una vez*.
 
-- `SELECT … FOR UPDATE SKIP LOCKED`: con varias réplicas del servicio, dos relevos nunca toman el mismo evento.
+- `SELECT ... FOR UPDATE SKIP LOCKED`: con varias réplicas del servicio, dos relevos nunca toman el mismo evento.
 - Si el envío falla a mitad de un lote, se detiene para **conservar el orden**.
-- Los eventos enviados se borran pasadas 24 h; el aviso de “broker caído” se limita a uno cada 30 s en el registro.
+- Los eventos enviados se borran pasadas 24 h; el aviso de "broker caído" se limita a uno cada 30 s en el registro.
 - Se desactiva con `bancopreguntas.events.outbox.enabled=false` (se publica directo tras el commit).
 - Código: `bp-platform/.../events/{EventPublisher, OutboxEventPublisher, OutboxRelay}`; migraciones
   `lifecycle V1`, `assignment V1`, `evaluation V1`, `notification V3` y `user V2`. Los servicios que
@@ -160,7 +160,7 @@ en las llamadas de `question-service` a validación y a ciclo de vida); las dem�
 | Limitación | Detalle |
 |---|---|
 | Outbox sin confirmación del broker | `OutboxRelay` marca como enviado lo que RabbitMQ aceptó, pero no espera la confirmación del publicador ni usa `mandatory`. La entrega sigue siendo al menos una vez en el caso normal; un fallo entre el envío y la confirmación podría perder un evento |
-| Orden entre colas | Los eventos de una misma pregunta viajan por colas distintas; el orden solo se garantiza con el número de secuencia de `question.state-changed` |
+| Orden entre colas | Los eventos de una misma pregunta viajan por colas distintas; el orden solo se respeta con el número de secuencia de `question.state-changed` |
 | Modo de seguridad por defecto | `bp-platform` arranca en modo `headers` si no se configura nada; el `docker-compose.yml` lo deja en `jwt`. Un despliegue real debe fijar `SECURITY_MODE` |
 | Limpieza de `processed_event` | La tabla de eventos ya procesados crece sin límite; falta una tarea que borre los antiguos |
 | Migración de `question` (V5) | Elimina las tablas de historial, eventos procesados y Outbox porque el ciclo de vida pasó a otro servicio. Sirve para una base nueva; con datos viejos habría que migrarlos antes |

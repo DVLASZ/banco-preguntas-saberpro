@@ -1,6 +1,6 @@
 # Monolito del primer corte (aplicación de escritorio)
 
-Proyecto de curso — Ingeniería de Software II, Universidad del Cauca
+Proyecto de curso, Ingeniería de Software II, Universidad del Cauca
 (Periodo 2-2026).
 
 > Esta carpeta contiene el **monolito modular del primer corte**. La solución distribuida del segundo corte
@@ -9,21 +9,21 @@ Proyecto de curso — Ingeniería de Software II, Universidad del Cauca
 
 **Sistema para la Gestión, Validación y Administración de un Banco de
 Preguntas para la Preparación de las Pruebas Saber Pro.** Aplicación de
-escritorio en Java SE (Swing) que permite: redactar y revisar preguntas
+escritorio en Java SE (Swing) con la que se puede: redactar y revisar preguntas
 por pares, y generar/presentar simulacros a partir de preguntas ya
 publicadas.
 
 Este repositorio es la continuación, ya como proyecto único, de los
 talleres sueltos de la materia (login/roles del Taller 2, modelo C4 del
 Taller 3, capas/MVC/Observer del Taller 4, microkernel del Taller 5 y API
-REST del Taller 6) — ver la sección
+REST del Taller 6), ver la sección
 [Historia y talleres relacionados](#historia-y-talleres-relacionados).
 
 ## Arquitectura: monolito modular
 
 Por indicación de la docente del curso, el proyecto se construye como un
 **monolito modular**: un único proceso desplegable (un solo `.jar`), pero
-dividido internamente en módulos Maven con límites explícitos — cada uno
+dividido internamente en módulos Maven con límites explícitos, cada uno
 declara en su propio `pom.xml` de qué otros módulos depende, en vez de
 que todo el código comparta paquetes y clases libremente. La razón:
 eventualmente el proyecto migrará a microservicios, y partir de un
@@ -33,7 +33,7 @@ directas entre módulos por llamadas de red, la lógica de negocio interna
 de cada módulo no cambia).
 
 ```
-monolito/                          (pom padre — packaging "pom")
+monolito/                          (pom padre, packaging "pom")
 ├── modulos/
 │   ├── modulo-usuarios/                Autenticación, registro y roles (RF-01 a RF-03)
 │   ├── modulo-preguntas/                Banco de preguntas: redacción, listado y ciclo de vida RF-14 (depende de: nada)
@@ -47,19 +47,14 @@ monolito/                          (pom padre — packaging "pom")
 Grafo de dependencias entre módulos (siempre en una sola dirección, sin
 ciclos):
 
-```
-app  →  modulo-simulacros  →  modulo-preguntas
- │                          ↘
- │                            modulo-usuarios
- ├──────────────────────────────────↗
- ├→  modulo-microkernel  →  modulo-preguntas
- └→  modulo-revision  →  modulo-preguntas, modulo-usuarios
-
-modulo-api-rest  →  modulo-preguntas      (aparte: app no depende de él)
-```
+- app depende de modulo-simulacros, modulo-microkernel y modulo-revision.
+- modulo-simulacros depende de modulo-preguntas y modulo-usuarios.
+- modulo-microkernel depende de modulo-preguntas.
+- modulo-revision depende de modulo-preguntas y modulo-usuarios.
+- modulo-api-rest depende de modulo-preguntas, y app no depende de él.
 
 `modulo-preguntas` y `modulo-usuarios` no dependen de ningún otro módulo
-del proyecto — son la base. `modulo-simulacros` depende de ambos (necesita
+del proyecto, son la base. `modulo-simulacros` depende de ambos (necesita
 preguntas publicadas y necesita saber qué usuario presenta el simulacro).
 `modulo-microkernel` solo depende de `modulo-preguntas` (genera preguntas
 reales del banco a partir de plugins). `modulo-revision` depende de
@@ -72,7 +67,7 @@ inyección de dependencias manualmente y define `SesionRouter`, que decide
 qué ventana abrir según el rol autenticado.
 
 Cada módulo, a su vez, aplica internamente arquitectura en capas
-(dominio / acceso a datos / presentación) y el micropatrón MVC — ver el
+(dominio / acceso a datos / presentación) y el micropatrón MVC, ver el
 README de cada módulo para el detalle de sus capas.
 
 ## Cómo compilar y ejecutar
@@ -101,7 +96,7 @@ Al iniciar se muestra el login. Usuarios de prueba (contraseña
 
 | Usuario | Rol | Ventana que abre |
 |---|---|---|
-| `autor1` | Autor de preguntas | Redactar preguntas (borrador → enviar a revisión) y ver su listado con paginación y filtros |
+| `autor1` | Autor de preguntas | Redactar preguntas (borrador y luego enviar a revisión) y ver su listado con paginación y filtros |
 | `revisor1` | Revisor | Evaluar y decidir (Aprobar/Rechazar) |
 | `docente1` | Docente | Generar simulacros |
 | `estudiante1` | Estudiante | Presentar simulacros |
@@ -155,7 +150,7 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
 - Asignación de revisores por el Administrador (HU-04): al menos un revisor por
   pregunta pendiente, la pregunta pasa a "En revisión" y cada revisor se notifica
   por correo (simulado); el autor de la pregunta no se ofrece como su propio
-  revisor — ver `modulo-revision`.
+  revisor, ver `modulo-revision`.
 - Revisión por un Revisor: aprobar/rechazar solo las preguntas que se le
   asignaron.
 - Generación de simulacros por el Docente filtrando por competencia,
@@ -168,19 +163,19 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
   Microkernel con carga dinámica por Reflexión desde `plugins.properties`
   (3 plugins: selección múltiple, caso de estudio, multimedia), cada uno
   validado por un pipeline de Tuberías y Filtros (4 filtros) antes de
-  crear la pregunta real y notificar a las vistas observadoras — ver
+  crear la pregunta real y notificar a las vistas observadoras, ver
   `modulo-microkernel`.
 - API REST de preguntas (Taller 6): microservicio Spring Boot con CRUD
   (GET/POST/PUT/DELETE) sobre la `Question` real, persistencia con Spring
   Data JPA + H2 detrás del puerto `QuestionRepository`, y DELETE que archiva
-  en vez de borrar (RNF-16) — ver `modulo-api-rest`.
+  en vez de borrar (RNF-16), ver `modulo-api-rest`.
 
 **Pendiente:**
 - Persistencia real de preguntas y simulacros (hoy son en memoria; solo
   usuarios usa SQLite).
-- Historial de revisiones con observaciones (HU-10/HU-11) — hoy el Revisor
+- Historial de revisiones con observaciones (HU-10/HU-11), hoy el Revisor
   decide sin dejar un registro de sus observaciones más allá del estado.
-- Búsqueda de preguntas para todos los roles (HU-05) — hoy la búsqueda
+- Búsqueda de preguntas para todos los roles (HU-05), hoy la búsqueda
   solo existe internamente (`QuestionService.buscarPublicadas`) para armar
   simulacros, y el listado con filtros es solo para el Autor.
 - Historial de simulacros de un estudiante (HU-15) y estadísticas
@@ -194,20 +189,20 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
 Este proyecto nació de una serie de talleres sueltos de la materia, en
 el repositorio [`ingenieria-software-2`](https://github.com/DVLASZ/ingenieria-software-2):
 
-- **Taller 2** — módulo de usuarios (SOLID), origen de `modulo-usuarios`.
-- **Taller 3** — modelo de arquitectura C4 (Contexto/Contenedores/
+- **Taller 2**, módulo de usuarios (SOLID), origen de `modulo-usuarios`.
+- **Taller 3**, modelo de arquitectura C4 (Contexto/Contenedores/
   Componentes/Clases) de todo el sistema, incluyendo las historias de
   usuario (HU) y requisitos funcionales (RF) citados en este README.
-- **Taller 4** — capas + MVC + Observer sobre el banco de preguntas,
+- **Taller 4**, capas + MVC + Observer sobre el banco de preguntas,
   origen de `modulo-preguntas` y `modulo-simulacros`; se conserva intacto
   en ese repositorio como entregable del laboratorio, mientras este
   repositorio es donde el proyecto sigue avanzando.
-- **Taller 5** — arquitectura Microkernel combinada con Tuberías y Filtros:
+- **Taller 5**, arquitectura Microkernel combinada con Tuberías y Filtros:
   generación de preguntas por plugins cargados por Reflexión y validados por
   un pipeline de cuatro filtros; origen de `modulo-microkernel`. Desde este
   taller el código se desarrolla directamente en este repositorio; en
   `ingenieria-software-2` solo queda una carpeta con su README y el enlace.
-- **Taller 6** — API REST con Spring Boot y Spring Data JPA: microservicio con
+- **Taller 6**, API REST con Spring Boot y Spring Data JPA: microservicio con
   el CRUD de preguntas sobre la `Question` real del proyecto, con validación,
   manejo de errores y colección de Postman; origen de `modulo-api-rest`. Igual
   que el Taller 5, su carpeta en `ingenieria-software-2` solo deja el enlace.
@@ -218,13 +213,13 @@ La documentación de arquitectura (historias de usuario, prototipos, Sprint 1,
 modificabilidad, C4 y UML, patrones de diseño y pruebas) está dividida por
 tema en la carpeta [`docs/corte-1`](../docs/corte-1/README.md). El documento de entrega del
 primer corte, consolidado en un solo archivo, está disponible tanto en
-Markdown para lectura directa —
-[`docs/Documento-Arquitectura-PrimerCorte.md`](../docs/corte-1/Documento-Arquitectura-PrimerCorte.md)
-— como en el Word original entregado —
+Markdown para lectura directa,
+[`docs/Documento-Arquitectura-PrimerCorte.md`](../docs/corte-1/Documento-Arquitectura-PrimerCorte.md),
+y como en el Word original entregado,
 [`docs/Documento-Arquitectura-PrimerCorte.docx`](../docs/corte-1/Documento-Arquitectura-PrimerCorte.docx).
 
 ## Autores
 
-- Edward Esteban Dávila Salazar — edwarddavila@unicauca.edu.co
+- Edward Esteban Dávila Salazar, edwarddavila@unicauca.edu.co
 - Laura Isabel Sánchez Fernández
 - Kevin Yesid Castaño Herrera

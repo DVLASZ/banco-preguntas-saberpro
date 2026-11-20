@@ -3,7 +3,7 @@
 ## Qué es
 
 **Sistema para la Gestión, Validación y Administración de un Banco de Preguntas para la Preparación de las Pruebas
-Saber Pro.** Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 2026.2. Permite que los
+Saber Pro.** Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 2026.2. Sirve para que los
 autores redacten preguntas de selección múltiple con validación estructural, que un administrador asigne de 1 a 3
 revisores, que los revisores evalúen por unanimidad y que el administrador publique las preguntas aprobadas.
 

@@ -28,7 +28,7 @@ flowchart LR
 ```
 
 El correo electrónico es simulado (decisión del docente): el sistema deja el aviso en la bandeja de cada usuario y
-`email-service` registra el «envío»; por eso no aparece un servidor de correo como sistema externo.
+`email-service` registra el "envío"; por eso no aparece un servidor de correo como sistema externo.
 
 ## C4 · Nivel 2: contenedores
 
@@ -363,7 +363,7 @@ sequenceDiagram
   LS->>MQ: question.state-changed y question.reopened
   AUT->>GW: PUT /api/questions/{id}
   QS->>VS: valida el contenido corregido
-  AUT->>GW: POST …/submit
+  AUT->>GW: POST .../submit
   QS->>LS: Borrador a Pendiente de revisión
   LS->>MQ: question.submitted
   MQ->>AS: nueva ronda con los mismos revisores (asignación automática)
@@ -374,7 +374,7 @@ sequenceDiagram
 Los servicios se refieren entre sí solo por identificador, sin claves foráneas entre bases. No hay borrado
 físico (RNF-16): se usan estados y fechas. Las migraciones de Flyway están en `src/main/resources/db/migration`
 de cada servicio. Todos los consumidores de eventos guardan `processed_event` (idempotencia) y los servicios que publican
-(`lifecycle_db`, `assignment_db`, `evaluation_db`, `notification_db` y `user_db`) guardan además
+(`lifecycle_db`, `assignment_db`, `evaluation_db`, `notification_db` y `user_db`) guardan también
 `outbox_event` (patrón Outbox: `seq`, `event_id`, `routing_key`, `payload`, `created_at`, `sent_at`). `validation-service` no tiene base.
 
 ### user_db

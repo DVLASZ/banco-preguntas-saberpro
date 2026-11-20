@@ -6,7 +6,7 @@ El tercer corte pide aplicar arquitectura hexagonal con la filosofía DDD a un m
 ## Por qué este servicio
 
 Es el que más reglas de negocio guarda. Decide por unanimidad, deja que un solo rechazo cierre la ronda, no deja evaluar dos veces, obliga a escribir
-una observación al rechazar y conserva el historial de rondas de cada pregunta. Además es el núcleo de la historia HU-06, porque de aquí sale lo que el
+una observación al rechazar y conserva el historial de rondas de cada pregunta. También es el núcleo de la historia HU-06, porque de aquí sale lo que el
 autor lee para mejorar su pregunta. El dominio quedó modelado primero en el Taller 11 (`Pregunta` y `Revision` en Java puro), y aquí se aplicó la
 misma idea sobre el servicio real.
 
@@ -53,7 +53,7 @@ uso, por eso cambiar de unanimidad a mayoría es agregar una clase.
 | Una asignación necesita revisor, quién asigna y fecha | `Asignacion` | `AsignacionTest` |
 | Cada rol ve solo lo que le corresponde del caso | `CasoDeEvaluacion.vistaPara` | `CasoDeEvaluacionTest` |
 
-Que sean de 1 a 3 revisores lo garantiza `assignment-service`, que es quien los asigna. Este servicio los recibe por evento y los registra.
+Que sean de 1 a 3 revisores lo hace cumplir `assignment-service`, que es quien los asigna. Este servicio los recibe por evento y los registra.
 
 ## Puertos y adaptadores
 

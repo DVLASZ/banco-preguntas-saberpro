@@ -2,7 +2,7 @@
 
 Guion y plantillas para aplicar la prueba de usabilidad del proyecto. El enunciado la pide como parte de los
 prototipos y respalda el requisito **RNF-03** (un usuario nuevo aprende a usar el sistema en 30 minutos o menos). Este
-documento es el material de la prueba; los **resultados** se registran en la sección «Resultados» de
+documento es el material de la prueba; los **resultados** se registran en la sección "Resultados" de
 [06 · Prototipos](../06-prototipos.md) una vez aplicada.
 
 > Estado: material listo, prueba **pendiente de aplicar**. Debe hacerla alguien del equipo con personas que no conozcan el
@@ -27,14 +27,14 @@ Preguntas que debe responder la prueba:
 
 Prueba **pensando en voz alta** (*thinking aloud*): la persona realiza las tareas en la aplicación real y dice en voz alta lo
 que piensa, lo que busca y lo que no entiende. El moderador **no ayuda**: solo recuerda que hable en voz alta y toma notas.
-Si la persona se bloquea más de 3 minutos, se anota «no completó» y se le indica la salida para seguir con la tarea
+Si la persona se bloquea más de 3 minutos, se anota "no completó" y se le indica la salida para seguir con la tarea
 siguiente.
 
 | Elemento | Detalle |
 |---|---|
 | Participantes | Entre 3 y 5 personas que no hayan visto el sistema. Idealmente: 2 con perfil de autor o docente, 1 o 2 con perfil de revisor y 1 sin experiencia en el tema |
 | Duración | 25 a 30 minutos por persona |
-| Lugar | Un equipo con el sistema levantado (ver «Preparación») y la grabación de pantalla y audio si la persona lo autoriza |
+| Lugar | Un equipo con el sistema levantado (ver "Preparación") y la grabación de pantalla y audio si la persona lo autoriza |
 | Roles del equipo | **Moderador** (habla con la persona) y **observador** (toma notas y tiempos; puede ser la misma persona si no hay otra) |
 | Qué se mide | Éxito por tarea, tiempo, errores, comentarios y puntaje SUS |
 
@@ -60,18 +60,18 @@ siguiente.
 
 **Antes (2 minutos).**
 
-> «Gracias por ayudarnos. Estamos probando un sistema para gestionar un banco de preguntas de las pruebas Saber Pro. Lo que
+> "Gracias por ayudarnos. Estamos probando un sistema para gestionar un banco de preguntas de las pruebas Saber Pro. Lo que
 > evaluamos es el sistema, **no a usted**: si algo no se entiende, el problema es nuestro. Le voy a pedir que haga algunas
 > tareas y que vaya diciendo en voz alta lo que piensa: qué busca, qué espera que pase, qué no entiende. No le puedo ayudar
 > mientras hace la tarea, pero puede preguntar lo que quiera: lo anoto y lo hablamos al final. Si quiere parar, puede hacerlo
-> en cualquier momento. Con su permiso grabo la pantalla y el audio solo para analizar la prueba; no se publicará.»
+> en cualquier momento. Con su permiso grabo la pantalla y el audio solo para analizar la prueba; no se publicará."
 
 Pedir el consentimiento verbal (o con la hoja de la sección 8) y anotar el perfil: rol, experiencia con aplicaciones web,
 experiencia con bancos de preguntas.
 
-**Durante.** Entregar una tarea a la vez, leída en voz alta. Frases permitidas: «¿Qué está pensando?», «¿Qué esperaba que
-pasara?», «Siga hablando, por favor». Frases que **no** se dicen: dónde está un botón, qué significa un mensaje, «casi lo
-logra».
+**Durante.** Entregar una tarea a la vez, leída en voz alta. Frases permitidas: "¿Qué está pensando?", "¿Qué esperaba que
+pasara?", "Siga hablando, por favor". Frases que **no** se dicen: dónde está un botón, qué significa un mensaje, "casi lo
+logra".
 
 **Después (5 minutos).** Aplicar el cuestionario SUS y hacer estas preguntas:
 
@@ -85,22 +85,22 @@ logra».
 Cada tarea tiene un criterio de éxito y un tiempo de referencia. Se cuentan los errores (clic en un lugar equivocado, mensaje
 de error del sistema, volver atrás).
 
-| # | Rol / sesión | Tarea que se lee a la persona | Éxito si… | Tiempo de referencia |
+| # | Rol / sesión | Tarea que se lee a la persona | Éxito si... | Tiempo de referencia |
 |---|---|---|---|---|
-| T1 | Autor | «Entre al sistema con el usuario que le dé el moderador y diga en qué pantalla está y qué puede hacer» | Entra y describe las opciones del menú | 2 min |
-| T2 | Autor | «Cree una pregunta nueva con los datos de esta hoja y guárdela como borrador» | La pregunta queda en Borrador | 6 min |
-| T3 | Autor | «Esta vez deje vacío el contexto e intente enviarla a revisión. Diga qué le dice el sistema y corríjalo» | Entiende el error, lo corrige y la envía confirmando | 3 min |
-| T4 | Autor | «Busque en su lista la pregunta que acaba de enviar y diga en qué estado está» | Ubica la pregunta y nombra el estado | 2 min |
-| T5 | Administrador | «Esta pregunta está esperando revisores. Asígnele dos» | Asigna 2 revisores distintos del autor | 3 min |
-| T6 | Administrador | «Intente asignarle cuatro revisores a otra pregunta y cuénteme qué pasa» | Entiende que el máximo es 3 | 2 min |
-| T7 | Revisor | «Encuentre la pregunta que le asignaron, léala y recházela dejando una observación» | Rechaza con observación y entiende que es definitiva | 4 min |
-| T8 | Autor | «Su pregunta fue rechazada. Averigüe por qué, corríjala y envíela otra vez» | Lee la observación, reabre, corrige y reenvía | 5 min |
-| T9 | Cualquiera | «Revise sus notificaciones y diga cuál le avisa de lo que acaba de pasar» | Encuentra la notificación correspondiente | 2 min |
-| T10 | Administrador | «Publique una pregunta aprobada» (con una aprobada preparada de antemano) | La pregunta queda Publicada | 2 min |
-| T11 | Estudiante | «Entre como estudiante y cree un simulacro con 5 preguntas» | Crea el simulacro y ve la primera pregunta | 3 min |
-| T12 | Estudiante | «Responda el simulacro, entréguelo y diga cuántas acertó y cuánto tardó» | Entrega y lee el puntaje y el tiempo | 4 min |
-| T13 | Estudiante | «Vaya a su progreso y diga en qué competencia le va mejor y en cuál peor» | Identifica fortalezas y debilidades | 3 min |
-| T14 | Docente | «Entre como docente, abra el reporte del grupo y diga qué estudiante necesita más apoyo» | Ubica al estudiante con menor desempeño y abre su detalle | 4 min |
+| T1 | Autor | "Entre al sistema con el usuario que le dé el moderador y diga en qué pantalla está y qué puede hacer" | Entra y describe las opciones del menú | 2 min |
+| T2 | Autor | "Cree una pregunta nueva con los datos de esta hoja y guárdela como borrador" | La pregunta queda en Borrador | 6 min |
+| T3 | Autor | "Esta vez deje vacío el contexto e intente enviarla a revisión. Diga qué le dice el sistema y corríjalo" | Entiende el error, lo corrige y la envía confirmando | 3 min |
+| T4 | Autor | "Busque en su lista la pregunta que acaba de enviar y diga en qué estado está" | Ubica la pregunta y nombra el estado | 2 min |
+| T5 | Administrador | "Esta pregunta está esperando revisores. Asígnele dos" | Asigna 2 revisores distintos del autor | 3 min |
+| T6 | Administrador | "Intente asignarle cuatro revisores a otra pregunta y cuénteme qué pasa" | Entiende que el máximo es 3 | 2 min |
+| T7 | Revisor | "Encuentre la pregunta que le asignaron, léala y recházela dejando una observación" | Rechaza con observación y entiende que es definitiva | 4 min |
+| T8 | Autor | "Su pregunta fue rechazada. Averigüe por qué, corríjala y envíela otra vez" | Lee la observación, reabre, corrige y reenvía | 5 min |
+| T9 | Cualquiera | "Revise sus notificaciones y diga cuál le avisa de lo que acaba de pasar" | Encuentra la notificación correspondiente | 2 min |
+| T10 | Administrador | "Publique una pregunta aprobada" (con una aprobada preparada de antemano) | La pregunta queda Publicada | 2 min |
+| T11 | Estudiante | "Entre como estudiante y cree un simulacro con 5 preguntas" | Crea el simulacro y ve la primera pregunta | 3 min |
+| T12 | Estudiante | "Responda el simulacro, entréguelo y diga cuántas acertó y cuánto tardó" | Entrega y lee el puntaje y el tiempo | 4 min |
+| T13 | Estudiante | "Vaya a su progreso y diga en qué competencia le va mejor y en cuál peor" | Identifica fortalezas y debilidades | 3 min |
+| T14 | Docente | "Entre como docente, abra el reporte del grupo y diga qué estudiante necesita más apoyo" | Ubica al estudiante con menor desempeño y abre su detalle | 4 min |
 
 Cada participante hace las tareas de **su rol**; si hay pocas personas, una persona puede hacer más de un rol, en ese
 orden. El flujo completo de T1 a T10 debe poder recorrerse con 3 personas (autor, administrador y revisor); T11 a T13 las hace una persona

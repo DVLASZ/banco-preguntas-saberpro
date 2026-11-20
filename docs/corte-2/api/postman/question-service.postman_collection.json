@@ -199,7 +199,7 @@
           }
         },
         {
-          "name": "Crear con «todas las anteriores»",
+          "name": "Crear con 'todas las anteriores'",
           "event": [
             {
               "listen": "test",
@@ -331,7 +331,7 @@
           }
         },
         {
-          "name": "Crear con la respuesta correcta fuera de A–D",
+          "name": "Crear con la respuesta correcta fuera de A a D",
           "event": [
             {
               "listen": "test",

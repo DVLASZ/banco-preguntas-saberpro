@@ -15,7 +15,7 @@ Es el contexto de **Validación estructural** (HU-03, RF-08 a RF-13). Lo llama `
 
 ## Reglas de negocio
 
-- Siete reglas independientes: campos obligatorios, contexto obligatorio, una única pregunta directa, exactamente cuatro opciones, una única respuesta correcta, sin expresiones prohibidas («todas las anteriores») y longitud y estructura de las opciones.
+- Siete reglas independientes: campos obligatorios, contexto obligatorio, una única pregunta directa, exactamente cuatro opciones, una única respuesta correcta, sin expresiones prohibidas ("todas las anteriores") y longitud y estructura de las opciones.
 - Agregar o quitar un criterio es registrar otra regla en `QuestionValidator`, sin tocar las existentes (RNF-13).
 - Siempre responde 200: el cuerpo dice si el contenido es válido y, si no, lista cada campo con su mensaje. Quien lo llama decide qué hacer.
 - Como cualquier servicio, comprueba el rol (AUTHOR o ADMIN) de quien pidió la operación, que le llega con la identidad propagada.

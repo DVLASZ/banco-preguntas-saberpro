@@ -9,7 +9,7 @@ preguntas sin modificar el núcleo del sistema.
 `QuestionMicrokernel` administra el banco de preguntas y carga los
 plugins dinámicamente **por Reflexión**
 (`Class.forName(...).getDeclaredConstructor().newInstance()`), leyendo
-sus nombres de clase desde `src/main/resources/plugins.properties` — el
+sus nombres de clase desde `src/main/resources/plugins.properties`, el
 mismo mecanismo del ejemplo visto en clase sobre el envío de paquetes a
 distintos países (`DeliveryPluginManager`).
 
@@ -50,15 +50,15 @@ Antes de construir la pregunta, `BaseQuestionPlugin` ejecuta un
 `QuestionPipeline` con cuatro filtros (`QuestionFilter`), en orden, que
 se detiene en el primero que falla:
 
-1. `ContentValidationFilter` — título y enunciado no vacíos.
-2. `OptionsValidationFilter` — exactamente 4 opciones, todas con contenido.
-3. `ClassificationFilter` — la competencia debe ser una de las reales del banco.
-4. `CorrectAnswerValidationFilter` — la respuesta correcta debe estar entre las opciones.
+1. `ContentValidationFilter`, título y enunciado no vacíos.
+2. `OptionsValidationFilter`, exactamente 4 opciones, todas con contenido.
+3. `ClassificationFilter`, la competencia debe ser una de las reales del banco.
+4. `CorrectAnswerValidationFilter`, la respuesta correcta debe estar entre las opciones.
 
 ## Interfaz gráfica
 
 `GUIMicrokernel` (Swing) se abre junto a la ventana habitual del Autor
-de Preguntas: permite elegir el tipo, diligenciar el formulario y
+de Preguntas: deja elegir el tipo, diligenciar el formulario y
 generar la pregunta a través del microkernel.
 
 ## Pruebas

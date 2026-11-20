@@ -5,7 +5,7 @@ Las 32 preguntas de alcance del corte 2 y del corte 3 se hicieron a los dos doce
 - **Mage** (profesor Pablo Magé), primera consulta.
 - **Libardo** (profesor W. Libardo Pantoja), segunda consulta. Es el tutor y coordinador de la materia: **cuando ambos difieren, manda lo que dijo Libardo**, y así quedó aclarado en la segunda sesión.
 
-Cada pregunta trae las dos respuestas y la decisión que toma el equipo. «Sin respuesta» significa que el docente no se pronunció sobre ese punto.
+Cada pregunta trae las dos respuestas y la decisión que toma el equipo. "Sin respuesta" significa que el docente no se pronunció sobre ese punto.
 
 ## Resumen: dónde difieren y qué decidimos
 
@@ -58,7 +58,7 @@ Cada pregunta trae las dos respuestas y la decisión que toma el equipo. «Sin r
    - **Libardo:** Cada microservicio debe tener su base de datos; sirve cualquier motor (PostgreSQL).
    - **Decisión:** una instancia de PostgreSQL por servicio.
 8. Escalabilidad: ¿cómo se espera demostrarla, con réplicas (`docker compose --scale`) detrás de un balanceador, con una prueba de carga como k6, o con ambas? RNF-05 pide 100 usuarios y RNF-17 pide 500: ¿cuál vale, y el tiempo es promedio o percentil 95?
-   - **Mage:** Se demuestra sometiendo la arquitectura hasta el límite de la infraestructura («lo que dé la máquina»). Sin respuesta sobre réplicas, herramienta, 100 contra 500 ni promedio contra percentil 95.
+   - **Mage:** Se demuestra sometiendo la arquitectura hasta el límite de la infraestructura ("lo que dé la máquina"). Sin respuesta sobre réplicas, herramienta, 100 contra 500 ni promedio contra percentil 95.
    - **Libardo:** Fuera de alcance.
    - **Decisión:** se mide con k6 de todos modos, con 500 o más usuarios y percentil 95, como valor agregado.
 9. ¿Se espera tolerancia a fallos (reintentos, circuit breaker) o queda fuera de alcance?
@@ -84,15 +84,15 @@ Cada pregunta trae las dos respuestas y la decisión que toma el equipo. «Sin r
     - **Mage:** Unanimidad. Con un solo rechazo la pregunta es devuelta.
     - **Libardo:** Unanimidad. Con un rechazo la pregunta se devuelve.
     - **Decisión:** unanimidad; un rechazo devuelve la pregunta al autor.
-14. (Relacionada con la 13) ¿Cuándo pasa la pregunta a «En revisión»: al asignar los revisores o cuando el primero evalúa? Tras una versión mejorada (HU-06), ¿se reasignan los mismos revisores o se eligen nuevos?
-    - **Mage:** Pasa automáticamente a «En revisión» cuando el administrador asigna los revisores. Sin respuesta sobre la reasignación.
+14. (Relacionada con la 13) ¿Cuándo pasa la pregunta a "En revisión": al asignar los revisores o cuando el primero evalúa? Tras una versión mejorada (HU-06), ¿se reasignan los mismos revisores o se eligen nuevos?
+    - **Mage:** Pasa automáticamente a "En revisión" cuando el administrador asigna los revisores. Sin respuesta sobre la reasignación.
     - **Libardo:** Al enviar la pregunta de nuevo a revisión se asignan los mismos revisores.
-    - **Decisión:** pasa a «En revisión» al asignar; las nuevas rondas conservan a los mismos revisores.
+    - **Decisión:** pasa a "En revisión" al asignar; las nuevas rondas conservan a los mismos revisores.
 15. Formato de evaluación (RF-17): ¿hay criterios y puntaje definidos o los definimos nosotros? ¿Las observaciones son obligatorias al rechazar y opcionales al aprobar? ¿El revisor puede editar su evaluación después de enviarla? ¿Los revisores ven las evaluaciones de los demás?
     - **Mage:** No hay formato rígido de puntaje; se aplica el criterio libre del comité. Todos los revisores ven las observaciones de sus colegas para generar consenso.
     - **Libardo:** Las observaciones son obligatorias al rechazar y opcionales al aprobar. Una vez enviada la evaluación, queda así. No se tienen criterios ni puntaje definidos: se deja el formulario que ya existe.
     - **Decisión:** observaciones obligatorias solo al rechazar; la evaluación no se edita; los revisores ven las observaciones de sus colegas; sin puntaje.
-16. Notificaciones: ¿quiénes son «los implicados» (autor, revisores, administrador)? ¿Una bandeja dentro del sistema más un correo simulado es suficiente, o se espera correo real?
+16. Notificaciones: ¿quiénes son "los implicados" (autor, revisores, administrador)? ¿Una bandeja dentro del sistema más un correo simulado es suficiente, o se espera correo real?
     - **Mage:** Solo los involucrados: administrador, revisores y autor. Se exige integración con un servicio de correo real (ejemplo citado: Microsoft/Outlook).
     - **Libardo:** Correo **simulado**, mediante eventos de publicador y suscriptor: se genera un evento y se simula el envío en el microservicio. Rectificó la indicación de correo real porque enviar correos reales en pruebas bloquea cuentas y complica la evaluación.
     - **Decisión:** correo simulado por eventos, a administrador, revisores y autor, con bandeja dentro del sistema. Si más adelante se pidiera correo real, solo cambia el adaptador de envío.
@@ -156,7 +156,7 @@ Cada pregunta trae las dos respuestas y la decisión que toma el equipo. «Sin r
 
 ## G. Aclaraciones adicionales
 
-29. Rechazo: «con un solo rechazo la pregunta es devuelta». ¿La revisión se cierra al primer rechazo, o se espera a que todos los revisores evalúen? ¿«Devuelta» significa que pasa al estado Rechazada, y el autor luego la mejora y la reenvía (HU-06)?
+29. Rechazo: "con un solo rechazo la pregunta es devuelta". ¿La revisión se cierra al primer rechazo, o se espera a que todos los revisores evalúen? ¿"Devuelta" significa que pasa al estado Rechazada, y el autor luego la mejora y la reenvía (HU-06)?
     - **Mage:** Sin respuesta.
     - **Libardo:** Con un rechazo la pregunta se devuelve; se puede editar y volver a enviar a revisión.
     - **Decisión:** la pregunta pasa a Rechazada, el autor la corrige y se abre una nueva ronda con los mismos revisores. Las observaciones que lleguen después del rechazo se guardan marcadas como tardías.
@@ -168,7 +168,7 @@ Cada pregunta trae las dos respuestas y la decisión que toma el equipo. «Sin r
     - **Mage:** Sin respuesta (pidió seguridad mínima, simulada o simple).
     - **Libardo:** Sí en esencia: inicio de sesión sencillo con datos quemados, y pantalla de login en el frontend.
     - **Decisión:** usuarios precargados; el emisor del token es Keycloak, que se adelantó.
-32. Hexagonal y DDD: la respuesta habla de dominio limpio «en los microservicios», pero el documento del corte 3 dice «un microservicio que lo amerite». ¿Se aplica a todos o a uno?
+32. Hexagonal y DDD: la respuesta habla de dominio limpio "en los microservicios", pero el documento del corte 3 dice "un microservicio que lo amerite". ¿Se aplica a todos o a uno?
     - **Mage:** Sin respuesta definitiva (ver 24).
     - **Libardo:** A uno solo.
     - **Decisión:** a uno, en el corte 3.

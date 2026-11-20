@@ -112,7 +112,7 @@ Severidad: 0 = no es un problema, 1 = cosmético, 2 = menor, 3 = mayor, 4 = cata
 
 | # | Problema | Heurística | Severidad | Mejora propuesta |
 |---|---|---|---|---|
-| P1 | El nombre largo de una pregunta se corta en la tabla ("Principio de Responsabilidad Únic…") | 6. Reconocer antes que recordar | 1 | Ensanchar la columna o mostrar el nombre completo al pasar el cursor |
+| P1 | El nombre largo de una pregunta se corta en la tabla ("Principio de Responsabilidad Únic...") | 6. Reconocer antes que recordar | 1 | Ensanchar la columna o mostrar el nombre completo al pasar el cursor |
 | P2 | Los campos del formulario no indican cuáles son obligatorios hasta guardar | 5. Prevención de errores | 2 | Marcar los campos obligatorios con un asterisco |
 | P3 | El botón "Cancelar" descarta los cambios, pero su rótulo no lo dice | 2. Relación con el mundo real | 1 | Renombrarlo "Descartar cambios" |
 | P4 | Con un filtro aplicado no hay un indicador de que la lista está filtrada, más allá de los controles | 1. Visibilidad del estado | 2 | Mostrar "Filtros activos" junto al total de preguntas |
@@ -132,7 +132,7 @@ La persona evaluadora no explica cómo se usa el sistema: solo lee la tarea y ob
 
 **Tareas**
 
-| Tarea | Enunciado que se le lee al participante | Éxito si… |
+| Tarea | Enunciado que se le lee al participante | Éxito si... |
 |---|---|---|
 | T1 | "Ingrese como `autor1` y redacte una pregunta nueva sobre un tema que usted elija." | Guarda un borrador sin ayuda |
 | T2 | "Envíe esa pregunta a revisión." | La pregunta queda "Pendiente de revisión" |

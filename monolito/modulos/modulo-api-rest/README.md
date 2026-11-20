@@ -8,7 +8,7 @@ las mismas reglas de validación que una creada desde la aplicación de
 escritorio.
 
 El monolito de escritorio (`app`) **no depende** de este módulo, así que el
-primer corte (monolito en capas) queda intacto. Este módulo es, además, un
+primer corte (monolito en capas) queda intacto. Este módulo es, también, un
 primer paso concreto hacia la migración a microservicios del Corte 2: sale de
 `modulo-preguntas` solo lo que ya era su contrato (`QuestionRepository`) y se
 le conecta una base de datos por el lado de afuera.
@@ -21,7 +21,7 @@ Cliente (Postman, navegador, otro servicio)
    ▼
 controller/   QuestionController      @RestController  /api/questions
    │
-service/      IQuestionApiService  →  QuestionApiServiceImpl   (traduce JSON ↔ dominio)
+service/      IQuestionApiService, implementada por QuestionApiServiceImpl   (traduce entre JSON y dominio)
    │
    ▼  usa el servicio de dominio, sin conocer JPA
 modulo-preguntas: QuestionService  ──depende de──▶  QuestionRepository (puerto)
@@ -38,9 +38,9 @@ model/       QuestionEntity (@Entity) ◀── QuestionMapper ──▶ Questio
 | `controller` | Mapea rutas y verbos HTTP; no contiene lógica |
 | `service` | Convierte el JSON de la petición al dominio y delega en `QuestionService` |
 | `repository` | Adaptador JPA que implementa el puerto `QuestionRepository` del dominio |
-| `model` | `QuestionEntity` (JPA) y `QuestionMapper` (entidad ↔ dominio ↔ respuesta) |
+| `model` | `QuestionEntity` (JPA) y `QuestionMapper` (entre entidad, dominio y respuesta) |
 | `dto` | `QuestionRequest` (con validaciones) y `QuestionResponse` |
-| `exception` | `GlobalExceptionHandler`: errores del dominio y de validación → respuestas HTTP |
+| `exception` | `GlobalExceptionHandler`: convierte los errores del dominio y de validación en respuestas HTTP |
 | `config` | Registro del servicio de dominio como bean y datos de ejemplo iniciales |
 
 ### Decisiones de diseño
@@ -55,7 +55,7 @@ model/       QuestionEntity (@Entity) ◀── QuestionMapper ──▶ Questio
   pregunta: `DELETE /api/questions/{id}` la pasa al estado `ARCHIVADA` y
   responde `204`. La pregunta sigue existiendo y se puede consultar.
 - **El servidor decide el id y el estado.** El cuerpo de POST/PUT no incluye
-  `id` ni `estado`: el id (`P-013`, `P-014`, …) lo genera el adaptador
+  `id` ni `estado`: el id (`P-013`, `P-014`, ...) lo genera el adaptador
   continuando el mayor consecutivo guardado, y una pregunta nueva nace siempre
   en `BORRADOR`, como en la aplicación de escritorio.
 - **PUT solo cambia el contenido**, nunca el estado, y solo mientras la
@@ -120,7 +120,7 @@ Todos los errores tienen el mismo formato:
 
 | Situación | Código |
 |---|---|
-| Falta un campo, texto demasiado largo o letra fuera de A–D | `400` con el detalle de cada campo |
+| Falta un campo, texto demasiado largo o letra fuera de A a D | `400` con el detalle de cada campo |
 | JSON mal formado, o competencia/dificultad desconocida (se listan los valores válidos) | `400` |
 | La pregunta no cumple la validación estructural (p. ej. contexto vacío, opciones repetidas, "todas las anteriores") | `400` con el campo y el motivo de cada incumplimiento |
 | El dominio rechaza los datos (`IllegalArgumentException`) | `400` |
@@ -165,11 +165,11 @@ en la variable `questionId` que usan el PUT, el DELETE y el GET final.
 
 | Clase | Pruebas | Qué cubre |
 |---|---|---|
-| `QuestionMapperTest` | 4 | Ida y vuelta dominio ↔ entidad ↔ respuesta y solicitud → contenido |
+| `QuestionMapperTest` | 4 | Ida y vuelta entre dominio, entidad y respuesta, y de la solicitud al contenido |
 | `QuestionJpaAdapterTest` | 11 | Adaptador JPA contra H2: crear, leer, actualizar, contenido extendido, orden y ids |
-| `QuestionApiServiceImplTest` | 8 | Traducción JSON → dominio, creación de borradores, DELETE = archivar |
+| `QuestionApiServiceImplTest` | 8 | Traducción del JSON al dominio, creación de borradores, DELETE archiva |
 | `QuestionControllerTest` | 16 | Códigos HTTP (200, 201, 204, 400, 403, 404, 409, 500), `Location` y formato de errores (MockMvc) |
-| `QuestionApiIntegrationTest` | 10 | Flujo completo sin dobles: API → dominio → JPA → H2 |
+| `QuestionApiIntegrationTest` | 10 | Flujo completo sin dobles: API, dominio, JPA y H2 |
 | `SampleDataSeederTest` | 3 | Carga inicial de 12 preguntas con su contenido completo e idempotencia |
 
 ```bash
@@ -191,5 +191,5 @@ mvn -pl modulo-api-rest -am test
 
 Taller realizado en pareja:
 
-- Edward Esteban Dávila Salazar — edwarddavila@unicauca.edu.co
+- Edward Esteban Dávila Salazar, edwarddavila@unicauca.edu.co
 - Laura Isabel Sánchez Fernández

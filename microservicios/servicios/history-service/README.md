@@ -18,7 +18,7 @@ Es el contexto de **Historial** (RF-29). Escucha los eventos de preguntas y revi
 
 - Cada evento con pregunta deja una entrada con quién, qué y cuándo.
 - El autor ve el historial de sus preguntas; el revisor, el de las que le asignaron; el administrador, el de todas.
-- «Mi historial» muestra todo lo que el usuario puede ver, lo más reciente primero.
+- "Mi historial" muestra todo lo que el usuario puede ver, lo más reciente primero.
 - Un evento repetido no duplica entradas.
 
 ## API REST

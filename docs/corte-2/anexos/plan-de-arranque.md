@@ -16,7 +16,7 @@ Del código del monolito (`monolito/`) se migró el dominio, que ya estaba separ
 | Reglas de validación y `QuestionValidator` | `validation-service` | Siete reglas independientes; el validador las ejecuta todas y reúne las violaciones |
 | `FiltroPreguntas`, `Pagina` | `question-service` | Listado con filtros y paginación (HU-03) |
 | Repositorio con adaptador JPA | `question-service` | Ahora sobre PostgreSQL con Flyway |
-| Módulo de revisión y su estrategia de decisión | `assignment-service` y `evaluation-service` | Se amplió a 1–3 revisores, rondas y la estrategia `PoliticaDeDecision` (`Unanimidad`); la asignación y la evaluación son servicios separados |
+| Módulo de revisión y su estrategia de decisión | `assignment-service` y `evaluation-service` | Se amplió a 1 a 3 revisores, rondas y la estrategia `PoliticaDeDecision` (`Unanimidad`); la asignación y la evaluación son servicios separados |
 | Observer del primer corte | RabbitMQ | El Observer en memoria se reemplazó por eventos reales entre servicios |
 | Presentación Swing | No se migró | El frontend nuevo es web (Angular) |
 | Módulo de usuarios (SQLite) | Keycloak y `user-service` | Los usuarios y la autenticación pasaron a Keycloak |
@@ -47,10 +47,10 @@ anotaciones de Spring dentro de `domain` (lo vigila `ArquitecturaTest`).
 
 | Contenedor | Puerto | Base de datos | Puerto de la base en el equipo |
 |---|---|---|---|
-| frontend | 4200 | — | — |
-| edge → api-gateway | 8080 | — | — |
-| keycloak | 8180 | — | — |
-| discovery-server | 8761 | — | — |
+| frontend | 4200 | - | - |
+| edge hacia api-gateway | 8080 | - | - |
+| keycloak | 8180 | - | - |
+| discovery-server | 8761 | - | - |
 | user-service | 8081 (solo depuración) | `user_db` | 5433 |
 | question-service | 8082 (solo depuración) | `question_db` | 5434 |
 | assignment-service | 8083 (solo depuración) | `assignment_db` | 5445 |
@@ -59,9 +59,9 @@ anotaciones de Spring dentro de `domain` (lo vigila `ArquitecturaTest`).
 | email-service | 8090 (solo depuración) | `email_db` | 5440 |
 | audit-service | 8091 (solo depuración) | `audit_db` | 5441 |
 | lifecycle-service | 8094 (solo depuración) | `lifecycle_db` | 5444 |
-| validation-service | 8095 (solo depuración) | — (sin base de datos) | — |
+| validation-service | 8095 (solo depuración) | ninguno (sin base de datos) | - |
 | evaluation-service | 8096 (solo depuración) | `evaluation_db` | 5446 |
-| RabbitMQ | 5672 / panel 15672 | — | — |
+| RabbitMQ | 5672 / panel 15672 | - | - |
 
 Las variables (usuarios y claves de las bases, RabbitMQ, Keycloak, `SECURITY_MODE`, `ASSIGNMENT_MAX_REVIEWERS`,
 `EMAIL_DOMAIN`) están en `.env.example`.
@@ -82,7 +82,7 @@ Los usuarios y roles de demostración están en [datos semilla](datos-semilla.md
 ## 5. Eventos (RabbitMQ)
 
 Exchange `bancopreguntas.events` (*topic*, durable). Cada consumidor tiene su cola (`review.q.question-submitted`,
-`question.q.reviewers-assigned`, `notification.q.…`, `history.q.…`) con mensajes persistentes, reintentos y cola de
+`question.q.reviewers-assigned`, `notification.q....`, `history.q....`) con mensajes persistentes, reintentos y cola de
 mensajes muertos. El catálogo completo y el cuerpo de cada evento están en [02](../02-contextos-y-eventos.md) y en el
 [esquema JSON](../api/eventos/eventos.schema.json).
 
@@ -96,7 +96,7 @@ en `/swagger-ui.html`.
 
 - De 1 a 3 revisores por pregunta (el máximo es configurable con `ASSIGNMENT_MAX_REVIEWERS`, por defecto 3); el autor nunca es
   su revisor y un revisor no se repite en la misma ronda.
-- La pregunta pasa a «En revisión» en cuanto se asignan los revisores (evento `review.reviewers-assigned`).
+- La pregunta pasa a "En revisión" en cuanto se asignan los revisores (evento `review.reviewers-assigned`).
 - Aprobación por **unanimidad**. Con un solo rechazo la ronda se cierra y la pregunta queda Rechazada; las observaciones que
   lleguen después se guardan como tardías.
 - Los revisores ven las observaciones de sus colegas; no hay puntaje rígido. Rechazar exige una observación.
@@ -115,7 +115,7 @@ Ver [plan de pruebas](plan-de-pruebas.md).
 | 0 | Ramas creadas; `docker compose up` levanta las bases y el broker sanos |
 | 1 | `question-service` con HU-01 a HU-03 probados por Swagger y Postman |
 | 2 | `user-service`, `api-gateway` y roles |
-| 3 | `assignment-service` (entonces parte de `review-service`): asignación de 1 a 3 revisores y eventos; la pregunta pasa sola a «En revisión» |
+| 3 | `assignment-service` (entonces parte de `review-service`): asignación de 1 a 3 revisores y eventos; la pregunta pasa sola a "En revisión" |
 | 4 | HU-05 completa y `notification-service` con correo simulado |
 | 5 | Prueba de carga con k6: una réplica contra varias, anotando el límite de la máquina |
 | 6 | Keycloak, frontend Angular, `history-service`, Outbox y resiliencia |

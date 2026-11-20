@@ -22,7 +22,7 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 ### Builder · `Question.Builder`
 
 - **Problema:** una pregunta tiene más de quince campos (contexto, enunciado, cuatro opciones, justificación,
-  competencia, tema, estado, versión, fechas…). Un constructor con tantos parámetros es ilegible y propenso a errores.
+  competencia, tema, estado, versión, fechas...). Un constructor con tantos parámetros es ilegible y propenso a errores.
 - **Solución:** `Question.builder()` arma el objeto campo por campo y valida al construir. `Question` es inmutable:
   cada cambio de estado (`conEstado`, `reabrir`) devuelve una instancia nueva.
 - **Prueba:** `QuestionTransicionTest`, `QuestionTest`.
@@ -45,7 +45,7 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 
 - **Problema:** el dominio y los casos de uso no deben depender de PostgreSQL, RabbitMQ ni del servidor de correo.
 - **Solución:** cada servicio declara puertos en `application/port` (`QuestionRepository`, `NotificationRepository`,
-  `EmailSender`, `DomainEventPublisher`…) y los adapta en `infrastructure`: JPA, RabbitMQ y el envío de correo. El correo es
+  `EmailSender`, `DomainEventPublisher`...) y los adapta en `infrastructure`: JPA, RabbitMQ y el envío de correo. El correo es
   simulado porque así lo decidió el docente (consulta 16); si se pidiera correo real solo cambia el adaptador.
 - **Prueba:** pruebas de persistencia sobre PostgreSQL real, de mensajería y `ArquitecturaTest` (ArchUnit), que
   falla si el dominio depende de Spring, de JPA o de las capas externas.
@@ -69,10 +69,10 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 - **Problema:** lo que se puede hacer con una pregunta depende de su estado: solo el borrador se modifica y se envía,
   solo la aprobada se publica, solo la rechazada se reabre. Esas reglas estaban repartidas en condicionales
   (`if (estado != BORRADOR)`) por el servicio de aplicación.
-- **Solución:** cada estado es una clase (`FaseBorrador`, `FaseEnRevision`…) que implementa solo las operaciones que admite
+- **Solución:** cada estado es una clase (`FaseBorrador`, `FaseEnRevision`...) que implementa solo las operaciones que admite
   (`enviarARevision`, `iniciarRevision`, `aprobar`, `rechazar`, `reabrir`, `publicar`, `archivar`) y devuelve el estado
   siguiente; las demás lanzan `OperacionNoPermitidaException` con el mensaje de siempre. `Question` delega en su fase
-  (`esEditable`, `enviarARevision`, `reabrir`…) y `EstadoPregunta.puedePasarA` también. `EstadoPregunta` sigue siendo el
+  (`esEditable`, `enviarARevision`, `reabrir`...) y `EstadoPregunta.puedePasarA` también. `EstadoPregunta` sigue siendo el
   identificador que se guarda y viaja en los eventos.
 - **Para agregar un estado nuevo:** una clase más y una línea en `FaseDePregunta.de`.
 - **Prueba:** `FaseDePreguntaTest` (cada operación solo desde su estado, coincidencia con la tabla de RF-15, la pregunta
@@ -112,7 +112,7 @@ rúbrica y tres más completan el catálogo); cada fila indica las clases reales
 | Estructurales | 2 | Adapter, Facade, Decorator |
 | Comportamiento | 2 | Strategy, Observer, State, Template Method |
 
-Además, el Taller 8 del laboratorio implementa Builder, Adapter, Facade, State, Template Method y Decorator sobre un modelo
+También, el Taller 8 del laboratorio implementa Builder, Adapter, Facade, State, Template Method y Decorator sobre un modelo
 propio de pregunta; los docentes aceptan que los patrones de los laboratorios cuenten.
 
 ## Otros elementos de diseño
@@ -121,7 +121,7 @@ Esto **no es** un patrón GoF; se documenta porque explica una decisión del có
 
 | Elemento | Dónde | Observación |
 |---|---|---|
-| Lista de reglas de validación | `QuestionValidator` (en `validation-service`) y las siete `…Rule` que implementan `ValidationRule` | El validador ejecuta todas las reglas y reúne las violaciones para mostrar al autor todo lo que debe corregir de una vez; no es una cadena de responsabilidad (ninguna regla decide si pasa el turno a la siguiente) |
+| Lista de reglas de validación | `QuestionValidator` (en `validation-service`) y las siete `...Rule` que implementan `ValidationRule` | El validador ejecuta todas las reglas y reúne las violaciones para mostrar al autor todo lo que debe corregir de una vez; no es una cadena de responsabilidad (ninguna regla decide si pasa el turno a la siguiente) |
 
 ## Patrones de arquitectura de microservicios
 

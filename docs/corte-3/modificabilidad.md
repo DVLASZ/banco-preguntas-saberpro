@@ -83,6 +83,6 @@ La razón es que el caso de evaluación recibe la política como parámetro (pat
 ## Cómo se protege
 
 - Cada servicio tiene su propia base de datos y solo se comunica con otros por eventos o por una llamada REST puntual, así que un cambio no se propaga.
-- ArchUnit comprueba en cada servicio que el dominio no dependa de Spring, de JPA ni de la mensajería. En `evaluation-service` comprueba además el hexágono completo.
+- ArchUnit comprueba en cada servicio que el dominio no dependa de Spring, de JPA ni de la mensajería. En `evaluation-service` comprueba también el hexágono completo.
 - Las pruebas de cada clase del dominio avisan si un cambio rompe una regla. La cobertura está en [cobertura de pruebas](cobertura-de-pruebas.md).
 - Los patrones que hacen posibles estos cambios están en [patrones y principios](patrones-y-principios.md).

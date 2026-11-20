@@ -1,6 +1,6 @@
 # 01 · Historias de usuario de la segunda iteración
 
-La iteración mantiene HU-01 a HU-03 del primer corte, ajusta HU-04 y agrega HU-05. Además se adelantó HU-06, la
+La iteración mantiene HU-01 a HU-03 del primer corte, ajusta HU-04 y agrega HU-05. También se adelantó HU-06, la
 historia nueva del tercer corte (el autor consulta el historial de revisiones). Las épicas son las de Jira: HE-01
 (gestión del banco), HE-02 (administración del proceso de revisión) y HE-04 (evaluación por revisores).
 
@@ -36,7 +36,7 @@ Como autor quiero cambiar el estado de mis preguntas de "Borrador" a "Pendiente 
 administrador les asigne revisores. Los estados se muestran con colores.
 
 1. Solo las preguntas en Borrador pueden enviarse.
-2. El envío pide confirmación («¿Enviar la pregunta a revisión? Después de enviarla no podrás editarla.») y deja
+2. El envío pide confirmación ("¿Enviar la pregunta a revisión? Después de enviarla no podrás editarla.") y deja
    la pregunta en "Pendiente de revisión".
 3. El cambio queda registrado en el historial de estados.
 4. **Nuevo:** `lifecycle-service` publica el evento `question.submitted` para que `assignment-service` y `evaluation-service` la tengan disponible.

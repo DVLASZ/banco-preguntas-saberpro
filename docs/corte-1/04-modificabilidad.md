@@ -4,7 +4,7 @@
 
 | Atributo | Por qué importa en el banco de preguntas | Cómo se atiende |
 |---|---|---|
-| **Modificabilidad** (principal) | Las reglas de validación, los estados de una pregunta y las formas de notificar cambian con el uso; además el proyecto migrará a microservicios | Módulos Maven con dependencias en una sola dirección; interfaces (puertos) entre capas; una regla de validación por clase; inyección de dependencias en un único punto (`MainApp`) |
+| **Modificabilidad** (principal) | Las reglas de validación, los estados de una pregunta y las formas de notificar cambian con el uso; también el proyecto migrará a microservicios | Módulos Maven con dependencias en una sola dirección; interfaces (puertos) entre capas; una regla de validación por clase; inyección de dependencias en un único punto (`MainApp`) |
 | **Testabilidad** | La rúbrica exige pruebas unitarias a las clases del dominio y las vistas Swing son difíciles de probar | El dominio no depende de Swing; los controladores hablan con la vista por una interfaz y se prueban con una vista falsa; los repositorios y notificadores se reemplazan por dobles de prueba |
 | **Usabilidad** | Los autores redactan preguntas largas y no deben perder trabajo ni equivocarse de estado | Estados con color, campos en rojo, confirmaciones antes de enviar o descartar, formulario de solo lectura fuera de Borrador |
 
@@ -48,7 +48,7 @@ public class LongitudMaximaEnunciadoRule implements ValidationRule {
 |---|---|---|---|
 | Guardar las preguntas en una base de datos en vez de en memoria | Una clase nueva que implemente `QuestionRepository` y la línea donde se arma en `MainApp` | `QuestionService`, `Question`, los controladores y las vistas | Ya ocurrió en el Taller 6: `QuestionJpaAdapter` (JPA + H2) implementa el mismo puerto `QuestionRepository` y reutiliza el dominio sin cambiarlo |
 | Enviar el correo de asignación de revisores por SMTP real en vez del simulado | Una clase nueva que implemente `NotificadorAsignacion` y una línea en `MainApp` | `AsignacionRevisionService` | `AsignacionRevisionService` depende de la interfaz `NotificadorAsignacion`, no de `NotificadorCorreoSimulado` |
-| Que el Revisor vea solo las preguntas que le asignaron | Cambiar la fuente de preguntas que se le entrega a `GUIRevisor` | La ventana ni el controlador del Revisor | `FuenteDePreguntasParaRevisar` (Strategy) permite cambiar la fuente sin tocar `RevisionController` |
+| Que el Revisor vea solo las preguntas que le asignaron | Cambiar la fuente de preguntas que se le entrega a `GUIRevisor` | La ventana ni el controlador del Revisor | `FuenteDePreguntasParaRevisar` (Strategy) cambia la fuente sin tocar `RevisionController` |
 | Agregar un tipo de pregunta nuevo (por ejemplo, con imagen) | Un plugin nuevo y una línea en `plugins.properties` | El núcleo del microkernel | Arquitectura Microkernel del Taller 5: los plugins se cargan por reflexión |
 
 ## 4. Tácticas de modificabilidad aplicadas

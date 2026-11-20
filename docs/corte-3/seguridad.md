@@ -20,7 +20,7 @@ La autorización se revisa dos veces, como acordamos con los docentes.
 2. **En cada servicio.** Cada servicio vuelve a validar la firma y el emisor del token con la clave pública de Keycloak y exige el rol de la operación
    (`requireAnyRole`). Así, si el gateway tuviera un error, el servicio no abre la operación.
 
-El gateway además borra las cabeceras `X-User-Id` y `X-User-Roles` de la petición que llega de afuera. En modo `jwt` los servicios las ignoran, de
+El gateway también borra las cabeceras `X-User-Id` y `X-User-Roles` de la petición que llega de afuera. En modo `jwt` los servicios las ignoran, de
 modo que nadie puede hacerse pasar por otro usuario escribiendo una cabecera.
 
 ## Qué puede hacer cada rol

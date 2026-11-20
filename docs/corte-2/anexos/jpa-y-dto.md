@@ -15,7 +15,7 @@ JSON  <->  DTO (api/dto)  <->  dominio (domain)  <->  entidad JPA (infrastructur
 
 | Pieza | Dónde | Regla |
 |---|---|---|
-| **DTO de entrada** (`*Request`) | `api/dto`, como `record` | Lleva la validación de formato con Bean Validation (`@NotBlank`, `@Size`, `@Pattern`, `@NotNull`) y el controlador la activa con `@Valid`. Convierte a objetos del dominio con un método `a…()` |
+| **DTO de entrada** (`*Request`) | `api/dto`, como `record` | Lleva la validación de formato con Bean Validation (`@NotBlank`, `@Size`, `@Pattern`, `@NotNull`) y el controlador la activa con `@Valid`. Convierte a objetos del dominio con un método `a...()` |
 | **DTO de salida** (`*Response`, `PageResponse`) | `api/dto`, como `record` | Se construye desde el dominio con un método estático `de(...)`. Nunca se devuelve una entidad ni una clase del dominio. Oculta lo que el cliente no debe ver (por ejemplo, la respuesta correcta de un simulacro en curso) |
 | **Entidad JPA** (`*Entity`) | `infrastructure/persistence` | Anotada con `@Entity`; solo la conocen los adaptadores de persistencia. El esquema lo crea Flyway y Hibernate solo lo **valida** (`ddl-auto: validate`) |
 | **Repositorio Spring Data** (`*JpaRepository`) | `infrastructure/persistence` | Extiende `JpaRepository`; las consultas con filtros opcionales se construyen dinámicamente (`QuestionJpaRepositoryCustomImpl`) para poder usar índices |
@@ -23,14 +23,14 @@ JSON  <->  DTO (api/dto)  <->  dominio (domain)  <->  entidad JPA (infrastructur
 
 Reglas que **hace cumplir ArchUnit** (`ArquitecturaTest` en cada servicio, falla la compilación si se rompen): el dominio no
 depende de Spring, JPA, Jackson ni AMQP; la aplicación no depende de los adaptadores ni de la persistencia; la infraestructura no
-depende de la API. Además, `spring.jpa.open-in-view=false` en todos los servicios: las entidades nunca llegan al controlador.
+depende de la API. También, `spring.jpa.open-in-view=false` en todos los servicios: las entidades nunca llegan al controlador.
 
 ## 2. Inventario por servicio
 
 | Servicio | Entidades JPA | DTO de la API | Migraciones Flyway |
 |---|---|---|---|
 | `question-service` | `QuestionEntity` | `QuestionRequest`, `QuestionResponse`, `QuestionPageResponse`, `CambioEstadoResponse` | V1 a V5 |
-| `validation-service` | (sin base de datos) | `ValidationRequest`, `ValidationResponse` | — |
+| `validation-service` | (sin base de datos) | `ValidationRequest`, `ValidationResponse` | - |
 | `lifecycle-service` | `LifecycleEntity`, `StateHistoryEntity`, `ProcessedEventEntity` | `RegistroRequest`, `EnvioRequest`, `PublicacionRequest`, `LifecycleResponse`, `CambioEstadoResponse` | V1 |
 | `assignment-service` | `CaseEntity`, `RoundEntity`, `AssignmentEntity`, `ProcessedEventEntity` | `AssignReviewersRequest`, `AssignmentResponse`, `CaseAssignmentsResponse`, `PendingCaseResponse`, `ReviewConfigResponse`, `ReviewPageResponse` | V1 |
 | `evaluation-service` | `ReviewCaseEntity`, `ReviewRoundEntity`, `AssignmentEntity`, `EvaluationEntity`, `ProcessedEventEntity` | `EvaluationRequest`, `EvaluationResultResponse`, `ReviewResponse` | V1 |
@@ -40,7 +40,7 @@ depende de la API. Además, `spring.jpa.open-in-view=false` en todos los servici
 | `audit-service` | `AuditEntryEntity`, `ProcessedEventEntity` | `EntryResponse`, `PageResponse` | V1 |
 | `user-service` | `UserEntity`, `SessionCursorEntity` | `UserResponse`, `MeResponse`, `SyncResponse`, `PageResponse` | V1 y V2 |
 
-Los servicios con Outbox (publican eventos) comparten además la tabla `outbox_event` de `bp-platform`.
+Los servicios con Outbox (publican eventos) comparten también la tabla `outbox_event` de `bp-platform`.
 
 ## 3. Hallazgos de la verificación
 

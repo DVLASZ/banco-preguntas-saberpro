@@ -6,7 +6,7 @@
 | [`eventos/`](eventos/) | Esquema JSON de los diez eventos que se publican en RabbitMQ |
 | [`postman/`](postman/) | Colecciones de Postman por servicio (7, las de los servicios que el gateway expone) y el entorno `SaberPro_Local` |
 
-Cada servicio publica además su propio Swagger en `/swagger-ui.html` cuando está en ejecución; los archivos de `openapi/`
+Cada servicio publica también su propio Swagger en `/swagger-ui.html` cuando está en ejecución; los archivos de `openapi/`
 son una copia de lo que sirve `GET /docs/<servicio>/v3/api-docs` a través del gateway (se regeneran si cambia la API, ver
 [`openapi/README.md`](openapi/README.md)).
 
@@ -30,7 +30,7 @@ identidad de quien hizo la petición; el gateway no tiene rutas hacia ellos (sol
 
 ## Colecciones de Postman
 
-Las colecciones piden el token a Keycloak (flujo de contraseña del cliente de pruebas locales) en su carpeta «0 · Sesión» y
+Las colecciones piden el token a Keycloak (flujo de contraseña del cliente de pruebas locales) en su carpeta "0 · Sesión" y
 lo usan en cada petición; cada una trae verificaciones automáticas de éxito y de error (401, 403, 400, 404, 409). Las de los dos
 servicios internos no existen: se ejercitan a través de `question-service`, que los llama al crear, enviar, reabrir y publicar.
 
@@ -51,7 +51,7 @@ servicios internos no existen: se ejercitan a través de `question-service`, que
    y elegir ese entorno. Las variables son `baseUrl` (`http://localhost:8080`), `keycloakUrl` (`http://localhost:8180`) y
    `password` (la clave de desarrollo de los usuarios del realm).
 3. Ejecutar la colección completa con el *Collection Runner*, de arriba abajo: cada petición guarda en variables (`tokenAutor`,
-   `qId`…) lo que necesita la siguiente. Las peticiones que dependen de un evento de RabbitMQ esperan 1,5 segundos antes de consultar.
+   `qId`...) lo que necesita la siguiente. Las peticiones que dependen de un evento de RabbitMQ esperan 1,5 segundos antes de consultar.
 
 Por consola: `npx newman run user-service.postman_collection.json -e SaberPro_Local.postman_environment.json`.
 

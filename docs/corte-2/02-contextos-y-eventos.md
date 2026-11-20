@@ -59,8 +59,8 @@ dos, y todas propagan la identidad de quien hizo la petición para que el servic
 
 | Llamada | Por qué es síncrona |
 |---|---|
-| `question-service` → `validation-service` | El autor necesita saber **ahora** qué campos corregir; la respuesta decide si se guarda |
-| `question-service` → `lifecycle-service` | Crear, enviar, reabrir y publicar deben cambiar el estado antes de contestarle al usuario |
+| `question-service` a `validation-service` | El autor necesita saber **ahora** qué campos corregir; la respuesta decide si se guarda |
+| `question-service` a `lifecycle-service` | Crear, enviar, reabrir y publicar deben cambiar el estado antes de contestarle al usuario |
 
 Si uno de esos servicios no responde, la operación no se hace y se informa 503 (la consulta de una pregunta sigue funcionando).
 
@@ -109,7 +109,7 @@ Cuerpo (`data`) de cada evento:
 El esquema formal está en [`api/eventos/eventos.schema.json`](api/eventos/eventos.schema.json).
 
 Garantías: mensajes persistentes con confirmación de entrega y consumidores **idempotentes** (se ignora un
-`eventId` ya procesado). El evento `question.state-changed` lleva además un número, `sequence`, que permite ignorar avisos atrasados sin llevar registro
+`eventId` ya procesado). El evento `question.state-changed` lleva también un número, `sequence`, que sirve para ignorar avisos atrasados sin llevar registro
 (quien guarda una copia del estado solo acepta un cambio más nuevo).
 
 ## Flujo principal

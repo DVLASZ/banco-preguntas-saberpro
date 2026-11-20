@@ -1,6 +1,6 @@
 # simulation-service · Simulacros
 
-Permite al estudiante practicar con simulacros armados al azar con preguntas publicadas, con tiempo límite y calificación automática.
+El estudiante practica con simulacros armados al azar con preguntas publicadas, con tiempo límite y calificación automática.
 
 | | |
 |---|---|
