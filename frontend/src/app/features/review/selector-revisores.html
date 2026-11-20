@@ -10,7 +10,7 @@
 
   <div class="campo">
     <label for="buscar-revisor">Buscar revisor</label>
-    <input id="buscar-revisor" type="search" placeholder="Buscar por nombre o usuario…" [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
+    <input id="buscar-revisor" type="search" placeholder="Buscar por nombre o usuario..." [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
   </div>
 
   @if (errorDeCarga(); as mensaje) {
@@ -49,7 +49,7 @@
     </span>
     <button type="button" class="boton fantasma" (click)="limpiar()" [disabled]="marcados().size === 0">Limpiar</button>
     <button type="button" class="boton primario" [disabled]="!seleccion().valida || enviando()" (click)="asignar()">
-      <bp-icono nombre="usuarios" /> {{ enviando() ? 'Asignando…' : etiquetaBoton() }}
+      <bp-icono nombre="usuarios" /> {{ enviando() ? 'Asignando...' : etiquetaBoton() }}
     </button>
   </footer>
 </div>

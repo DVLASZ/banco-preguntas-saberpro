@@ -15,7 +15,7 @@ export interface GrupoDeDia {
   items: Notificacion[];
 }
 
-/** Agrupa las notificaciones (ya ordenadas, la más reciente primero) por día: «Hoy», «Ayer», «6 de octubre». */
+/** Agrupa las notificaciones (ya ordenadas, la más reciente primero) por día: 'Hoy', 'Ayer', '6 de octubre'. */
 export function agruparPorDia(lista: Notificacion[], ahora: Date = new Date()): GrupoDeDia[] {
   const grupos: GrupoDeDia[] = [];
   for (const n of lista) {

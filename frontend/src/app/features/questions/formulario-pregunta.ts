@@ -58,7 +58,7 @@ export class FormularioPregunta implements OnInit {
     this.preguntas.obtener(id).subscribe({
       next: (p) => {
         if (p.estado !== 'BORRADOR') {
-          this.avisos.info('Solo se pueden editar los borradores. Para corregir una pregunta rechazada, ábrela y elige «Corregir pregunta».');
+          this.avisos.info('Solo se pueden editar los borradores. Para corregir una pregunta rechazada, ábrela y elige "Corregir pregunta".');
           void this.router.navigate(['/preguntas', p.id]);
           return;
         }

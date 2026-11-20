@@ -59,7 +59,7 @@
                 <td>{{ e.mejorPuntaje }}</td>
                 <td>{{ e.ultimoPuntaje }}</td>
                 <td><bp-insignia [texto]="(tendencias[e.tendencia] ?? tendencias['SIN_DATOS']).texto" [tono]="(tendencias[e.tendencia] ?? tendencias['SIN_DATOS']).tono" /></td>
-                <td class="suave">{{ e.debilidades.length ? e.debilidades.map(textoCompetencia).join(', ') : '—' }}</td>
+                <td class="suave">{{ e.debilidades.length ? e.debilidades.map(textoCompetencia).join(', ') : '-' }}</td>
               </tr>
             }
           </tbody>

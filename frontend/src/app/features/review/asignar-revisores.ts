@@ -71,7 +71,7 @@ export class AsignarRevisores implements OnInit {
   }
 
   protected alAsignar(caso: CasoPendiente): void {
-    this.avisos.exito(`Revisores asignados a «${caso.titulo}».`);
+    this.avisos.exito(`Revisores asignados a "${caso.titulo}".`);
     this.seleccionada.set(null);
     this.cargar();
     this.refresco.avisarCambioDeContadores();

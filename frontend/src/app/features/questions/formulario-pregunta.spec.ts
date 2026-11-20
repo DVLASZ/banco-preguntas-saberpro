@@ -56,7 +56,7 @@ describe('FormularioPregunta · envío a revisión', () => {
     expect(servicio.enviarARevision).not.toHaveBeenCalled();
   });
 
-  it('«Seguir editando» cancela el envío', () => {
+  it('"Seguir editando" cancela el envío', () => {
     const f = crear();
     boton(f, 'Enviar a revisión').click();
     f.detectChanges();
@@ -68,7 +68,7 @@ describe('FormularioPregunta · envío a revisión', () => {
     expect(servicio.enviarARevision).not.toHaveBeenCalled();
   });
 
-  it('«Confirmar envío» guarda el borrador y lo envía a revisión', () => {
+  it('"Confirmar envío" guarda el borrador y lo envía a revisión', () => {
     const f = crear();
     boton(f, 'Enviar a revisión').click();
     f.detectChanges();

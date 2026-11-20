@@ -8,15 +8,15 @@
 
   <section class="rejilla-estadisticas" aria-label="Resumen">
     <div class="estadistica azul">
-      <div><div class="valor">{{ resumen()?.pendientes ?? '—' }}</div><div class="etiqueta">Por evaluar</div></div>
+      <div><div class="valor">{{ resumen()?.pendientes ?? '-' }}</div><div class="etiqueta">Por evaluar</div></div>
       <bp-icono nombre="bandeja" [tamano]="22" />
     </div>
     <div class="estadistica verde">
-      <div><div class="valor">{{ resumen()?.evaluadas ?? '—' }}</div><div class="etiqueta">Evaluadas</div></div>
+      <div><div class="valor">{{ resumen()?.evaluadas ?? '-' }}</div><div class="etiqueta">Evaluadas</div></div>
       <bp-icono nombre="doble-check" [tamano]="22" />
     </div>
     <div class="estadistica ambar">
-      <div><div class="valor">{{ resumen()?.conRondaRechazada ?? '—' }}</div><div class="etiqueta">En ronda ya rechazada</div></div>
+      <div><div class="valor">{{ resumen()?.conRondaRechazada ?? '-' }}</div><div class="etiqueta">En ronda ya rechazada</div></div>
       <bp-icono nombre="mensaje" [tamano]="22" />
     </div>
   </section>

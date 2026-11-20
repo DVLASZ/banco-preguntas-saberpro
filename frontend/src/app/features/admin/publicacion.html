@@ -17,7 +17,7 @@
   <section class="filtros" aria-label="Filtros">
     <div class="campo">
       <label for="buscar">Buscar pregunta</label>
-      <input id="buscar" type="search" placeholder="Buscar por título o tema…" [value]="texto()" (input)="escribir($any($event.target).value)" />
+      <input id="buscar" type="search" placeholder="Buscar por título o tema..." [value]="texto()" (input)="escribir($any($event.target).value)" />
     </div>
     <div class="campo">
       <label for="competencia">Competencia</label>
@@ -54,7 +54,7 @@
                 <td class="accion">
                   @if (p.estado === 'APROBADA') {
                     <button type="button" class="boton chico primario" [disabled]="publicando() === p.id" (click)="publicar(p)">
-                      <bp-icono nombre="publicar" [tamano]="16" /> {{ publicando() === p.id ? 'Publicando…' : 'Publicar' }}
+                      <bp-icono nombre="publicar" [tamano]="16" /> {{ publicando() === p.id ? 'Publicando...' : 'Publicar' }}
                     </button>
                   } @else {
                     <a class="boton chico fantasma" [routerLink]="['/preguntas', p.id]">Ver</a>

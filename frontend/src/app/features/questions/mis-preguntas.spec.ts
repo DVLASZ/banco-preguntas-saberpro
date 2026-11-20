@@ -44,7 +44,7 @@ describe('MisPreguntas', () => {
     expect(filas(f)).toHaveLength(2);
     expect(filas(f)[0].textContent).toContain('Primera');
     expect(filas(f)[1].textContent).toContain('Rechazada');
-    expect(f.nativeElement.textContent).toContain('Mostrando 1–10 de 12 preguntas');
+    expect(f.nativeElement.textContent).toContain('Mostrando 1 a 10 de 12 preguntas');
   });
 
   it('el resumen suma los estados: creadas, borradores, en revisión y aprobadas (incluye publicadas)', () => {

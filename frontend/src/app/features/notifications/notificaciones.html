@@ -38,7 +38,7 @@
               <div class="cuerpo">
                 <strong>{{ n.asunto }}</strong>
                 <p>{{ n.mensaje }}</p>
-                @if (n.preguntaId) { <span class="enlace">{{ textoEnlace(n) }} →</span> }
+                @if (n.preguntaId) { <span class="enlace">{{ textoEnlace(n) }}</span> }
               </div>
               <div class="lateral">
                 <time>{{ hora(n.creadaEn) }}</time>
@@ -54,7 +54,7 @@
         }
         @if (hayMas()) {
           <button type="button" class="boton ancho" [disabled]="cargandoMas()" (click)="cargarMas()">
-            {{ cargandoMas() ? 'Cargando…' : 'Cargar notificaciones anteriores' }}
+            {{ cargandoMas() ? 'Cargando...' : 'Cargar notificaciones anteriores' }}
           </button>
         } @else if (grupos().length > 0) {
           <p class="al-dia">Estás al día · Mostrando la actividad más reciente</p>

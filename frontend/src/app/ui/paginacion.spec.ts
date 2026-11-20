@@ -33,11 +33,11 @@ describe('Paginacion', () => {
   it('resume el rango que se está viendo', () => {
     const fixture = crear(1, 5, 24);
 
-    expect(fixture.nativeElement.querySelector('.resumen').textContent).toBe('Mostrando 6–10 de 24 preguntas');
+    expect(fixture.nativeElement.querySelector('.resumen').textContent).toBe('Mostrando 6 a 10 de 24 preguntas');
   });
 
   it('la última página recorta el rango al total', () => {
-    expect(crear(4, 5, 24).nativeElement.querySelector('.resumen').textContent).toBe('Mostrando 21–24 de 24 preguntas');
+    expect(crear(4, 5, 24).nativeElement.querySelector('.resumen').textContent).toBe('Mostrando 21 a 24 de 24 preguntas');
   });
 
   it('sin elementos lo dice y no muestra la navegación', () => {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { ESTADOS, ESTADOS_RONDA, Tono } from '../core/etiquetas';
 import { EstadoPregunta, EstadoRonda } from '../core/models';
 
-/** Píldora con un punto de color: «● Rechazada». */
+/** Píldora con un punto de color: '● Rechazada'. */
 @Component({
   selector: 'bp-insignia',
   changeDetection: ChangeDetectionStrategy.OnPush,

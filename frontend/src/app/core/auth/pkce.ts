@@ -1,4 +1,4 @@
-/** Ayudas del flujo «código de autorización con PKCE» (RFC 7636). */
+/** Ayudas del flujo 'código de autorización con PKCE' (RFC 7636). */
 
 function aBase64Url(bytes: Uint8Array): string {
   let texto = '';

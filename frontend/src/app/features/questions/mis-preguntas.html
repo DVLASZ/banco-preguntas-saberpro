@@ -11,19 +11,19 @@
 
   <section class="rejilla-estadisticas" aria-label="Resumen">
     <div class="estadistica">
-      <div><div class="valor">{{ resumen()?.creadas ?? '—' }}</div><div class="etiqueta">Preguntas creadas</div></div>
+      <div><div class="valor">{{ resumen()?.creadas ?? '-' }}</div><div class="etiqueta">Preguntas creadas</div></div>
       <bp-icono nombre="preguntas" [tamano]="22" />
     </div>
     <div class="estadistica">
-      <div><div class="valor">{{ resumen()?.borradores ?? '—' }}</div><div class="etiqueta">Borradores</div></div>
+      <div><div class="valor">{{ resumen()?.borradores ?? '-' }}</div><div class="etiqueta">Borradores</div></div>
       <bp-icono nombre="lapiz" [tamano]="22" />
     </div>
     <div class="estadistica ambar">
-      <div><div class="valor">{{ resumen()?.enRevision ?? '—' }}</div><div class="etiqueta">En proceso de revisión</div></div>
+      <div><div class="valor">{{ resumen()?.enRevision ?? '-' }}</div><div class="etiqueta">En proceso de revisión</div></div>
       <bp-icono nombre="reloj" [tamano]="22" />
     </div>
     <div class="estadistica verde">
-      <div><div class="valor">{{ resumen()?.aprobadas ?? '—' }}</div><div class="etiqueta">Preguntas aprobadas</div></div>
+      <div><div class="valor">{{ resumen()?.aprobadas ?? '-' }}</div><div class="etiqueta">Preguntas aprobadas</div></div>
       <bp-icono nombre="escudo-ok" [tamano]="22" />
     </div>
   </section>
@@ -31,7 +31,7 @@
   <section class="filtros" aria-label="Filtros">
     <div class="campo">
       <label for="buscar">Buscar pregunta</label>
-      <input id="buscar" type="search" placeholder="Buscar por título o tema…" [value]="texto()" (input)="escribir($any($event.target).value)" />
+      <input id="buscar" type="search" placeholder="Buscar por título o tema..." [value]="texto()" (input)="escribir($any($event.target).value)" />
     </div>
     <div class="campo">
       <label for="estado">Estado</label>

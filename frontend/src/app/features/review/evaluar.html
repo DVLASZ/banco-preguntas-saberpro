@@ -94,7 +94,7 @@
 
               <div class="campo">
                 <label for="observacion">Observaciones {{ decision() === 'RECHAZAR' ? '*' : '' }}</label>
-                <textarea id="observacion" rows="4" placeholder="Explica los ajustes necesarios…" [value]="observacion()"
+                <textarea id="observacion" rows="4" placeholder="Explica los ajustes necesarios..." [value]="observacion()"
                   [class.invalido]="intento() && errorDeObservacion()"
                   (input)="observacion.set($any($event.target).value)"></textarea>
                 @if (errorDeObservacion(); as e) {
@@ -111,7 +111,7 @@
                     <p>Vas a {{ decision() === 'APROBAR' ? 'aprobar' : 'rechazar' }} esta pregunta. No podrás cambiarla después.</p>
                     <div class="confirmacion">
                       <button type="button" class="boton chico" (click)="confirmando.set(false)">Revisar</button>
-                      <button type="button" class="boton chico primario" [disabled]="enviando()" (click)="enviar()">{{ enviando() ? 'Enviando…' : 'Confirmar envío' }}</button>
+                      <button type="button" class="boton chico primario" [disabled]="enviando()" (click)="enviar()">{{ enviando() ? 'Enviando...' : 'Confirmar envío' }}</button>
                     </div>
                   </div>
                 </div>

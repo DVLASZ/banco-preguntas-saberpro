@@ -44,9 +44,9 @@ describe('etiquetas', () => {
     });
 
     it('una fecha ausente se muestra como raya', () => {
-      expect(fecha(null)).toBe('—');
-      expect(fechaCorta(undefined)).toBe('—');
-      expect(fechaHora('')).toBe('—');
+      expect(fecha(null)).toBe('-');
+      expect(fechaCorta(undefined)).toBe('-');
+      expect(fechaHora('')).toBe('-');
     });
 
     it('agrupa por día relativo: hoy, ayer y fecha larga', () => {

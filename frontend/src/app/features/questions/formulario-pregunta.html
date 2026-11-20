@@ -92,7 +92,7 @@
             <label for="competencia">Competencia *</label>
             <select id="competencia" [class.invalido]="error('competencia')"
               (change)="cambiar('competencia', $any($event.target).value)" (blur)="tocar('competencia')">
-              <option value="" disabled [selected]="!valor('competencia')">Selecciona…</option>
+              <option value="" disabled [selected]="!valor('competencia')">Selecciona...</option>
               @for (c of competencias; track c.valor) { <option [value]="c.valor" [selected]="valor('competencia') === c.valor">{{ c.texto }}</option> }
             </select>
             @if (error('competencia'); as e) { <span class="error">{{ e }}</span> }
@@ -117,7 +117,7 @@
             <label for="dificultad">Dificultad *</label>
             <select id="dificultad" [class.invalido]="error('dificultad')"
               (change)="cambiar('dificultad', $any($event.target).value)" (blur)="tocar('dificultad')">
-              <option value="" disabled [selected]="!valor('dificultad')">Selecciona…</option>
+              <option value="" disabled [selected]="!valor('dificultad')">Selecciona...</option>
               @for (d of dificultades; track d.valor) { <option [value]="d.valor" [selected]="valor('dificultad') === d.valor">{{ d.texto }}</option> }
             </select>
             @if (error('dificultad'); as e) { <span class="error">{{ e }}</span> }
@@ -127,7 +127,7 @@
             <label for="respuesta">Respuesta correcta *</label>
             <select id="respuesta" [class.invalido]="error('respuestaCorrecta')"
               (change)="cambiar('respuestaCorrecta', $any($event.target).value)" (blur)="tocar('respuestaCorrecta')">
-              <option value="" disabled [selected]="!valor('respuestaCorrecta')">Selecciona…</option>
+              <option value="" disabled [selected]="!valor('respuestaCorrecta')">Selecciona...</option>
               @for (l of letras; track l) {
                 <option [value]="l" [selected]="valor('respuestaCorrecta').toUpperCase() === l">{{ l }}{{ textoOpcion(l) ? ' · ' + textoOpcion(l) : '' }}</option>
               }
@@ -160,10 +160,10 @@
       } @else {
         <a class="boton fantasma" routerLink="/mis-preguntas">Cancelar</a>
         <button type="button" class="boton" [disabled]="trabajando() !== null" (click)="guardarBorrador()">
-          <bp-icono nombre="guardar" /> {{ trabajando() === 'guardar' ? 'Guardando…' : 'Guardar borrador' }}
+          <bp-icono nombre="guardar" /> {{ trabajando() === 'guardar' ? 'Guardando...' : 'Guardar borrador' }}
         </button>
         <button type="button" class="boton primario" [disabled]="trabajando() !== null" (click)="enviarARevision()">
-          <bp-icono nombre="enviar" /> {{ trabajando() === 'enviar' ? 'Enviando…' : 'Enviar a revisión' }}
+          <bp-icono nombre="enviar" /> {{ trabajando() === 'enviar' ? 'Enviando...' : 'Enviar a revisión' }}
         </button>
       }
     </footer>

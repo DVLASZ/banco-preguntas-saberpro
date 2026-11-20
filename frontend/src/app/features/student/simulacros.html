@@ -40,7 +40,7 @@
     </div>
     <div class="pie-nuevo">
       <span class="suave">
-        @if (disponibles() !== null) { Hay hasta {{ disponibles() }} preguntas con estos filtros. } @else { Consultando el catálogo… }
+        @if (disponibles() !== null) { Hay hasta {{ disponibles() }} preguntas con estos filtros. } @else { Consultando el catálogo... }
       </span>
       <button type="button" class="boton primario" [disabled]="generando() || cantidad < 1 || minutos < 1" (click)="generar()">
         <bp-icono nombre="mas-circulo" [tamano]="16" /> Comenzar simulacro
@@ -71,7 +71,7 @@
                 <td><bp-insignia [texto]="estados[s.estado].texto" [tono]="estados[s.estado].tono" /></td>
                 <td>{{ s.respondidas }} de {{ s.totalPreguntas }}</td>
                 <td class="suave">{{ s.duracionMinutos }} min</td>
-                <td>{{ s.puntaje !== undefined && s.puntaje !== null ? s.puntaje + ' / 100' : '—' }}</td>
+                <td>{{ s.puntaje !== undefined && s.puntaje !== null ? s.puntaje + ' / 100' : '-' }}</td>
                 <td class="accion">
                   <a class="boton chico" [class.primario]="s.estado === 'EN_CURSO'" [routerLink]="['/simulacros', s.id]">
                     {{ s.estado === 'EN_CURSO' ? 'Continuar' : 'Ver resultado' }}

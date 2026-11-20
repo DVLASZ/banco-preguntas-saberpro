@@ -14,7 +14,7 @@ import { paginaDeInicio } from '../../core/auth/guards';
         <div class="aviso error" role="alert"><p>{{ mensaje }}</p></div>
         <a class="boton primario" routerLink="/login">Volver al acceso</a>
       } @else {
-        <p>Completando tu acceso…</p>
+        <p>Completando tu acceso...</p>
       }
     </div>
   `,

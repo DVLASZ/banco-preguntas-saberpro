@@ -7,7 +7,7 @@ export interface Aviso {
   texto: string;
 }
 
-/** Mensajes breves que aparecen en una esquina («Pregunta enviada a revisión»). */
+/** Mensajes breves que aparecen en una esquina ('Pregunta enviada a revisión'). */
 @Injectable({ providedIn: 'root' })
 export class AvisosService {
   private readonly _avisos = signal<Aviso[]>([]);

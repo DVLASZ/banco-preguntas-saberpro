@@ -37,7 +37,7 @@ export function evaluarSeleccion(marcados: number, yaAsignados: number, maximo: 
   return { total, valida: true, motivo: null, exceso: 0 };
 }
 
-/** Lista de revisores disponibles con casillas, contador «n / máximo» y el botón que asigna (HU-04). */
+/** Lista de revisores disponibles con casillas, contador 'n / máximo' y el botón que asigna (HU-04). */
 @Component({
   selector: 'bp-selector-revisores',
   imports: [Avatar, Icono],

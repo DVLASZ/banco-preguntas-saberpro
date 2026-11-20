@@ -99,7 +99,7 @@ export class Publicacion implements OnInit {
     this.preguntas.publicar(p.id).subscribe({
       next: () => {
         this.publicando.set(null);
-        this.avisos.exito(`«${p.nombre}» fue publicada.`);
+        this.avisos.exito(`"${p.nombre}" fue publicada.`);
         this.cargar();
         this.contarPorPublicar();
       },

@@ -117,7 +117,7 @@ describe('DetallePregunta', () => {
     expect(navegar).toHaveBeenCalledWith(['/preguntas', 'q-1', 'editar']);
   });
 
-  it('solo el autor de una rechazada ve «Corregir»; el de un borrador ve «Editar»', () => {
+  it('solo el autor de una rechazada ve "Corregir"; el de un borrador ve "Editar"', () => {
     expect(boton(crear('EN_REVISION'), 'Corregir pregunta')).toBeUndefined();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: QuestionsService, useValue: preguntas }, { provide: ReviewsService, useValue: reviews }, { provide: AuthService, useValue: auth }, { provide: AvisosService, useValue: avisos }] });
@@ -131,7 +131,7 @@ describe('DetallePregunta', () => {
     expect(boton(crear('RECHAZADA'), 'Corregir pregunta')).toBeUndefined();
   });
 
-  it('el administrador ve «Publicar» solo si la pregunta está aprobada', () => {
+  it('el administrador ve "Publicar" solo si la pregunta está aprobada', () => {
     roles = ['ADMIN'];
     usuarioId = 'admin';
 

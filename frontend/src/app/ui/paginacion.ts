@@ -18,7 +18,7 @@ export function paginasVisibles(actual: number, total: number): (number | null)[
   return resultado;
 }
 
-/** Paginación numerada («Mostrando 1–5 de 24 preguntas», anterior, números, siguiente). Las páginas cuentan desde 0. */
+/** Paginación numerada ('Mostrando 1 a 5 de 24 preguntas', anterior, números, siguiente). Las páginas cuentan desde 0. */
 @Component({
   selector: 'bp-paginacion',
   imports: [Icono],
@@ -33,7 +33,7 @@ export function paginasVisibles(actual: number, total: number): (number | null)[
           </button>
           @for (p of paginas(); track $index) {
             @if (p === null) {
-              <span class="hueco">…</span>
+              <span class="hueco">...</span>
             } @else {
               <button type="button" class="numero" [class.activa]="p === pagina()" [attr.aria-current]="p === pagina() ? 'page' : null" (click)="ir(p)">
                 {{ p + 1 }}
@@ -53,7 +53,7 @@ export class Paginacion {
   readonly pagina = input.required<number>();
   readonly tamano = input.required<number>();
   readonly total = input.required<number>();
-  /** Cómo se llaman los elementos: «preguntas», «notificaciones»… */
+  /** Cómo se llaman los elementos: 'preguntas', 'notificaciones'... */
   readonly elementos = input('resultados');
   readonly cambia = output<number>();
 
@@ -65,7 +65,7 @@ export class Paginacion {
     }
     const desde = this.pagina() * this.tamano() + 1;
     const hasta = Math.min(this.total(), (this.pagina() + 1) * this.tamano());
-    return `Mostrando ${desde}–${hasta} de ${this.total()} ${this.elementos()}`;
+    return `Mostrando ${desde} a ${hasta} de ${this.total()} ${this.elementos()}`;
   });
 
   protected ir(pagina: number): void {

@@ -54,7 +54,7 @@ describe('Seguimiento', () => {
   });
 
   it.each([['SIN_DATOS', 'Sin datos'], ['MEJORANDO', 'Mejorando'], ['ESTABLE', 'Estable'], ['BAJANDO', 'Bajando']] as const)(
-    'con la tendencia %s del servicio muestra «%s» y sigue mostrando competencias e historial', (tendencia, etiqueta) => {
+    'con la tendencia %s del servicio muestra "%s" y sigue mostrando competencias e historial', (tendencia, etiqueta) => {
       servicio.misEstadisticas.mockReturnValue(of({ ...estadisticas, tendencia }));
 
       const f = crear(null);

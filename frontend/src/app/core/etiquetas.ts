@@ -51,7 +51,7 @@ export function textoDificultad(dificultad: string): string {
   return DIFICULTADES[dificultad as Dificultad] ?? dificultad;
 }
 
-/** Código corto legible de una pregunta a partir de su identificador: «SP-1A2B». */
+/** Código corto legible de una pregunta a partir de su identificador: 'SP-1A2B'. */
 export function codigoCorto(id: string): string {
   return 'SP-' + id.replace(/-/g, '').slice(0, 4).toUpperCase();
 }
@@ -97,35 +97,35 @@ function parte(formato: Intl.DateTimeFormat, fecha: Date, tipo: Intl.DateTimeFor
   return formato.formatToParts(fecha).find((p) => p.type === tipo)?.value.replace(/\./g, '') ?? '';
 }
 
-/** «8 oct 2026» */
+/** '8 oct 2026' */
 export function fecha(iso: string | null | undefined): string {
   if (!iso) {
-    return '—';
+    return '-';
   }
   const d = new Date(iso);
   return `${parte(formatoDia, d, 'day')} ${parte(formatoDia, d, 'month')} ${parte(formatoDia, d, 'year')}`;
 }
 
-/** «8 oct» */
+/** '8 oct' */
 export function fechaCorta(iso: string | null | undefined): string {
   if (!iso) {
-    return '—';
+    return '-';
   }
   const d = new Date(iso);
   return `${parte(formatoDiaCorto, d, 'day')} ${parte(formatoDiaCorto, d, 'month')}`;
 }
 
-/** «8 oct · 16:10» */
+/** '8 oct · 16:10' */
 export function fechaHora(iso: string | null | undefined): string {
-  return iso ? `${fechaCorta(iso)} · ${formatoHora.format(new Date(iso))}` : '—';
+  return iso ? `${fechaCorta(iso)} · ${formatoHora.format(new Date(iso))}` : '-';
 }
 
-/** «16:10» */
+/** '16:10' */
 export function hora(iso: string): string {
   return formatoHora.format(new Date(iso));
 }
 
-/** Encabezado de grupo de notificaciones: «Hoy · 8 de octubre», «Ayer · 7 de octubre» o «6 de octubre». */
+/** Encabezado de grupo de notificaciones: 'Hoy · 8 de octubre', 'Ayer · 7 de octubre' o '6 de octubre'. */
 export function diaRelativo(iso: string, ahora: Date = new Date()): string {
   const clave = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(d);
   const dia = new Date(iso);
@@ -155,7 +155,7 @@ export const ESTADOS_SIMULACRO: Record<string, { texto: string; tono: Tono }> = 
   EXPIRADO: { texto: 'Tiempo agotado', tono: 'ambar' },
 };
 
-/** Segundos como reloj: «45:07» o «1:05:00». */
+/** Segundos como reloj: '45:07' o '1:05:00'. */
 export function reloj(segundos: number): string {
   const total = Math.max(0, Math.floor(segundos));
   const h = Math.floor(total / 3600);
@@ -165,7 +165,7 @@ export function reloj(segundos: number): string {
   return h > 0 ? `${h}:${dos(m)}:${dos(s)}` : `${dos(m)}:${dos(s)}`;
 }
 
-/** Un porcentaje con un decimal: «72,5 %». */
+/** Un porcentaje con un decimal: '72,5 %'. */
 export function porcentaje(valor: number | null | undefined): string {
-  return valor === null || valor === undefined ? '—' : `${valor.toLocaleString('es-CO', { maximumFractionDigits: 1 })} %`;
+  return valor === null || valor === undefined ? '-' : `${valor.toLocaleString('es-CO', { maximumFractionDigits: 1 })} %`;
 }

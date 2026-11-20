@@ -40,7 +40,7 @@ export function usuarioDeToken(token: string): UsuarioSesion {
   return { id, nombre, correo: typeof r['email'] === 'string' ? (r['email'] as string) : null, roles };
 }
 
-/** Iniciales para el avatar: «Ana Rodríguez» → «AR». */
+/** Iniciales para el avatar, por ejemplo 'AR' para 'Ana Rodríguez'. */
 export function iniciales(nombre: string): string {
   const palabras = nombre.trim().split(/\s+/).filter(Boolean);
   if (palabras.length === 0) {

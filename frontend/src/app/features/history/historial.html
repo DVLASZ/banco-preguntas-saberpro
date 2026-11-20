@@ -25,7 +25,7 @@
             <div class="cuerpo">
               <strong>{{ entradas[e.tipo].texto }}</strong>
               <p>{{ e.resumen }}</p>
-              @if (e.preguntaId) { <a [routerLink]="['/historial', e.preguntaId]">Ver recorrido de {{ codigoCorto(e.preguntaId) }} →</a> }
+              @if (e.preguntaId) { <a [routerLink]="['/historial', e.preguntaId]">Ver recorrido de {{ codigoCorto(e.preguntaId) }}</a> }
             </div>
             <time>{{ hora(e.ocurridaEn) }}</time>
           </article>

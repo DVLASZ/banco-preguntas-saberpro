@@ -20,7 +20,7 @@
         <div class="tarjeta-cabecera"><h2>Preguntas pendientes</h2><span class="nota">{{ visibles().length }} de {{ total() }}</span></div>
         <div class="campo">
           <label for="buscar-cola">Buscar en la cola</label>
-          <input id="buscar-cola" type="search" placeholder="Buscar por título, ID o autor…" [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
+          <input id="buscar-cola" type="search" placeholder="Buscar por título, ID o autor..." [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
         </div>
         @if (cargando() && pendientes().length === 0) {
           <div class="esqueleto" style="height: 110px"></div>
