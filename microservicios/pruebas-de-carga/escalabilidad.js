@@ -69,7 +69,7 @@ export function setup() {
 const cabeceras = (token) => ({ headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } });
 
 function ok(respuesta, nombre, esperado = 200) {
-  const bien = check(respuesta, { [`${nombre} → ${esperado}`]: (r) => r.status === esperado });
+  const bien = check(respuesta, { [`${nombre} espera ${esperado}`]: (r) => r.status === esperado });
   if (!bien && __ENV.DEPURAR && Math.random() < 0.01) {
     console.log(`FALLO : estado=${respuesta.status} error=${respuesta.error} cuerpo=${String(respuesta.body).slice(0, 120)}`);
   }

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Min;
 
 import java.util.Set;
 
-/** Lo que pide el estudiante al generar un simulacro. Los conjuntos vacíos significan «cualquiera». */
+/** Lo que pide el estudiante al generar un simulacro. Los conjuntos vacíos significan 'cualquiera'. */
 public record CreateSimulationRequest(
         @Schema(description = "Competencias, por ejemplo LECTURA_CRITICA", example = "[\"LECTURA_CRITICA\"]") Set<String> competencias,
         @Schema(description = "Temas o subtemas") Set<String> temas,

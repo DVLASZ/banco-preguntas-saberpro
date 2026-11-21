@@ -80,7 +80,7 @@ class CreadoresDeAvisoTest {
         Notificacion automatica = crear(TipoNotificacion.REVISORES_ASIGNADOS,
                 ContextoDeAviso.de("Observer", "q-1").enRonda(2).asignadaAutomaticamente(true));
 
-        assertThat(manual.asunto()).contains("«Observer»");
+        assertThat(manual.asunto()).contains("'Observer'");
         assertThat(manual.mensaje()).contains("administrador").contains("ronda 1");
         assertThat(automatica.mensaje()).contains("quedas asignado otra vez").contains("ronda 2");
     }
@@ -93,7 +93,7 @@ class CreadoresDeAvisoTest {
         assertThat(crear(TipoNotificacion.PREGUNTA_PUBLICADA, ContextoDeAviso.de("  ", "q-9")).asunto())
                 .contains("la pregunta q-9");
         assertThat(crear(TipoNotificacion.PREGUNTA_PUBLICADA, ContextoDeAviso.de("Observer", "q-9")).mensaje())
-                .contains("«Observer»");
+                .contains("'Observer'");
     }
 
     @Test

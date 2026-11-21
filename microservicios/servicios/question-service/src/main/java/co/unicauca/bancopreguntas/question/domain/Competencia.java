@@ -3,7 +3,7 @@ package co.unicauca.bancopreguntas.question.domain;
 /**
  * Competencias evaluadas por las Pruebas Saber Pro (HU-03: toda pregunta
  * se clasifica por competencia, tema y nivel de dificultad para poder
- * filtrarla después — HU-05 — y usarla en la generación de simulacros —
+ * filtrarla después, HU-05, y usarla en la generación de simulacros,
  * HU-12).
  */
 public enum Competencia {

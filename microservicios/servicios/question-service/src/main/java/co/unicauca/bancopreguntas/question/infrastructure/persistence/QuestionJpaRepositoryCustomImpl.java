@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * La consulta solo incluye los filtros que se pidieron. El patrón «(:filtro IS NULL OR columna = :filtro)» en una
+ * La consulta solo incluye los filtros que se pidieron. El patrón '(:filtro IS NULL OR columna = :filtro)' en una
  * sola consulta fija obliga a PostgreSQL a un plan genérico que no usa los índices (recorre toda la tabla en cada
  * búsqueda); armada a medida, usa el índice del autor y el del orden. El conteo se omite cuando la página no está
  * llena y ya se conoce el total.

@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * Lo que pide el estudiante al generar un simulacro (RF-22): cuántas preguntas, cuánto tiempo y, opcionalmente,
- * de qué competencias, temas y niveles de dificultad. Un conjunto vacío significa «cualquiera».
+ * de qué competencias, temas y niveles de dificultad. Un conjunto vacío significa 'cualquiera'.
  *
  * @param duracionMinutos tiempo máximo del simulacro (RF-23)
  */

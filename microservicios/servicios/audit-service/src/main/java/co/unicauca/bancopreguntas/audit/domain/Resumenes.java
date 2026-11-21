@@ -25,7 +25,7 @@ public final class Resumenes {
     }
 
     public static String cambioDeEstado(String desde, String hacia, String cambiadoPor) {
-        return "Estado: " + (desde == null ? "(nuevo)" : desde) + " → " + hacia + " (por " + usuario(cambiadoPor) + ")";
+        return "Estado: " + (desde == null ? "(nuevo)" : desde) + " a " + hacia + " (por " + usuario(cambiadoPor) + ")";
     }
 
     public static String revisoresAsignados(String asignadoPor, int ronda, List<String> revisores, boolean automatica) {
@@ -56,6 +56,6 @@ public final class Resumenes {
     }
 
     private static String nombre(String titulo) {
-        return titulo == null || titulo.isBlank() ? " la pregunta" : " «" + titulo + "»";
+        return titulo == null || titulo.isBlank() ? " la pregunta" : " '" + titulo + "'";
     }
 }

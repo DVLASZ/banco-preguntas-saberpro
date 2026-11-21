@@ -48,7 +48,7 @@ class EntradaDeHistorialTest {
     @DisplayName("los resúmenes nombran a quien actuó, o al sistema si no hay actor")
     void resumenes() {
         assertThat(Resumenes.preguntaPublicada(null)).isEqualTo("el sistema publicó la pregunta");
-        assertThat(Resumenes.preguntaEnviada("a", null, 1)).contains("la pregunta").doesNotContain("«");
+        assertThat(Resumenes.preguntaEnviada("a", null, 1)).contains("la pregunta").doesNotContain("'");
         assertThat(Resumenes.cambioDeEstado(null, "PENDIENTE_REVISION", null)).contains("(nuevo)").contains("el sistema");
         assertThat(Resumenes.revisoresAsignados("admin", 1, List.of("r1", "r2"), false)).contains("admin").contains("r1, r2");
         assertThat(Resumenes.revisoresAsignados("system", 2, List.of("r1"), true)).contains("automáticamente");

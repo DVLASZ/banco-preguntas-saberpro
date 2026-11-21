@@ -13,7 +13,7 @@ public record Pagina<T>(List<T> elementos, int numero, int tamano, long totalEle
         elementos = List.copyOf(elementos);
     }
 
-    /** Siempre al menos 1, para poder mostrar «Página 1 de 1» aunque no haya resultados. */
+    /** Siempre al menos 1, para poder mostrar 'Página 1 de 1' aunque no haya resultados. */
     public int totalPaginas() {
         return (int) Math.max(1, (totalElementos + tamano - 1) / tamano);
     }

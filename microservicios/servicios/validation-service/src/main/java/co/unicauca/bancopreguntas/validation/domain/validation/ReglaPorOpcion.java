@@ -38,7 +38,7 @@ public abstract class ReglaPorOpcion implements ValidationRule {
         return new Violacion(Texto.campoOpcion(indice), mensaje);
     }
 
-    /** «La opción X», para los mensajes. */
+    /** 'La opción X', para los mensajes. */
     protected static String etiqueta(int indice) {
         return "La opción " + Texto.letra(indice);
     }

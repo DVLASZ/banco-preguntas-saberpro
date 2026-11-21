@@ -15,7 +15,7 @@ public final class AvisoPreguntaEnRevision extends CreadorDeAviso {
     protected Mensaje crearMensaje(ContextoDeAviso c) {
         String pregunta = c.nombreDeLaPregunta();
         return new Mensaje("Tu pregunta está en revisión: " + pregunta,
-                "Se asignaron revisores a " + pregunta + " (ronda " + c.ronda() + ") y su estado ahora es «En revisión». "
+                "Se asignaron revisores a " + pregunta + " (ronda " + c.ronda() + ") y su estado ahora es 'En revisión'. "
                         + "Te avisaremos cuando termine la revisión.");
     }
 }

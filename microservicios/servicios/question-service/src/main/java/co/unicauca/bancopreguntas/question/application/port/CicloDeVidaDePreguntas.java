@@ -18,13 +18,13 @@ public interface CicloDeVidaDePreguntas {
     /** Registra la pregunta recién creada en Borrador a nombre de su autor. */
     EstadoDeCiclo registrar(String preguntaId);
 
-    /** Borrador → Pendiente de revisión. */
+    /** De Borrador a Pendiente de revisión. */
     EstadoDeCiclo enviarARevision(Question pregunta);
 
-    /** Rechazada → Borrador, como una versión nueva. */
+    /** De Rechazada a Borrador, como una versión nueva. */
     EstadoDeCiclo reabrir(String preguntaId);
 
-    /** Aprobada → Publicada. Lleva el contenido que viajará en el evento {@code question.published}. */
+    /** De Aprobada a Publicada. Lleva el contenido que viajará en el evento {@code question.published}. */
     EstadoDeCiclo publicar(Question pregunta);
 
     /** El historial de estados, del más antiguo al más reciente. */

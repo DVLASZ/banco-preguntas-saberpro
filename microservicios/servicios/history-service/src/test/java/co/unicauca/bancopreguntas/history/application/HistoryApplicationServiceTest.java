@@ -62,7 +62,7 @@ class HistoryApplicationServiceTest {
             assertThat(e.tipo()).isEqualTo(TipoEntrada.PREGUNTA_ENVIADA);
             assertThat(e.preguntaId()).isEqualTo("q-1");
             assertThat(e.actorId()).isEqualTo("autor-1");
-            assertThat(e.resumen()).contains("autor-1").contains("«Observer»").contains("versión 2");
+            assertThat(e.resumen()).contains("autor-1").contains("'Observer'").contains("versión 2");
             assertThat(e.detalles()).isEqualTo("{\"k\":1}");
             assertThat(e.ocurridaEn()).isEqualTo(T0.plusSeconds(1));
             assertThat(e.registradaEn()).isEqualTo(T0.plusSeconds(1000));

@@ -67,7 +67,7 @@ def token(usuario, clave):
 
 def chequeo(nombre, condicion, detalle=''):
     RESULTADOS.append((nombre, bool(condicion)))
-    print('OK   ' if condicion else 'FALLA', nombre, ('— ' + str(detalle)) if (detalle and not condicion) else '')
+    print('OK   ' if condicion else 'FALLA', nombre, (': ' + str(detalle)) if (detalle and not condicion) else '')
 
 
 def esperar(condicion, intentos=20, pausa=0.5):
@@ -114,7 +114,7 @@ def main():
     chequeo('HU-01 crear una pregunta válida: 201 y estado Borrador', estado == 201 and q1.get('estado') == 'BORRADOR', (estado, q1))
     q1id = q1.get('id')
     for nombre, cuerpo in [('dos preguntas directas', {**PREGUNTA, 'enunciado': '¿Qué es? ¿Y esto?'}),
-                           ('opción «todas las anteriores»', {**PREGUNTA, 'opcionD': 'Todas las anteriores'}),
+                           ('opción "todas las anteriores"', {**PREGUNTA, 'opcionD': 'Todas las anteriores'}),
                            ('falta de contexto', {**PREGUNTA, 'contexto': ' '}),
                            ('opciones repetidas', {**PREGUNTA, 'opcionA': PREGUNTA['opcionB']})]:
         estado, j = http('POST', API + '/questions', t['autor1'], cuerpo)
@@ -204,7 +204,7 @@ def main():
     chequeo('El docente sí consulta el simulacro de un estudiante', estado == 200, estado)
     qsim = sim['preguntas'][0]['preguntaId']
     estado, j = http('POST', API + '/simulations/%s/answers' % simid, t['estudiante1'], {'preguntaId': qsim, 'opcion': 'E'})
-    chequeo('Una opción fuera de A–D se rechaza (400)', estado == 400, estado)
+    chequeo('Una opción fuera de A a D se rechaza (400)', estado == 400, estado)
     estado, j = http('POST', API + '/simulations/%s/answers' % simid, t['estudiante1'], {'preguntaId': qsim, 'opcion': 'B'})
     chequeo('El estudiante contesta la pregunta', estado == 200 and j.get('respondidas') == 1, (estado, j))
     estado, fin = http('POST', API + '/simulations/%s/finish' % simid, t['estudiante1'])

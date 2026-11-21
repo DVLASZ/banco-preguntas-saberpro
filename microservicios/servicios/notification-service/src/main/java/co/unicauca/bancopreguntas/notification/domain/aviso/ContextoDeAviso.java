@@ -42,6 +42,6 @@ public record ContextoDeAviso(String titulo, String preguntaId, int ronda, boole
 
     /** Cómo se nombra la pregunta en el texto: por su título, o por su identificador si no se conoce. */
     public String nombreDeLaPregunta() {
-        return titulo == null || titulo.isBlank() ? "la pregunta " + preguntaId : "«" + titulo + "»";
+        return titulo == null || titulo.isBlank() ? "la pregunta " + preguntaId : "'" + titulo + "'";
     }
 }

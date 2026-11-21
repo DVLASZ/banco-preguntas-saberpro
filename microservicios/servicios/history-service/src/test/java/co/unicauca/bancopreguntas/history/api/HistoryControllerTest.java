@@ -45,7 +45,7 @@ class HistoryControllerTest {
 
     private static EntradaDeHistorial entrada() {
         return new EntradaDeHistorial("h-1", "e-1", "q-1", "autor-1", TipoEntrada.PREGUNTA_ENVIADA,
-                "autor-1 envió a revisión «Observer» (versión 1)", "{\"questionId\":\"q-1\",\"version\":1}", T0, T0);
+                "autor-1 envió a revisión 'Observer' (versión 1)", "{\"questionId\":\"q-1\",\"version\":1}", T0, T0);
     }
 
     @Test
@@ -56,7 +56,7 @@ class HistoryControllerTest {
         mvc.perform(como(get("/api/history/questions/q-1"), "autor-1", "AUTHOR"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipo").value("PREGUNTA_ENVIADA"))
-                .andExpect(jsonPath("$[0].resumen").value("autor-1 envió a revisión «Observer» (versión 1)"))
+                .andExpect(jsonPath("$[0].resumen").value("autor-1 envió a revisión 'Observer' (versión 1)"))
                 .andExpect(jsonPath("$[0].detalles.version").value(1))
                 .andExpect(jsonPath("$[0].actorId").value("autor-1"));
     }
