@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Coordina la ejecución secuencial de los filtros de validación
  * (Taller 5: Tuberías y Filtros). Se detiene en el primer filtro que
- * falla — no tiene sentido seguir validando una solicitud que ya se sabe
+ * falla, no tiene sentido seguir validando una solicitud que ya se sabe
  * inválida.
  */
 public class QuestionPipeline {

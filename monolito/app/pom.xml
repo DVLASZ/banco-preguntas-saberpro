@@ -18,7 +18,7 @@
         Unico modulo que conoce a todos los demas: los arma (inyeccion de
         dependencias manual), registra las vistas observadoras y define el
         SesionRouter que decide, segun el rol autenticado, que ventana
-        abrir. Es la "cascara" del monolito — el unico punto de union entre
+        abrir. Es la "cascara" del monolito, el unico punto de union entre
         modulo-usuarios, modulo-preguntas y modulo-simulacros. Se empaqueta
         como jar ejecutable (todas las dependencias incluidas).
     </description>

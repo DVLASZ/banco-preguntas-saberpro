@@ -9,7 +9,7 @@ import java.util.List;
  * un {@link co.unicauca.saberpro.microkernel.common.interfaces.QuestionPlugin}
  * para que genere una pregunta real del banco. No es la pregunta en sí
  * (eso es {@link co.unicauca.saberpro.preguntas.domain.Question}) sino la
- * solicitud sin validar todavía — por eso {@code classification} viaja
+ * solicitud sin validar todavía, por eso {@code classification} viaja
  * como texto libre y {@code correctAnswer} como el texto de la opción, en
  * vez de ya venir como {@code Competencia}/letra: son justamente lo que
  * el pipeline de validación (HU del taller) debe verificar antes de que

@@ -6,7 +6,7 @@ import co.unicauca.saberpro.preguntas.domain.Question;
 /**
  * Contrato que debe cumplir todo plugin de generación de preguntas
  * (Taller 5: patrón Microkernel). El núcleo ({@code QuestionMicrokernel})
- * solo conoce esta interfaz — nunca las clases concretas de los plugins,
+ * solo conoce esta interfaz, nunca las clases concretas de los plugins,
  * que se cargan dinámicamente por Reflexión desde {@code plugins.properties}.
  */
 public interface QuestionPlugin {

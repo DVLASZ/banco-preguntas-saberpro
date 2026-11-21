@@ -4,8 +4,7 @@ import co.unicauca.saberpro.microkernel.common.entities.QuestionRequest;
 
 /**
  * Un filtro de validación del pipeline (Taller 5: Tuberías y Filtros).
- * Cada filtro tiene una única responsabilidad y no conoce a los demás —
- * es {@code QuestionPipeline} quien los encadena.
+ * Cada filtro tiene una única responsabilidad y no conoce a los demás. Los encadena {@code QuestionPipeline}.
  */
 public interface QuestionFilter {
 

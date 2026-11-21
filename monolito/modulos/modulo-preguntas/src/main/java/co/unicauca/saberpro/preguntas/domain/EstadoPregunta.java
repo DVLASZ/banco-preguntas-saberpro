@@ -3,7 +3,7 @@ package co.unicauca.saberpro.preguntas.domain;
 /**
  * Estados por los que puede pasar una pregunta del banco de preguntas.
  * Corresponde exactamente al ciclo de vida definido en RF-14 del proyecto
- * de curso (ver Taller 3 — modelo C4, Nivel 4: componente de Gestión de
+ * de curso (ver Taller 3, modelo C4, Nivel 4: componente de Gestión de
  * Preguntas), y {@link #puedePasarA(EstadoPregunta)} concentra las
  * transiciones válidas entre ellos (RF-15).
  */

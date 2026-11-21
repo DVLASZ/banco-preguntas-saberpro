@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * Implementación común a los plugins de generación de preguntas: todos
  * ejecutan el mismo pipeline de validación (Tuberías y Filtros) antes de
- * construir la {@link Question} real del banco — la guía del taller pide
+ * construir la {@link Question} real del banco, la guía del taller pide
  * integrarlo en "al menos uno" de los plugins, pero aquí se hace en los
  * tres, porque no tiene sentido que un plugin genere una pregunta sin
  * pasar por la misma validación que las demás.

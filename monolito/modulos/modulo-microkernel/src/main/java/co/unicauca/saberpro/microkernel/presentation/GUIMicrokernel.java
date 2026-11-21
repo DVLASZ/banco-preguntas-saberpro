@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Ventana adicional del rol <b>Autor de preguntas</b> (Taller 5): genera
  * preguntas usando el Microkernel de plugins en vez del formulario manual
- * de {@code GUIQuestions}. Solo conoce {@link QuestionMicrokernel} — no
+ * de {@code GUIQuestions}. Solo conoce {@link QuestionMicrokernel}, no
  * sabe qué plugins existen ni cómo se cargan (Reflexión, patrón
  * Microkernel).
  */
@@ -61,7 +61,7 @@ public class GUIMicrokernel extends JFrame {
         setLayout(new BorderLayout(12, 12));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel rol = new JLabel("Rol: Autor de preguntas — vía plugin (Taller 5)");
+        JLabel rol = new JLabel("Rol: Autor de preguntas, vía plugin (Taller 5)");
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 

@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 /**
  * Prueba el núcleo con los plugins reales, cargados por Reflexión desde el
  * {@code plugins.properties} de {@code src/main/resources} (Maven lo pone
- * también en el classpath de pruebas) — así se verifica el registro y
+ * también en el classpath de pruebas), así se verifica el registro y
  * carga dinámica de verdad, no un doble de prueba.
  */
 @ExtendWith(MockitoExtension.class)

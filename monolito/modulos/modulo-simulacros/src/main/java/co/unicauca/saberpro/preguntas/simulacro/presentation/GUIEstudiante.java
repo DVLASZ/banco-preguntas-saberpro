@@ -16,7 +16,7 @@ import java.awt.event.WindowEvent;
  * Ventana del rol <b>Estudiante</b>: elige un simulacro disponible y lo
  * presenta dentro de su tiempo máximo (HU-13, RF-23), con calificación
  * automática al finalizar (HU-14, RF-24). Solo conoce
- * {@link SimulacroService} — no sabe cómo se generó el simulacro ni cómo
+ * {@link SimulacroService}, no sabe cómo se generó el simulacro ni cómo
  * se persisten los intentos (DIP).
  */
 public class GUIEstudiante extends JFrame {

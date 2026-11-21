@@ -10,7 +10,7 @@ import java.awt.*;
 /**
  * Pantalla inicial de la aplicacion (RF-02): autenticacion por usuario y
  * contrasena. Al autenticar con exito, delega en {@link SesionRouter} cual
- * ventana abrir segun el rol del usuario — este frame no conoce ni
+ * ventana abrir segun el rol del usuario, este frame no conoce ni
  * {@code GUIQuestions} ni {@code GUIRevisor} ni ninguna otra vista concreta
  * del modulo de preguntas, solo la abstraccion del router (DIP).
  */
@@ -74,7 +74,7 @@ public class LoginFrame extends JFrame {
             // login no se necesita más en esta sesión. Si se dejara abierta
             // (aunque fuera detrás de la otra ventana) y el usuario la cerrara,
             // al tener EXIT_ON_CLOSE terminaría toda la aplicación aunque la
-            // ventana de su rol siguiera abierta — se descarta para evitarlo.
+            // ventana de su rol siguiera abierta, se descarta para evitarlo.
             dispose();
         } catch (AuthenticationException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "No fue posible iniciar sesion",

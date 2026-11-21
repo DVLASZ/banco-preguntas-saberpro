@@ -18,7 +18,7 @@
     <description>
         Gestion del banco de preguntas: redaccion, ciclo de vida RF-14 y
         revision por pares (RF-15/RF-16). Aplica capas + MVC + Observer.
-        No depende de ningun otro modulo del proyecto — es intencional:
+        No depende de ningun otro modulo del proyecto, es intencional:
         el modulo de simulacros depende de este, y no al reves, para no
         crear un ciclo entre modulos.
     </description>

@@ -17,7 +17,7 @@ import java.util.Properties;
  * Núcleo del patrón Microkernel (Taller 5): administra el banco de
  * preguntas en un {@code Map} (tal como pide la guía del taller) y
  * registra/ejecuta dinámicamente los plugins, cargados por
- * <b>Reflexión</b> desde {@code plugins.properties} — igual que el
+ * <b>Reflexión</b> desde {@code plugins.properties}, igual que el
  * ejemplo visto en clase del envío de paquetes a distintos países
  * ({@code DeliveryPluginManager}).
  * <p>

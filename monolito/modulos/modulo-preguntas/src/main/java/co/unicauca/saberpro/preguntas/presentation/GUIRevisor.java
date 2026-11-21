@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Vista (MVC) del rol <b>Revisor</b>: muestra una pregunta ya enviada a
- * revisión y solo permite Aprobarla o Rechazarla (RF-16) — a diferencia del
+ * revisión y solo permite Aprobarla o Rechazarla (RF-16), a diferencia del
  * Autor ({@link GUIQuestions}), no edita el contenido de la pregunta ni
  * tiene un selector de estado libre. Las decisiones las toma el
  * {@link RevisionController}, que las registra en el modelo
@@ -63,7 +63,7 @@ public class GUIRevisor extends JFrame implements RevisionVista {
         setLayout(new BorderLayout(12, 12));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel rol = new JLabel("Rol: Revisor — usuario: " + usuario);
+        JLabel rol = new JLabel("Rol: Revisor, usuario: " + usuario);
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 

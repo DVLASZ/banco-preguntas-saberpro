@@ -15,7 +15,7 @@ import java.awt.*;
  * Ventana del rol <b>Docente</b> (HU-12, RF-21/RF-22): genera un simulacro
  * para un grupo, filtrando por competencia, tema y/o dificultad entre las
  * preguntas ya {@code PUBLICADA}s del banco. Solo conoce
- * {@link SimulacroService} — no sabe si las preguntas o los simulacros
+ * {@link SimulacroService}, no sabe si las preguntas o los simulacros
  * viven en memoria, SQLite o cualquier otra tecnología (DIP).
  */
 public class GUIDocente extends JFrame {

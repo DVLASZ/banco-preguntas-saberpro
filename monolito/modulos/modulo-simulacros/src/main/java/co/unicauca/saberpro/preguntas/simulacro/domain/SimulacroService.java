@@ -16,8 +16,8 @@ import java.util.NoSuchElementException;
  * (HU-12 a HU-14). Depende de {@link QuestionService} (no de
  * {@code QuestionRepository} directamente) para reutilizar su lógica de
  * búsqueda de preguntas publicadas ({@code buscarPublicadas}), y de
- * {@link SimulacroRepository} para persistir simulacros e intentos —
- * ambas son abstracciones, nunca implementaciones concretas (DIP).
+ * {@link SimulacroRepository} para persistir simulacros e intentos.
+ * Ambas son abstracciones, nunca implementaciones concretas (DIP).
  */
 public class SimulacroService {
 

@@ -46,7 +46,7 @@ import java.util.function.Function;
 /**
  * Composition root de la aplicación fusionada Taller 2 (usuarios/login) +
  * Taller 4 (capas/MVC/Observer sobre Gestión de Preguntas): arma ambos
- * módulos, registra las vistas observadoras y — la pieza que los une —
+ * módulos, registra las vistas observadoras y
  * define el {@code SesionRouter} que, tras un login exitoso, abre la
  * ventana Swing correspondiente al rol autenticado.
  */
@@ -70,7 +70,7 @@ public class MainApp {
 
             // Las vistas de estadísticas y gráfica son un reporte agregado de
             // todo el banco de preguntas (HU-17): eso es competencia del
-            // Administrador, no de todos los roles — por eso se crean y se
+            // Administrador, no de todos los roles, por eso se crean y se
             // suscriben como observadoras desde ya (para que no se pierdan
             // notificaciones mientras están cerradas), pero no se muestran
             // automaticamente al iniciar sesion: el Administrador las abre
@@ -110,7 +110,7 @@ public class MainApp {
                 case ADMINISTRADOR -> {
                     // Que hace cada opcion del tablero (RF-17): "Asignar revisores"
                     // (HU-04) y "Ver reportes y estadisticas" tienen vista propia,
-                    // pero ninguna se abre sola — solo al pedirla el Administrador
+                    // pero ninguna se abre sola, solo al pedirla el Administrador
                     // (ver DashboardFrame); las demas opciones avisan que aun no
                     // tienen vista propia.
                     GUIAsignacionRevisores vistaAsignacion =

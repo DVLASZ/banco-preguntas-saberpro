@@ -33,7 +33,7 @@ public class GUIQuestions extends JFrame implements RedaccionPreguntaVista {
     private static final Color GRIS_TEXTO = new Color(0x475569);
     private static final Color FONDO_CAMPO = new Color(0xF1F5F9);
     private static final Color ROJO_ERROR = new Color(0xDC2626);
-    private static final String SIN_SELECCION = "— Seleccione —";
+    private static final String SIN_SELECCION = "Seleccione";
 
     private final QuestionService service;
     private final String usuario;
@@ -102,7 +102,7 @@ public class GUIQuestions extends JFrame implements RedaccionPreguntaVista {
         setLayout(new BorderLayout(12, 12));
         ((JComponent) getContentPane()).setBorder(new EmptyBorder(14, 14, 14, 14));
 
-        JLabel rol = new JLabel("Rol: Autor de preguntas — usuario: " + usuario);
+        JLabel rol = new JLabel("Rol: Autor de preguntas, usuario: " + usuario);
         rol.setForeground(GRIS_TEXTO);
         rol.setFont(rol.getFont().deriveFont(Font.ITALIC, 12f));
 
@@ -328,7 +328,7 @@ public class GUIQuestions extends JFrame implements RedaccionPreguntaVista {
         StringBuilder mensaje = new StringBuilder("La pregunta no cumple la validación estructural.\n"
                 + "Corrija los campos resaltados en rojo:\n");
         for (Violacion violacion : violaciones) {
-            mensaje.append("\n  • ").append(violacion.mensaje());
+            mensaje.append("\n  - ").append(violacion.mensaje());
         }
         JOptionPane.showMessageDialog(this, mensaje.toString(), "No se pudo guardar la pregunta",
                 JOptionPane.ERROR_MESSAGE);

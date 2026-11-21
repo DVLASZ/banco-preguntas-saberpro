@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Contrato de persistencia de simulacros e intentos. El dominio depende
  * de esta abstracción, nunca de una implementación concreta (Inversión
- * de Dependencias) — igual que {@code QuestionRepository}.
+ * de Dependencias), igual que {@code QuestionRepository}.
  */
 public interface SimulacroRepository {
 

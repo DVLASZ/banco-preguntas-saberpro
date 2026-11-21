@@ -17,7 +17,7 @@ import java.util.Map;
  * autenticado y se obtienen a traves de {@link MenuProviderRegistry}, sin
  * que esta clase necesite saber cuantos roles existen ni como se arma cada
  * menu (OCP). Autor de preguntas y Revisor ya tienen su propia ventana
- * ({@code GUIQuestions}, {@code GUIRevisor}) y no pasan por aqui — ver
+ * ({@code GUIQuestions}, {@code GUIRevisor}) y no pasan por aqui, ver
  * {@link SesionRouter}.
  *
  * <p>Cada opcion puede tener asociada una accion (por ejemplo, abrir una
@@ -38,7 +38,7 @@ public class DashboardFrame extends JFrame {
         setLayout(new BorderLayout(10, 10));
 
         JLabel welcomeLabel = new JLabel(
-                "Bienvenido(a), " + user.getFullName() + "  —  Rol: " + user.getRole().getDisplayName());
+                "Bienvenido(a), " + user.getFullName() + ", Rol: " + user.getRole().getDisplayName());
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
         add(welcomeLabel, BorderLayout.NORTH);
 

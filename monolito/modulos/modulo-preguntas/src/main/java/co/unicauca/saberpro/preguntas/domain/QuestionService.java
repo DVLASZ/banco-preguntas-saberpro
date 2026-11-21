@@ -112,7 +112,7 @@ public class QuestionService implements Subject {
      * Registra una pregunta ya construida por fuera del servicio (Taller 5:
      * los plugins de {@code QuestionMicrokernel} generan la {@link Question}
      * ellos mismos, tras pasar su propio pipeline de validación) y notifica
-     * a los observadores — así una pregunta generada por un plugin también
+     * a los observadores, así una pregunta generada por un plugin también
      * aparece de inmediato en las vistas de estadísticas y gráfica.
      */
     public void registrarPreguntaGenerada(Question pregunta) {
