@@ -4,15 +4,15 @@ Convierte lo que ocurre en la revisión en avisos de la bandeja de cada usuario 
 
 | | |
 |---|---|
-| **Puerto** | 8084 (`NOTIFICATION_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `notification_db` (puerto 5436 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/notification-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-notification-service.json`](../../../docs/corte-2/api/openapi/openapi-notification-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/notification-service.postman_collection.json) |
-| **Pruebas** | 85 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8084 (`NOTIFICATION_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `notification_db` (puerto 5436 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/notification-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | [`openapi-notification-service.json`](../../../docs/corte-2/api/openapi/openapi-notification-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/notification-service.postman_collection.json) |
+| Pruebas | 85 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Notificaciones**. Escucha los eventos de preguntas y revisión y crea el aviso que corresponde al autor, al administrador y a los revisores. **No envía correos**: publica `notification.created` y `email-service` se encarga.
+Es el contexto de Notificaciones. Escucha los eventos de preguntas y revisión y crea el aviso que corresponde al autor, al administrador y a los revisores. No envía correos: publica `notification.created` y `email-service` se encarga.
 
 ## Reglas de negocio
 
@@ -33,13 +33,13 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ## Mensajería (RabbitMQ)
 
-**Publica** (con Outbox transaccional, en el exchange `bancopreguntas.events`):
+Publica (con Outbox transaccional, en el exchange `bancopreguntas.events`):
 
 | Evento | Cuándo | Quién lo consume |
 |---|---|---|
 | `notification.created` | Se crea un aviso en la bandeja de un usuario | email |
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -67,7 +67,7 @@ src/main/java/co/unicauca/bancopreguntas/notification/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Factory Method (`CreadorDeAviso` y sus creadores), Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Factory Method (`CreadorDeAviso` y sus creadores), Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

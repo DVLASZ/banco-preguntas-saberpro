@@ -1,32 +1,32 @@
 # api-gateway · Entrada única
 
-Puerta de entrada de todas las peticiones de la aplicación web: **valida el token de Keycloak**, comprueba el rol que exige cada ruta
+Puerta de entrada de todas las peticiones de la aplicación web: valida el token de Keycloak, comprueba el rol que exige cada ruta
 y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gateway y Resilience4J.
 
 | | |
 |---|---|
-| **Puerto** | 8080 (`GATEWAY_PORT`) |
-| **Descubrimiento** | Eureka: reparte entre las réplicas de cada servicio con `lb://<servicio>` |
-| **Swagger agregado** | `http://localhost:8080/swagger-ui.html` (un solo Swagger para todos los servicios) |
-| **Pruebas** | 25 |
+| Puerto | 8080 (`GATEWAY_PORT`) |
+| Descubrimiento | Eureka: reparte entre las réplicas de cada servicio con `lb://<servicio>` |
+| Swagger agregado | `http://localhost:8080/swagger-ui.html` (un solo Swagger para todos los servicios) |
+| Pruebas | 25 |
 
 ## Qué hace
 
-1. **Autenticación.** Valida la firma y el emisor del JWT con las claves públicas de Keycloak (`KEYCLOAK_JWK_SET_URI`,
+1. Autenticación. Valida la firma y el emisor del JWT con las claves públicas de Keycloak (`KEYCLOAK_JWK_SET_URI`,
    `KEYCLOAK_ISSUER_URI`). Sin token válido responde 401.
-2. **Autorización por rol** (primera barrera, `RoleRules`). Cada servicio vuelve a comprobar el rol de cada operación, así que un
+2. Autorización por rol (primera barrera, `RoleRules`). Cada servicio vuelve a comprobar el rol de cada operación, así que un
    fallo del gateway no abre nada. Gana la primera regla que coincide; por eso van primero las más específicas.
-3. **Enrutamiento.** Cada servicio atiende sus caminos `/api/...` y publica su OpenAPI en `/docs/<servicio>/v3/api-docs`. Las
+3. Enrutamiento. Cada servicio atiende sus caminos `/api/...` y publica su OpenAPI en `/docs/<servicio>/v3/api-docs`. Las
    rutas de `/api/reviews` las reparten dos servicios: las de asignación (`config`, `pending-assignment`, `assigned`,
    `*/assignments`) van a `assignment-service` y el resto, a `evaluation-service`; por eso el orden de las rutas importa.
-   `validation-service` y `lifecycle-service` son internos: **no tienen rutas** (solo se publica su documentación).
-4. **Resiliencia.** Cada ruta tiene un circuit breaker (si el servicio no responde, contesta 503 de inmediato con el mensaje de
+   `validation-service` y `lifecycle-service` son internos: no tienen rutas (solo se publica su documentación).
+4. Resiliencia. Cada ruta tiene un circuit breaker (si el servicio no responde, contesta 503 de inmediato con el mensaje de
    `FallbackController` en lugar de dejar esperando), un bulkhead que limita las llamadas simultáneas y reintentos de las consultas
    GET cuando una réplica falla. El circuit breaker va por fuera y el reintento por dentro.
-5. **Trazabilidad y seguridad de las cabeceras.** `RequestIdFilter` da a cada petición un identificador `X-Request-Id` (el que traiga o
-   uno nuevo), lo envía al servicio y lo devuelve en la respuesta; también **descarta** las cabeceras `X-User-Id` y `X-User-Roles` que un
+5. Trazabilidad y seguridad de las cabeceras. `RequestIdFilter` da a cada petición un identificador `X-Request-Id` (el que traiga o
+   uno nuevo), lo envía al servicio y lo devuelve en la respuesta; también descarta las cabeceras `X-User-Id` y `X-User-Roles` que un
    cliente intente enviar, que solo valen entre servicios.
-6. **CORS.** Solo los orígenes de `GATEWAY_ALLOWED_ORIGINS`.
+6. CORS. Solo los orígenes de `GATEWAY_ALLOWED_ORIGINS`.
 
 ## Quién puede qué
 
@@ -34,8 +34,8 @@ y reenvía la petición al servicio correcto. Está hecho con Spring Cloud Gatew
 |---|---|
 | `GET /api/users/me` | Cualquier rol |
 | `/api/users/**` | `ADMIN` |
-| `GET /api/audit/**` (audit-service), `GET /api/emails/**` (email-service) | `ADMIN` |
-| `/api/history/**`, `/api/notifications/**` | `ADMIN`, `AUTHOR`, `REVIEWER` |
+| `GET /api/audit/` (audit-service), `GET /api/emails/` (email-service) | `ADMIN` |
+| `/api/history/`, `/api/notifications/` | `ADMIN`, `AUTHOR`, `REVIEWER` |
 | `POST /api/reviews/*/assignments`, `GET /api/reviews/pending-assignment` | `ADMIN` |
 | `GET /api/reviews/assigned`, `POST /api/reviews/*/evaluations` | `REVIEWER` |
 | `GET /api/reviews/**` | `ADMIN`, `AUTHOR`, `REVIEWER` |

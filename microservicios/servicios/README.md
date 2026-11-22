@@ -1,9 +1,9 @@
 # Servicios de negocio
 
-Cada carpeta es un microservicio **pequeño y con una sola responsabilidad**, con su propia base de datos (PostgreSQL, salvo
-`validation-service`, que no guarda nada), su propia imagen de Docker y su propio Swagger. Son **diez servicios**.
+Cada carpeta es un microservicio pequeño y con una sola responsabilidad, con su propia base de datos (PostgreSQL, salvo
+`validation-service`, que no guarda nada), su propia imagen de Docker y su propio Swagger. Son diez servicios.
 
-La mayor parte de la comunicación es por **eventos en RabbitMQ** (cada servicio publica con Outbox y escucha lo que le interesa). Hay solo
+La mayor parte de la comunicación es por eventos en RabbitMQ (cada servicio publica con Outbox y escucha lo que le interesa). Hay solo
 dos llamadas REST síncronas entre servicios, todas con la identidad de quien hizo la petición (la propaga `bp-platform`) para que el
 servicio llamado vuelva a comprobar el rol:
 
@@ -12,7 +12,7 @@ servicio llamado vuelva a comprobar el rol:
 | `question-service` | `validation-service` | Revisar la estructura del contenido al crear, modificar y enviar a revisión |
 | `question-service` | `lifecycle-service` | Registrar la pregunta y pedir las transiciones (enviar, reabrir, publicar) y el historial de estados |
 
-`validation-service` y `lifecycle-service` son **internos**: el gateway no tiene rutas hacia ellos.
+`validation-service` y `lifecycle-service` son internos: el gateway no tiene rutas hacia ellos.
 
 | Servicio | Función | Puerto |
 |---|---|---|

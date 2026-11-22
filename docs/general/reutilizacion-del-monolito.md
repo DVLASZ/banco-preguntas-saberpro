@@ -5,14 +5,14 @@
 
 ## Principio
 
-El monolito **no se descarta**: ya tiene el dominio, las reglas de negocio y las pruebas validadas en el corte 1.
-La migración consiste en **trasladar** ese código a servicios con su propia base de datos y a un frontend web, y en
+El monolito no se descarta: ya tiene el dominio, las reglas de negocio y las pruebas validadas en el corte 1.
+La migración consiste en trasladar ese código a servicios con su propia base de datos y a un frontend web, y en
 cambiar solo lo que cambia con la arquitectura: las llamadas directas entre módulos pasan a ser eventos o
 llamadas de red, y la interfaz Swing pasa a ser una aplicación web. La lógica de dominio se conserva.
 
 El monolito sigue disponible de dos formas:
 
-- La rama **`corte-1`** guarda el estado entregado del primer corte y no se modifica.
+- La rama `corte-1` guarda el estado entregado del primer corte y no se modifica.
 - Los módulos Maven de la carpeta [`monolito/`](../../monolito/README.md) (`modulo-*` y `app`) siguen en el repositorio y la aplicación de escritorio sigue
   ejecutándose con `MainApp`. Sirve como referencia viva y para demostrar el corte 1.
 
@@ -30,16 +30,16 @@ El monolito sigue disponible de dos formas:
 
 ## Cómo se hace la migración
 
-1. **Copiar, no mover.** El código de dominio se copia al servicio nuevo y el módulo original queda intacto. Así el
+1. Copiar, no mover. El código de dominio se copia al servicio nuevo y el módulo original queda intacto. Así el
    monolito sigue compilando y las pruebas del corte 1 siguen pasando.
-2. **Conservar las pruebas.** Las pruebas de dominio del monolito se trasladan junto con el código; si pasan en el
+2. Conservar las pruebas. Las pruebas de dominio del monolito se trasladan junto con el código; si pasan en el
    servicio nuevo, la migración no cambió el comportamiento.
-3. **Sustituir los puertos.** Los repositorios y notificadores ya son interfaces; el servicio nuevo implementa los
+3. Sustituir los puertos. Los repositorios y notificadores ya son interfaces; el servicio nuevo implementa los
    mismos puertos con adaptadores nuevos (JPA, RabbitMQ).
-4. **Reemplazar las llamadas directas por eventos.** Donde un módulo llamaba a otro (por ejemplo, revisión leyendo
+4. Reemplazar las llamadas directas por eventos. Donde un módulo llamaba a otro (por ejemplo, revisión leyendo
    preguntas pendientes) el servicio publica o consume un evento del catálogo de
    [contextos y eventos](../corte-2/02-contextos-y-eventos.md).
-5. **Un servicio a la vez.** Se empieza por `question-service`, que es la base; después revisión, notificaciones y
+5. Un servicio a la vez. Se empieza por `question-service`, que es la base; después revisión, notificaciones y
    usuarios, y por último el gateway y el frontend.
 
 ## Convivencia en el repositorio y en el IDE

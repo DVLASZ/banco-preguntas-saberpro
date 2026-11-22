@@ -1,6 +1,6 @@
 # Contrato de los eventos
 
-[`eventos.schema.json`](eventos.schema.json) describe, en JSON Schema, el sobre común y los **diez eventos** que se intercambian los
+[`eventos.schema.json`](eventos.schema.json) describe, en JSON Schema, el sobre común y los diez eventos que se intercambian los
 servicios por RabbitMQ (exchange *topic* `bancopreguntas.events`; la routing key es el tipo del evento).
 
 | Evento | Lo publica | Lo consumen |
@@ -17,8 +17,8 @@ servicios por RabbitMQ (exchange *topic* `bancopreguntas.events`; la routing key
 | `auth.login-failed` | user-service | audit |
 
 El sobre es `{eventId, type, occurredAt, data}`. Los consumidores descartan un evento repetido por su `eventId`. Todos los servicios que
-publican lo hacen por el patrón **Outbox**: el evento se guarda en la misma transacción que el cambio y un relevo lo envía al broker.
+publican lo hacen por el patrón Outbox: el evento se guarda en la misma transacción que el cambio y un relevo lo envía al broker.
 `validation-service` no publica ni escucha eventos.
 
-Los cambios de esta versión sobre los eventos anteriores solo **agregan** campos (`sequence` y `version` en `question.state-changed`;
+Los cambios de esta versión sobre los eventos anteriores solo agregan campos (`sequence` y `version` en `question.state-changed`;
 `questionVersion`, `title` y `competency` en `review.reviewers-assigned`), así que los consumidores existentes siguen funcionando.

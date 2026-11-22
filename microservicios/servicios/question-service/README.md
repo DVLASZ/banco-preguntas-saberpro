@@ -4,19 +4,19 @@ Dueño del contenido de las preguntas: el autor las redacta, las modifica mientr
 
 | | |
 |---|---|
-| **Puerto** | 8082 (`QUESTION_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `question_db` (puerto 5434 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/question-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-question-service.json`](../../../docs/corte-2/api/openapi/openapi-question-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/question-service.postman_collection.json) |
-| **Pruebas** | 141 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8082 (`QUESTION_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `question_db` (puerto 5434 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/question-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | [`openapi-question-service.json`](../../../docs/corte-2/api/openapi/openapi-question-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/question-service.postman_collection.json) |
+| Pruebas | 141 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Gestión de Preguntas** (HU-01, HU-02, HU-03 y la publicación de HU-07). Guarda la pregunta con su contexto, enunciado, cuatro opciones, justificación, bibliografía y clasificación (competencia, tema, subtema y dificultad) y su versión. **No decide el estado**: guarda una copia (con el número del último cambio aplicado) que mantiene al día con lo que le informa `lifecycle-service`, para poder listar y filtrar por estado y saber si la pregunta todavía se puede editar.
+Es el contexto de Gestión de Preguntas (HU-01, HU-02, HU-03 y la publicación de HU-07). Guarda la pregunta con su contexto, enunciado, cuatro opciones, justificación, bibliografía y clasificación (competencia, tema, subtema y dificultad) y su versión. No decide el estado: guarda una copia (con el número del último cambio aplicado) que mantiene al día con lo que le informa `lifecycle-service`, para poder listar y filtrar por estado y saber si la pregunta todavía se puede editar.
 
 ## Reglas de negocio
 
-- Solo se modifica una pregunta en **Borrador** y solo su autor (RF-06); fuera de ese estado se responde 409.
+- Solo se modifica una pregunta en Borrador y solo su autor (RF-06); fuera de ese estado se responde 409.
 - Al crear, modificar y enviar a revisión se pide la validación estructural a `validation-service`, que reúne todas las violaciones para que el autor corrija todo de una vez (400 con el detalle).
 - Crear registra la pregunta en `lifecycle-service`; enviar, reabrir y publicar piden la transición a ese servicio, que es quien la autoriza, la anota en el historial y publica los eventos. Lo que ese servicio rechaza (403, 404, 409) vuelve igual al cliente.
 - La copia del estado se actualiza con la respuesta de la transición y con `question.state-changed`; un aviso repetido o atrasado se ignora gracias al número de secuencia.
@@ -48,9 +48,9 @@ Son llamadas REST síncronas con la identidad de quien hizo la petición (la pro
 
 ## Mensajería (RabbitMQ)
 
-**Publica:** nada; es un consumidor puro.
+Publica: nada; es un consumidor puro.
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -76,7 +76,7 @@ src/main/java/co/unicauca/bancopreguntas/question/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Builder (`Question`), Adapter (puertos de validación, ciclo de vida y persistencia) y Facade (`QuestionApplicationService`). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Builder (`Question`), Adapter (puertos de validación, ciclo de vida y persistencia) y Facade (`QuestionApplicationService`). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

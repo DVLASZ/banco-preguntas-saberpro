@@ -11,9 +11,9 @@ historia nueva del tercer corte (el autor consulta el historial de revisiones). 
 | HU-01 Crear pregunta | Autor | HE-01 | Se migra a `question-service` |
 | HU-02 Enviar a revisión | Autor | HE-01 | Publica el evento `question.submitted` |
 | HU-03 Listar preguntas | Autor | HE-01 | Se migra; mantiene filtros y paginación |
-| HU-04 Asignar revisores | Administrador | HE-02 | **Ajuste:** entre 1 y 3 revisores, con notificación por correo |
-| HU-05 Evaluar preguntas | Revisor | HE-04 | **Nueva** |
-| HU-06 Historial de revisiones | Autor | HE-04 | **Adelantada** del tercer corte |
+| HU-04 Asignar revisores | Administrador | HE-02 | Ajuste: entre 1 y 3 revisores, con notificación por correo |
+| HU-05 Evaluar preguntas | Revisor | HE-04 | Nueva |
+| HU-06 Historial de revisiones | Autor | HE-04 | Adelantada del tercer corte |
 
 ## HU-01 · Crear pregunta de selección múltiple
 
@@ -28,7 +28,7 @@ Criterios de aceptación (sin cambios respecto al primer corte):
    exactamente cuatro distractores, una única respuesta correcta, sin "todas/ninguna de las anteriores"
    y distractores con longitud y estructura razonables.
 3. Si la validación falla, no se guarda y se informan las violaciones.
-4. Al guardar, la pregunta queda en estado **Borrador**.
+4. Al guardar, la pregunta queda en estado Borrador.
 
 ## HU-02 · Enviar a revisión
 
@@ -39,7 +39,7 @@ administrador les asigne revisores. Los estados se muestran con colores.
 2. El envío pide confirmación ("¿Enviar la pregunta a revisión? Después de enviarla no podrás editarla.") y deja
    la pregunta en "Pendiente de revisión".
 3. El cambio queda registrado en el historial de estados.
-4. **Nuevo:** `lifecycle-service` publica el evento `question.submitted` para que `assignment-service` y `evaluation-service` la tengan disponible.
+4. Nuevo: `lifecycle-service` publica el evento `question.submitted` para que `assignment-service` y `evaluation-service` la tengan disponible.
 
 ## HU-03 · Listar preguntas creadas
 
@@ -72,7 +72,7 @@ y cambiar el estado a Aprobada o Rechazada.
    observaciones.
 3. Las observaciones de todos los revisores de la misma pregunta son visibles entre ellos, para llegar a
    un consenso. No hay puntaje rígido; se aplica el criterio libre del comité.
-4. La pregunta se aprueba solo si **todos** los revisores asignados aprueban (unanimidad). Con un solo
+4. La pregunta se aprueba solo si todos los revisores asignados aprueban (unanimidad). Con un solo
    rechazo la ronda se cierra y la pregunta queda en estado Rechazada (decisión de los docentes, consulta 29); las
    observaciones que lleguen después se guardan marcadas como tardías.
 5. El autor puede leer las observaciones de los revisores en el detalle de su pregunta.

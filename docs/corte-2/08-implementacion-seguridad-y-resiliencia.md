@@ -1,6 +1,6 @@
 # 08 · Implementación: topología, seguridad y resiliencia
 
-Este documento describe **lo que quedó construido** al cierre de la iteración y las decisiones técnicas que
+Este documento describe lo que quedó construido al cierre de la iteración y las decisiones técnicas que
 se tomaron al construirlo. Los documentos 02 y 03 recogen el diseño inicial; donde difieren, manda este.
 
 ## Topología desplegada
@@ -56,11 +56,11 @@ Réplicas: `docker compose up -d --scale question-service=3 --scale api-gateway=
 
 ## Seguridad
 
-**Autenticación.** Keycloak 26. El navegador inicia sesión con *Authorization Code + PKCE* y envía el JWT al
+Autenticación. Keycloak 26. El navegador inicia sesión con *Authorization Code + PKCE* y envía el JWT al
 gateway. Cada servicio vuelve a validar la firma (clave pública de Keycloak, `jwk-set-uri` interno) y el
 emisor (`issuer-uri`), de modo que no depende de que el gateway sea el único camino.
 
-**Autorización redundante.** El gateway aplica una tabla de reglas (`RoleRules`: método y camino, con los roles que pueden usarlo) y, también,
+Autorización redundante. El gateway aplica una tabla de reglas (`RoleRules`: método y camino, con los roles que pueden usarlo) y, también,
 cada controlador exige el rol de su operación (`requireAnyRole`). Un error en una barrera no abre la operación.
 
 | Rol | Puede |
@@ -69,49 +69,49 @@ cada controlador exige el rol de su operación (`requireAnyRole`). Un error en u
 | `REVIEWER` | Ver las preguntas asignadas y enviar evaluaciones |
 | `ADMIN` | Ver todas las preguntas, asignar revisores, publicar, listar usuarios, ver auditoría y correos |
 
-**Anti-suplantación.** En modo `jwt` las cabeceras `X-User-Id` y `X-User-Roles` se ignoran en los servicios y el
+Anti-suplantación. En modo `jwt` las cabeceras `X-User-Id` y `X-User-Roles` se ignoran en los servicios y el
 gateway las elimina de la petición entrante. El modo `headers` existe solo para pruebas y desarrollo; el
 compose arranca en `jwt` por defecto (`SECURITY_MODE`).
 
-**Auditoría de accesos.** Keycloak registra los eventos de inicio de sesión (correctos y fallidos); `user-service`
+Auditoría de accesos. Keycloak registra los eventos de inicio de sesión (correctos y fallidos); `user-service`
 los consulta periódicamente y publica `auth.login-succeeded` / `auth.login-failed`, que `audit-service`
 guarda. Un administrador los ve en la pantalla de auditoría.
 
-**Identidad entre servicios.** Las dos llamadas REST entre servicios (de question a validation y de question a lifecycle) pasan la identidad de quien hizo la petición: `bp-platform` copia el token (`Authorization`) y las
+Identidad entre servicios. Las dos llamadas REST entre servicios (de question a validation y de question a lifecycle) pasan la identidad de quien hizo la petición: `bp-platform` copia el token (`Authorization`) y las
 cabeceras de identidad al `RestClient`, así que el servicio llamado vuelve a validar el token y a exigir el rol, y nadie gana
 permisos por pasar por un servicio intermedio. El gateway no tiene rutas hacia validation ni lifecycle. Solo se manda el token a servicios internos (nombres sin puntos), nunca a un servidor externo.
 
-**Cuenta de servicio.** `user-service` habla con la API de administración de Keycloak con un cliente de
+Cuenta de servicio. `user-service` habla con la API de administración de Keycloak con un cliente de
 credenciales propio (`client credentials`), sin usuario ni contraseña de persona.
 
-**Secretos.** Los valores de desarrollo van en `.env` (no se versiona; ver `.env.example`). El realm de
+Secretos. Los valores de desarrollo van en `.env` (no se versiona; ver `.env.example`). El realm de
 prueba trae usuarios de ejemplo solo para el entorno local.
 
 ## Resiliencia
 
 | Mecanismo | Dónde | Qué evita |
 |---|---|---|
-| **Circuit breaker** (Resilience4J) | Una por ruta del gateway | Esperar a un servicio caído: tras 50 % de fallos en 20 llamadas, responde `503` de inmediato con un mensaje en español y prueba de nuevo a los 10 s |
-| **Reintento** | Gateway, solo `GET`, 2 veces con espera creciente | Fallos momentáneos de una réplica. Va *dentro* del circuit breaker; al revés actuaría sobre una respuesta ya enviada |
-| **Bulkhead** | Gateway, 1000 llamadas simultáneas por servicio | Que un servicio lento acumule peticiones sin límite. El valor por defecto (25) rechazaba llamadas sanas bajo carga |
-| **Límite de tiempo** | Gateway, 10 s | Peticiones colgadas |
-| **Balanceo con reintento** | `edge` | Una réplica del gateway caída: nginx prueba otra |
-| **Outbox** | lifecycle, assignment, evaluation, notification y user | Perder un evento cuando RabbitMQ está caído (ver abajo) |
-| **Reintento del consumidor + cola de mensajes muertos** | Todos los consumidores | Perder o bloquear la cola por un mensaje que falla |
-| **Consumidores idempotentes** | Todos | Efectos dobles si un evento llega repetido (`processed_event`) |
+| Circuit breaker (Resilience4J) | Una por ruta del gateway | Esperar a un servicio caído: tras 50 % de fallos en 20 llamadas, responde `503` de inmediato con un mensaje en español y prueba de nuevo a los 10 s |
+| Reintento | Gateway, solo `GET`, 2 veces con espera creciente | Fallos momentáneos de una réplica. Va *dentro* del circuit breaker; al revés actuaría sobre una respuesta ya enviada |
+| Bulkhead | Gateway, 1000 llamadas simultáneas por servicio | Que un servicio lento acumule peticiones sin límite. El valor por defecto (25) rechazaba llamadas sanas bajo carga |
+| Límite de tiempo | Gateway, 10 s | Peticiones colgadas |
+| Balanceo con reintento | `edge` | Una réplica del gateway caída: nginx prueba otra |
+| Outbox | lifecycle, assignment, evaluation, notification y user | Perder un evento cuando RabbitMQ está caído (ver abajo) |
+| Reintento del consumidor + cola de mensajes muertos | Todos los consumidores | Perder o bloquear la cola por un mensaje que falla |
+| Consumidores idempotentes | Todos | Efectos dobles si un evento llega repetido (`processed_event`) |
 
 ### Patrón Outbox
 
 Problema: publicar el evento *después* del commit puede fallar (RabbitMQ caído), y entonces el cambio queda
 guardado pero nadie se entera; publicarlo *antes* puede avisar de algo que luego se deshace.
 
-Solución: el evento se inserta en la tabla `outbox_event` **en la misma transacción** que el cambio de negocio.
+Solución: el evento se inserta en la tabla `outbox_event` en la misma transacción que el cambio de negocio.
 Un relevo (`OutboxRelay`) lee los pendientes cada 0,5 s y los publica en orden; si el broker no responde,
 los deja y reintenta. La entrega es *al menos una vez* y los consumidores son idempotentes, así que el efecto
 neto es *exactamente una vez*.
 
 - `SELECT ... FOR UPDATE SKIP LOCKED`: con varias réplicas del servicio, dos relevos nunca toman el mismo evento.
-- Si el envío falla a mitad de un lote, se detiene para **conservar el orden**.
+- Si el envío falla a mitad de un lote, se detiene para conservar el orden.
 - Los eventos enviados se borran pasadas 24 h; el aviso de "broker caído" se limita a uno cada 30 s en el registro.
 - Se desactiva con `bancopreguntas.events.outbox.enabled=false` (se publica directo tras el commit).
 - Código: `bp-platform/.../events/{EventPublisher, OutboxEventPublisher, OutboxRelay}`; migraciones
@@ -119,7 +119,7 @@ neto es *exactamente una vez*.
   solo escuchan eventos (`question`, `email`, `history` y `audit`) desactivan el Outbox con
   `bancopreguntas.events.outbox.enabled=false`.
 
-**Prueba realizada:** con RabbitMQ detenido, un autor envió una pregunta a revisión. El servicio respondió
+Prueba realizada: con RabbitMQ detenido, un autor envió una pregunta a revisión. El servicio respondió
 `200` (antes del Outbox respondía `503`); los dos eventos (`question.submitted` y `question.state-changed`)
 quedaron pendientes en la tabla; al encender RabbitMQ salieron y el servicio de revisión los procesó. (Prueba hecha cuando el
 sistema tenía 7 servicios; el mecanismo es el mismo de `bp-platform` en los 7 que hoy publican con Outbox.)

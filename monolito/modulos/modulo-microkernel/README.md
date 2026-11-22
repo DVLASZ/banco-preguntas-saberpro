@@ -7,14 +7,14 @@ preguntas sin modificar el núcleo del sistema.
 ## Patrón Microkernel
 
 `QuestionMicrokernel` administra el banco de preguntas y carga los
-plugins dinámicamente **por Reflexión**
+plugins dinámicamente por Reflexión
 (`Class.forName(...).getDeclaredConstructor().newInstance()`), leyendo
 sus nombres de clase desde `src/main/resources/plugins.properties`, el
 mismo mecanismo del ejemplo visto en clase sobre el envío de paquetes a
 distintos países (`DeliveryPluginManager`).
 
 A diferencia del ejemplo del taller (que usa una entidad `Question` de
-juguete), este módulo reutiliza la **`Question` real** de
+juguete), este módulo reutiliza la `Question` real de
 `modulo-preguntas`: cada pregunta generada se registra a través de
 `QuestionService.registrarPreguntaGenerada(...)`, así queda en el mismo
 banco que usan el Autor, el Revisor y el Docente, y el patrón Observer

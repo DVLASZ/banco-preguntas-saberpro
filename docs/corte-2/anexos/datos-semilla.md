@@ -1,11 +1,11 @@
 # Datos semilla para desarrollo y demostración
 
-El docente confirmó que se trabaja solo con **usuarios precargados**. Los usuarios viven en Keycloak: al arrancar,
+El docente confirmó que se trabaja solo con usuarios precargados. Los usuarios viven en Keycloak: al arrancar,
 Keycloak importa el realm `bancopreguntas` desde
 [`microservicios/infraestructura/keycloak/bancopreguntas-realm.json`](../../../microservicios/infraestructura/keycloak/bancopreguntas-realm.json)
 y `user-service` copia sus perfiles a `user_db` para poder listar revisores y asignar (`POST /api/users/sync`, también
 de la sincronización periódica). Las contraseñas no están en la base de los servicios: las guarda Keycloak con hash
-(RNF-08). La clave de los usuarios de demostración está en el archivo del realm y **solo sirve en el entorno local**.
+(RNF-08). La clave de los usuarios de demostración está en el archivo del realm y solo sirve en el entorno local.
 
 ## Usuarios
 

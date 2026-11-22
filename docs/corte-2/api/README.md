@@ -2,7 +2,7 @@
 
 | Carpeta | Contenido |
 |---|---|
-| [`openapi/`](openapi/) | Contrato OpenAPI de cada uno de los **10 servicios**, **exportado de los propios servicios** (prueba `ContratoOpenApiTest`) |
+| [`openapi/`](openapi/) | Contrato OpenAPI de cada uno de los 10 servicios, exportado de los propios servicios (prueba `ContratoOpenApiTest`) |
 | [`eventos/`](eventos/) | Esquema JSON de los diez eventos que se publican en RabbitMQ |
 | [`postman/`](postman/) | Colecciones de Postman por servicio (7, las de los servicios que el gateway expone) y el entorno `SaberPro_Local` |
 
@@ -25,7 +25,7 @@ son una copia de lo que sirve `GET /docs/<servicio>/v3/api-docs` a través del g
 | [`openapi-history-service.json`](openapi/openapi-history-service.json) | `history-service` | `/api/history/questions/{id}`, `/me` |
 | [`openapi-audit-service.json`](openapi/openapi-audit-service.json) | `audit-service` | `/api/audit` |
 
-Los servicios **internos** (`validation-service` y `lifecycle-service`) solo los llaman otros servicios, pasando la
+Los servicios internos (`validation-service` y `lifecycle-service`) solo los llaman otros servicios, pasando la
 identidad de quien hizo la petición; el gateway no tiene rutas hacia ellos (solo publica su documentación).
 
 ## Colecciones de Postman
@@ -55,6 +55,6 @@ servicios internos no existen: se ejercitan a través de `question-service`, que
 
 Por consola: `npx newman run user-service.postman_collection.json -e SaberPro_Local.postman_environment.json`.
 
-> **Estado de la verificación.** Las 7 colecciones se ejecutaron completas con newman contra la pila de Docker el 26 de octubre de
+> Estado de la verificación. Las 7 colecciones se ejecutaron completas con newman contra la pila de Docker el 26 de octubre de
 > 2026: 107 peticiones y 172 verificaciones, sin fallos. Los contratos OpenAPI se regeneraron de los servicios. Las colecciones que
 > preparan una pregunta publicada esperan unos segundos entre pasos porque los eventos viajan por RabbitMQ.

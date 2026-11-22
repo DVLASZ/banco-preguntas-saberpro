@@ -1,7 +1,7 @@
 # Plan de pruebas del segundo corte
 
 La rúbrica pide pruebas unitarias a todas las clases del dominio (entidades y servicios) y el docente confirmó que se
-esperan pruebas unitarias y de integración sobre el dominio. Este documento recoge **qué se prueba y con qué**, tal como
+esperan pruebas unitarias y de integración sobre el dominio. Este documento recoge qué se prueba y con qué, tal como
 quedó construido. Todas las pruebas automatizadas se ejecutan con `./mvnw test` (desde `microservicios/`) y `npm test`
 (desde `frontend/`), sin necesidad de Docker.
 
@@ -39,7 +39,7 @@ quedó construido. Todas las pruebas automatizadas se ejecutan con `./mvnw test`
 | `user-service` | 62 | Perfiles, sincronización con Keycloak (cliente simulado), eventos de acceso, API, persistencia |
 | `api-gateway` | 25 | Rutas de los servicios, 401 y 403 por rol, anti-suplantación, circuit breaker, fallback, CORS y rutas internas sin exponer |
 | `discovery-server` | 3 | Salud y registro de servicios de Eureka |
-| **Backend (sin los servicios del tercer corte)** | **868** | |
+| Backend (sin los servicios del tercer corte) | 868 | |
 | `frontend` (Vitest) | 166 | Formularios y validación, listados, detalle, evaluación, selector de revisores, notificaciones, guardias de rutas, etiquetas y estados |
 
 Cobertura del dominio: todas las clases del dominio de los diez servicios tienen pruebas propias o directas

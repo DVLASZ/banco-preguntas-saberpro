@@ -1,30 +1,30 @@
 # Documento de arquitectura
 
-**Edward Esteban Dávila Salazar**
+Edward Esteban Dávila Salazar
 
-**Laura Isabel Sánchez Fernández**
+Laura Isabel Sánchez Fernández
 
-**Kevin Yesid Castaño Herrera**
+Kevin Yesid Castaño Herrera
 
-**Proyecto 2**
+Proyecto 2
 
-**Ingeniería de Software 2**
+Ingeniería de Software 2
 
-**Profesor:**
+Profesor:
 
-**Wilson Libardo Pantoja Yepez**
+Wilson Libardo Pantoja Yepez
 
-**Universidad del Cauca**
+Universidad del Cauca
 
-**Facultad de Ingeniería Electrónica y Telecomunicaciones**
+Facultad de Ingeniería Electrónica y Telecomunicaciones
 
-**Departamento de Sistemas**
+Departamento de Sistemas
 
-**Ingeniería de Software 2**
+Ingeniería de Software 2
 
-**Popayán, noviembre de 2026**
+Popayán, noviembre de 2026
 
-**DOCUMENTO DE ARQUITECTURA**
+DOCUMENTO DE ARQUITECTURA
 
 Proyecto 2 presentado en el curso de Ingeniería de Software 2
 
@@ -120,7 +120,7 @@ Popayán, 2026
 
 Este documento describe la arquitectura y el diseño de la segunda iteración del Sistema de Banco de Preguntas Saber Pro. En el primer corte el
 sistema era una aplicación de escritorio en Java (Swing) con módulos Maven. En este corte lo rehicimos como una solución distribuida:
-**diez microservicios** con Spring Boot, orientados a eventos, detrás de un API Gateway, con una base de datos PostgreSQL por servicio, RabbitMQ
+diez microservicios con Spring Boot, orientados a eventos, detrás de un API Gateway, con una base de datos PostgreSQL por servicio, RabbitMQ
 como bus de eventos y un frontend web en Angular que solo habla con el gateway por una API REST.
 
 La iteración implementa cinco historias de usuario. Las tres primeras vienen del primer corte (crear una pregunta con validación estructural,
@@ -144,8 +144,8 @@ tiene su historia en el tablero de Jira (Sprint 2). La HU-05 es la historia nuev
 | HU-01 Crear pregunta | Autor | HE-01 | Pasa a `question-service`; la validación estructural la hace `validation-service` |
 | HU-02 Enviar a revisión | Autor | HE-01 | El estado lo lleva `lifecycle-service`, que publica `question.submitted` |
 | HU-03 Listar preguntas | Autor | HE-01 | Pasa a `question-service`; mantiene filtros y paginación |
-| HU-04 Asignar revisores | Administrador | HE-02 | **Ajuste:** entre 1 y 3 revisores, con aviso a los implicados |
-| HU-05 Evaluar preguntas | Revisor | HE-04 | **Nueva** |
+| HU-04 Asignar revisores | Administrador | HE-02 | Ajuste: entre 1 y 3 revisores, con aviso a los implicados |
+| HU-05 Evaluar preguntas | Revisor | HE-04 | Nueva |
 
 Una sexta historia (el autor consulta el historial de revisiones de sus preguntas) es del tercer corte. Ya la tiene `history-service`, pero no
 forma parte de esta entrega y no se evalúa aquí.
@@ -160,7 +160,7 @@ Criterios de aceptación:
 1. La pregunta tiene contexto, pregunta directa, cuatro distractores, respuesta correcta, justificación, bibliografía, competencia, tema, subtema y nivel de dificultad.
 2. Al grabar se aplica la validación estructural: contexto presente, una única pregunta directa, exactamente cuatro opciones distintas, una única respuesta correcta, sin "todas" ni "ninguna de las anteriores" y opciones con longitud y estructura razonables.
 3. Si la validación falla, no se guarda y se informan todas las violaciones juntas.
-4. Al guardar, la pregunta queda en estado **Borrador**.
+4. Al guardar, la pregunta queda en estado Borrador.
 
 ### HU-02 · Enviar a revisión
 
@@ -198,7 +198,7 @@ Como revisor quiero listar las preguntas que me asignó el administrador para le
 1. El revisor ve solo las preguntas que tiene asignadas y pendientes de evaluar.
 2. Puede abrir una pregunta, leerla completa y registrar su decisión (aprobar o rechazar) con observaciones. Rechazar exige una observación.
 3. Los revisores de la misma pregunta ven las observaciones de los demás, para llegar a un consenso. No hay puntaje rígido.
-4. La pregunta se aprueba solo si **todos** los revisores asignados aprueban (unanimidad). Con un solo rechazo la ronda se cierra y la pregunta queda Rechazada. Las observaciones que lleguen después se guardan marcadas como tardías.
+4. La pregunta se aprueba solo si todos los revisores asignados aprueban (unanimidad). Con un solo rechazo la ronda se cierra y la pregunta queda Rechazada. Las observaciones que lleguen después se guardan marcadas como tardías.
 5. El autor lee las observaciones de los revisores en el detalle de su pregunta.
 6. Se notifica a los implicados (bandeja y correo simulado): al revisor, su asignación; al administrador, cada evaluación recibida; al autor, el resultado con las observaciones; y al administrador y a los revisores, el resultado de la revisión.
 7. Nada se borra físicamente: cada ronda y cada evaluación quedan guardadas.
@@ -317,7 +317,7 @@ Cada integrante respondió por servicios completos, y su trabajo queda con su au
 
 | Atributo | Por qué importa en el banco de preguntas | Cómo se atiende |
 |---|---|---|
-| **Escalabilidad** (principal) | Autores, revisores y administradores usan el sistema a la vez, y las consultas de listado pesan más que las escrituras | Servicios sin estado de sesión (el token es autocontenido), una base por servicio, trabajo lento (correo, trazabilidad) fuera de la petición por eventos, y réplicas que se registran solas en Eureka detrás del gateway |
+| Escalabilidad (principal) | Autores, revisores y administradores usan el sistema a la vez, y las consultas de listado pesan más que las escrituras | Servicios sin estado de sesión (el token es autocontenido), una base por servicio, trabajo lento (correo, trazabilidad) fuera de la petición por eventos, y réplicas que se registran solas en Eureka detrás del gateway |
 | Modificabilidad | Las reglas de validación, los estados y las formas de avisar cambian con el uso | Servicios pequeños con una sola responsabilidad, interfaces entre la aplicación y la infraestructura, y patrones de diseño (sección 7) |
 
 ### 4.2 Escenario de calidad de escalabilidad
@@ -362,7 +362,7 @@ Al medir se encontraron y se corrigieron cuatro problemas:
 | Errores por agotamiento de puertos en `edge` | Una conexión nueva por petición hacia el gateway | Upstream con `keepalive` |
 | `edge` descartaba réplicas sanas | Tomaba los `503` del circuit breaker como réplica caída | Solo `error` y `timeout` activan el reintento |
 
-**Sobre las réplicas.** Se comprobó que agregar réplicas funciona: Eureka las descubre, el gateway las reparte y al detener una el sistema
+Sobre las réplicas. Se comprobó que agregar réplicas funciona: Eureka las descubre, el gateway las reparte y al detener una el sistema
 sigue respondiendo sin errores. En esta máquina no mejora el rendimiento, porque todos los contenedores comparten los mismos 16 CPU: más
 réplicas reparten el mismo cómputo y suman cambios de contexto. La escalabilidad horizontal rinde cuando cada réplica tiene recursos propios.
 El diseño (servicios sin estado, una base por servicio, balanceo y descubrimiento) es el que hace posible ese escalado con más hardware.
@@ -557,40 +557,40 @@ en qué clases está y en qué servicio.
 | Comportamiento | Template Method | `ReglaPorOpcion.validar` y las reglas que la extienden | `validation-service` |
 | Comportamiento | Observer | Eventos por RabbitMQ: los servicios publican (`LifecycleEventPublisher`, `AssignmentEventPublisher`, `EvaluationEventPublisher`) y los demás se suscriben con `@RabbitListener` | todos |
 
-**Builder.** Una pregunta tiene más de quince campos. Un constructor con tantos parámetros es ilegible y se presta a errores. `Question.builder()`
+Builder. Una pregunta tiene más de quince campos. Un constructor con tantos parámetros es ilegible y se presta a errores. `Question.builder()`
 arma el objeto campo por campo y valida al construir. `Question` es inmutable: cada cambio de estado devuelve una instancia nueva.
 Pruebas: `QuestionTest`, `QuestionEstadoTest`.
 
-**Factory Method.** Cada evento produce un aviso distinto, con su asunto y su cuerpo. Un `if` por tipo dentro del servicio obligaba a conocer todos los
+Factory Method. Cada evento produce un aviso distinto, con su asunto y su cuerpo. Un `if` por tipo dentro del servicio obligaba a conocer todos los
 textos. `CreadorDeAviso.crear` arma la notificación y declara el método fábrica `crearMensaje`, que cada subclase implementa. El servicio de
 aplicación no conoce ninguna clase concreta. Para un tipo nuevo hace falta una subclase, un valor en `TipoNotificacion` y su registro. Prueba:
 `CreadoresDeAvisoTest`, con una comprobación por cada tipo.
 
-**Adapter.** El dominio y los casos de uso no deben depender de PostgreSQL, de RabbitMQ ni del servidor de correo. Cada servicio declara
+Adapter. El dominio y los casos de uso no deben depender de PostgreSQL, de RabbitMQ ni del servidor de correo. Cada servicio declara
 interfaces en `application/port` y las adapta en `infrastructure`. Si el correo fuera real, solo cambiaría el adaptador. Pruebas: persistencia
 sobre PostgreSQL embebido, mensajería y `ArquitecturaTest`.
 
-**Facade.** El frontend no debe conocer diez servicios, sus direcciones ni sus réplicas. El gateway expone una sola interfaz bajo `/api`,
+Facade. El frontend no debe conocer diez servicios, sus direcciones ni sus réplicas. El gateway expone una sola interfaz bajo `/api`,
 resuelve los servicios por Eureka, valida el JWT, aplica la tabla de roles y protege con circuit breaker, reintentos y bulkhead. Prueba:
 `ApiGatewayTest`.
 
-**Decorator.** Un servidor de correo real falla de vez en cuando y conviene dejar constancia de cada envío, pero eso no es tarea del caso de uso.
+Decorator. Un servidor de correo real falla de vez en cuando y conviene dejar constancia de cada envío, pero eso no es tarea del caso de uso.
 `EmailConReintentos` repite el envío hasta tres veces y `EmailConRegistro` cuenta los envíos correctos y fallidos. Ambos implementan `EmailSender`
 y envuelven a otro `EmailSender`; se apilan en `ApplicationConfig`. Prueba: `DecoradoresDeCorreoTest`.
 
-**Strategy.** Hoy una pregunta se aprueba por unanimidad; mañana podría pedirse mayoría. `PoliticaDeDecision.decidir` es la interfaz y `Unanimidad`
+Strategy. Hoy una pregunta se aprueba por unanimidad; mañana podría pedirse mayoría. `PoliticaDeDecision.decidir` es la interfaz y `Unanimidad`
 la estrategia vigente. `CasoDeEvaluacion` usa la interfaz, no la clase. Pruebas: `UnanimidadTest` y las de `CasoDeEvaluacion`.
 
-**State.** Lo que se puede hacer con una pregunta depende de su estado: solo el borrador se modifica y se envía, solo la aprobada se publica, solo
+State. Lo que se puede hacer con una pregunta depende de su estado: solo el borrador se modifica y se envía, solo la aprobada se publica, solo
 la rechazada se reabre. Esas reglas estaban repartidas en condicionales. Ahora cada estado es una clase que implementa solo las operaciones que
 admite y devuelve el estado siguiente; las demás lanzan `OperacionNoPermitidaException`. Para un estado nuevo hace falta una clase y una línea en
 `FaseDePregunta.de`. Prueba: `FaseDePreguntaTest`.
 
-**Template Method.** Dos reglas de validación recorrían las cuatro opciones con el mismo esqueleto y solo cambiaba lo que se comprueba en cada
+Template Method. Dos reglas de validación recorrían las cuatro opciones con el mismo esqueleto y solo cambiaba lo que se comprueba en cada
 una. `ReglaPorOpcion.validar` es el método plantilla (`final`): recorre las opciones A a D, omite las que descarta el gancho `omitir` y llama al
 paso abstracto `evaluar`, que implementa cada regla. Prueba: `ReglaPorOpcionTest`.
 
-**Observer.** `lifecycle-service` no debe llamar a revisión, notificaciones e historial cada vez que cambia una pregunta. Publica un evento y cada
+Observer. `lifecycle-service` no debe llamar a revisión, notificaciones e historial cada vez que cambia una pregunta. Publica un evento y cada
 interesado tiene su cola y su `@RabbitListener`. Agregar un observador nuevo, como `audit-service`, no cambia al publicador. Pruebas: los
 `EventsListenerTest` de cada servicio y las de Outbox de `bp-platform`.
 
@@ -608,11 +608,11 @@ interesado tiene su cola y su `@RabbitListener`. Agregar un observador nuevo, co
 
 | Principio | Cómo se aplica |
 |---|---|
-| **S** · Responsabilidad única | Cada regla de validación es una clase y `QuestionValidator` solo reúne las violaciones. `EstadoPregunta` identifica el estado y cada clase de fase conoce solo lo que se puede hacer en él. Los servicios de aplicación orquestan casos de uso y no tocan HTTP, SQL ni RabbitMQ; los controladores solo traducen HTTP |
-| **O** · Abierto/cerrado | Una regla de validación nueva es una clase que implementa `ValidationRule`. Un tipo de aviso nuevo es una subclase de `CreadorDeAviso`. Una forma distinta de decidir una ronda es otra `PoliticaDeDecision`. Un estado nuevo es otra `FaseDePregunta`. Una ruta protegida nueva es una línea en `RoleRules`. En ningún caso se toca el código que ya existe |
-| **L** · Sustitución de Liskov | `Unanimidad` cumple el contrato de `PoliticaDeDecision`; los creadores de aviso se prueban todos a través de la clase base con el mismo contrato; `SimulatedEmailSender` y el doble `RecordingEmailSender` sustituyen a cualquier `EmailSender` |
-| **I** · Segregación de interfaces | Las interfaces son pequeñas: `EmailSender` tiene un solo método, `ProcessedEvents` solo `registrarSiEsNuevo`, y `QuestionInfoRepository` está separada de `NotificationRepository` |
-| **D** · Inversión de dependencias | Los casos de uso reciben sus interfaces, el reloj y el generador de identificadores por constructor, y `ApplicationConfig` los arma con los adaptadores. Por eso las pruebas usan dobles en memoria y reloj manual. `ArquitecturaTest` falla si el dominio depende de Spring, JPA o de otras capas |
+| S · Responsabilidad única | Cada regla de validación es una clase y `QuestionValidator` solo reúne las violaciones. `EstadoPregunta` identifica el estado y cada clase de fase conoce solo lo que se puede hacer en él. Los servicios de aplicación orquestan casos de uso y no tocan HTTP, SQL ni RabbitMQ; los controladores solo traducen HTTP |
+| O · Abierto/cerrado | Una regla de validación nueva es una clase que implementa `ValidationRule`. Un tipo de aviso nuevo es una subclase de `CreadorDeAviso`. Una forma distinta de decidir una ronda es otra `PoliticaDeDecision`. Un estado nuevo es otra `FaseDePregunta`. Una ruta protegida nueva es una línea en `RoleRules`. En ningún caso se toca el código que ya existe |
+| L · Sustitución de Liskov | `Unanimidad` cumple el contrato de `PoliticaDeDecision`; los creadores de aviso se prueban todos a través de la clase base con el mismo contrato; `SimulatedEmailSender` y el doble `RecordingEmailSender` sustituyen a cualquier `EmailSender` |
+| I · Segregación de interfaces | Las interfaces son pequeñas: `EmailSender` tiene un solo método, `ProcessedEvents` solo `registrarSiEsNuevo`, y `QuestionInfoRepository` está separada de `NotificationRepository` |
+| D · Inversión de dependencias | Los casos de uso reciben sus interfaces, el reloj y el generador de identificadores por constructor, y `ApplicationConfig` los arma con los adaptadores. Por eso las pruebas usan dobles en memoria y reloj manual. `ArquitecturaTest` falla si el dominio depende de Spring, JPA o de otras capas |
 
 ### 7.3 Decisiones de diseño
 
@@ -637,13 +637,13 @@ El detalle de cada decisión, las alternativas descartadas y los costos está en
 
 ## 8. Seguridad y resiliencia
 
-**Seguridad.** Keycloak autentica con OAuth2 y PKCE y entrega un JWT. El gateway valida el token y aplica la tabla de roles (`RoleRules`), y cada
+Seguridad. Keycloak autentica con OAuth2 y PKCE y entrega un JWT. El gateway valida el token y aplica la tabla de roles (`RoleRules`), y cada
 servicio vuelve a validarlo y a exigir el rol, de modo que un error en una barrera no abre la operación. Los roles de esta iteración son `ADMIN`, `AUTHOR` y
 `REVIEWER`; el realm también trae usuarios Docente y Estudiante, que se usan en el tercer corte. El gateway elimina las cabeceras `X-User-Id` y `X-User-Roles` de lo que llega de fuera para que nadie suplante a otro usuario. Las
 contraseñas las guarda Keycloak con hash; los servicios no guardan ninguna. Los usuarios son los que importa el realm de prueba
 (`microservicios/infraestructura/keycloak`) y solo sirven en el entorno local.
 
-**Resiliencia.** El gateway tiene circuit breaker, reintentos de las consultas y un tope de llamadas simultáneas por servicio: si un servicio
+Resiliencia. El gateway tiene circuit breaker, reintentos de las consultas y un tope de llamadas simultáneas por servicio: si un servicio
 no responde, contesta 503 de inmediato en lugar de dejar esperando al usuario. Los eventos se publican con el patrón Outbox, y un mensaje
 que falla tras cuatro reintentos va a `bancopreguntas.dead-letter`. Se verificó a mano que detener RabbitMQ no impide guardar ni enviar a
 revisión, y que detener una réplica no interrumpe el servicio.

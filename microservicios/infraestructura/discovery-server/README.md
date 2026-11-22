@@ -5,9 +5,9 @@ réplicas de un servicio sin cambiar ninguna configuración: la nueva réplica s
 
 | | |
 |---|---|
-| **Puerto** | 8761 (`DISCOVERY_SERVER_PORT`) |
-| **Consola** | `http://localhost:8761` |
-| **Pruebas** | 3 |
+| Puerto | 8761 (`DISCOVERY_SERVER_PORT`) |
+| Consola | `http://localhost:8761` |
+| Pruebas | 3 |
 
 ## Configuración pensada para desarrollo
 

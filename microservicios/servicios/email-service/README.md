@@ -4,14 +4,14 @@ Envía (de forma simulada) un correo por cada aviso creado y deja un registro qu
 
 | | |
 |---|---|
-| **Puerto** | 8090 (`EMAIL_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `email_db` (puerto 5440 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/email-service/v3/api-docs` (a través del gateway) |
-| **Pruebas** | 38 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8090 (`EMAIL_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `email_db` (puerto 5440 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/email-service/v3/api-docs` (a través del gateway) |
+| Pruebas | 38 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Correo electrónico**. Escucha `notification.created` y envía el correo del aviso. El envío es una simulación: no sale ningún mensaje real, pero se registra a quién, con qué asunto y si se logró.
+Es el contexto de Correo electrónico. Escucha `notification.created` y envía el correo del aviso. El envío es una simulación: no sale ningún mensaje real, pero se registra a quién, con qué asunto y si se logró.
 
 ## Reglas de negocio
 
@@ -30,9 +30,9 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ## Mensajería (RabbitMQ)
 
-**Publica:** nada; es un consumidor puro.
+Publica: nada; es un consumidor puro.
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -54,7 +54,7 @@ src/main/java/co/unicauca/bancopreguntas/email/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Decorator (`EmailConReintentos`, `EmailConRegistro`) y Adapter. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Decorator (`EmailConReintentos`, `EmailConRegistro`) y Adapter. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

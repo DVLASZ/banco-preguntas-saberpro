@@ -4,20 +4,20 @@ Abre una ronda de revisión por cada envío de una pregunta, deja que el adminis
 
 | | |
 |---|---|
-| **Puerto** | 8083 (`ASSIGNMENT_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `assignment_db` (puerto 5445 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/assignment-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-assignment-service.json`](../../../docs/corte-2/api/openapi/openapi-assignment-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
-| **Pruebas** | 96 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8083 (`ASSIGNMENT_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `assignment_db` (puerto 5445 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/assignment-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | [`openapi-assignment-service.json`](../../../docs/corte-2/api/openapi/openapi-assignment-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
+| Pruebas | 96 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Asignación de revisores** (HU-04) y de la **bandeja del revisor** (la consulta de HU-05). La decisión sobre la pregunta y las evaluaciones son de `evaluation-service`; aquí solo se recuerda quién evaluó (su decisión) y cómo terminó la ronda, para la bandeja y para saber cuándo una ronda ya no admite revisores.
+Es el contexto de Asignación de revisores (HU-04) y de la bandeja del revisor (la consulta de HU-05). La decisión sobre la pregunta y las evaluaciones son de `evaluation-service`; aquí solo se recuerda quién evaluó (su decisión) y cómo terminó la ronda, para la bandeja y para saber cuándo una ronda ya no admite revisores.
 
 ## Reglas de negocio
 
 - Cada ronda tiene de 1 a N revisores (`ASSIGNMENT_MAX_REVIEWERS`, 3 por defecto) y el autor nunca es uno de ellos.
-- En una ronda nueva (tras un rechazo y la reapertura) se **reasignan solos los mismos revisores**; el administrador puede agregar más, no quitar.
+- En una ronda nueva (tras un rechazo y la reapertura) se reasignan solos los mismos revisores; el administrador puede agregar más, no quitar.
 - No se asigna a una ronda ya decidida (409); una asignación inválida responde 400 con el motivo.
 - La bandeja separa pendientes y evaluadas; tras un rechazo, quien no evaluó sigue viéndola como pendiente (puede dejar una observación tardía).
 - Un evento repetido no abre una segunda ronda ni cambia nada.
@@ -35,13 +35,13 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ## Mensajería (RabbitMQ)
 
-**Publica** (con Outbox transaccional, en el exchange `bancopreguntas.events`):
+Publica (con Outbox transaccional, en el exchange `bancopreguntas.events`):
 
 | Evento | Cuándo | Quién lo consume |
 |---|---|---|
 | `review.reviewers-assigned` | El administrador asigna revisores, o el sistema reasigna los de la ronda anterior (con versión, título y competencia de la pregunta) | evaluation, lifecycle, notification, history, audit |
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -66,7 +66,7 @@ src/main/java/co/unicauca/bancopreguntas/assignment/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

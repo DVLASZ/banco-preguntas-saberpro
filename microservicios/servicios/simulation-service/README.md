@@ -4,21 +4,21 @@ El estudiante practica con simulacros armados al azar con preguntas publicadas, 
 
 | | |
 |---|---|
-| **Puerto** | 8086 (`SIMULATION_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `simulation_db` (puerto 5438 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/simulation-service/v3/api-docs` (a través del gateway) |
-| **Pruebas** | 88 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8086 (`SIMULATION_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `simulation_db` (puerto 5438 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/simulation-service/v3/api-docs` (a través del gateway) |
+| Pruebas | 88 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Simulacros de Evaluación** (RF-21 a RF-24, construido por adelantado del tercer corte). Mantiene su propio catálogo con las preguntas publicadas, alimentado por el evento `question.published` (que lleva el contenido de la pregunta), de modo que no necesita consultar a `question-service`. Genera simulacros, controla el tiempo, califica y publica el resultado.
+Es el contexto de Simulacros de Evaluación (RF-21 a RF-24, construido por adelantado del tercer corte). Mantiene su propio catálogo con las preguntas publicadas, alimentado por el evento `question.published` (que lleva el contenido de la pregunta), de modo que no necesita consultar a `question-service`. Genera simulacros, controla el tiempo, califica y publica el resultado.
 
 ## Reglas de negocio
 
 - El estudiante genera un simulacro con la cantidad de preguntas y la duración que pide, filtrando por competencia, tema y
   dificultad; las preguntas se escogen al azar (patrón Strategy: `SelectorDePreguntas` y `SeleccionAleatoria`). Si no hay suficientes,
   responde 409 con cuántas hay. El máximo es `SIMULATION_MAX_QUESTIONS`.
-- Mientras el simulacro está en curso **no se revela la respuesta correcta**; al finalizar, o cuando se agota el tiempo, se califica y se
+- Mientras el simulacro está en curso no se revela la respuesta correcta; al finalizar, o cuando se agota el tiempo, se califica y se
   muestran. Una tarea periódica cierra los simulacros vencidos (`SIMULATION_EXPIRATION_INTERVAL_MS`).
 - Se puede cambiar una respuesta mientras el simulacro siga en curso; un simulacro no se resuelve dos veces.
 - Un estudiante solo ve sus simulacros; el docente y el administrador ven cualquiera.
@@ -40,13 +40,13 @@ comprobarlo con el usuario autenticado que recibe.
 
 ## Mensajería (RabbitMQ)
 
-**Publica** (con Outbox transaccional):
+Publica (con Outbox transaccional):
 
 | Evento | Cuándo | Quién lo consume |
 |---|---|---|
 | `simulation.completed` | Un simulacro se finaliza o vence | tracking |
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -69,7 +69,7 @@ src/main/java/co/unicauca/bancopreguntas/simulation/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ
 ```
 
-**Patrones de diseño que usa:** Strategy (`SelectorDePreguntas`, `SeleccionAleatoria`), Adapter y Observer. Detalle en [simulacros y seguimiento](../../../docs/corte-3/simulacros-y-seguimiento.md).
+Patrones de diseño que usa: Strategy (`SelectorDePreguntas`, `SeleccionAleatoria`), Adapter y Observer. Detalle en [simulacros y seguimiento](../../../docs/corte-3/simulacros-y-seguimiento.md).
 
 ## Configuración
 

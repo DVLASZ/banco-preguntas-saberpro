@@ -1,6 +1,6 @@
 # Frontend · Banco de Preguntas Saber Pro
 
-Aplicación web en **Angular 22** (componentes independientes, señales, sin zone.js) que habla solo con el API
+Aplicación web en Angular 22 (componentes independientes, señales, sin zone.js) que habla solo con el API
 Gateway y se autentica con Keycloak. Las pantallas siguen los prototipos de
 [`docs/segundo-corte/06-prototipos.md`](../docs/corte-2/06-prototipos.md).
 

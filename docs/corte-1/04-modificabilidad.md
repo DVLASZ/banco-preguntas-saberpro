@@ -4,25 +4,25 @@
 
 | Atributo | Por qué importa en el banco de preguntas | Cómo se atiende |
 |---|---|---|
-| **Modificabilidad** (principal) | Las reglas de validación, los estados de una pregunta y las formas de notificar cambian con el uso; también el proyecto migrará a microservicios | Módulos Maven con dependencias en una sola dirección; interfaces (puertos) entre capas; una regla de validación por clase; inyección de dependencias en un único punto (`MainApp`) |
-| **Testabilidad** | La rúbrica exige pruebas unitarias a las clases del dominio y las vistas Swing son difíciles de probar | El dominio no depende de Swing; los controladores hablan con la vista por una interfaz y se prueban con una vista falsa; los repositorios y notificadores se reemplazan por dobles de prueba |
-| **Usabilidad** | Los autores redactan preguntas largas y no deben perder trabajo ni equivocarse de estado | Estados con color, campos en rojo, confirmaciones antes de enviar o descartar, formulario de solo lectura fuera de Borrador |
+| Modificabilidad (principal) | Las reglas de validación, los estados de una pregunta y las formas de notificar cambian con el uso; también el proyecto migrará a microservicios | Módulos Maven con dependencias en una sola dirección; interfaces (puertos) entre capas; una regla de validación por clase; inyección de dependencias en un único punto (`MainApp`) |
+| Testabilidad | La rúbrica exige pruebas unitarias a las clases del dominio y las vistas Swing son difíciles de probar | El dominio no depende de Swing; los controladores hablan con la vista por una interfaz y se prueban con una vista falsa; los repositorios y notificadores se reemplazan por dobles de prueba |
+| Usabilidad | Los autores redactan preguntas largas y no deben perder trabajo ni equivocarse de estado | Estados con color, campos en rojo, confirmaciones antes de enviar o descartar, formulario de solo lectura fuera de Borrador |
 
 ## 2. Escenario de calidad de modificabilidad
 
-**Escenario principal: agregar una regla de validación estructural.**
+Escenario principal: agregar una regla de validación estructural.
 
 | Elemento | Descripción |
 |---|---|
-| **Fuente del estímulo** | El coordinador del banco de preguntas (cliente) |
-| **Estímulo** | Solicita una regla nueva de validación estructural: "la pregunta directa no debe superar 300 caracteres" |
-| **Artefacto** | El módulo de validación estructural (`modulo-preguntas`, paquete `domain.validation`) |
-| **Entorno** | Tiempo de desarrollo; el sistema ya está funcionando y las reglas RF-08 a RF-13 están implementadas |
-| **Respuesta** | El desarrollador crea una clase que implementa `ValidationRule` con la nueva regla y la agrega a la lista de `QuestionValidator.porDefecto()`. La regla se aplica automáticamente al guardar y al enviar a revisión, tanto en la aplicación de escritorio como en el servicio REST |
-| **Medida de la respuesta** | Se crea **1 clase** (unas 15 líneas) y se modifica **1 línea**; se modifican **0 líneas** de `QuestionService`, de los controladores y de las vistas; el cambio y su prueba toman **menos de una hora**; las pruebas existentes siguen en verde |
-| **Resultado esperado** | La regla nueva funciona en todos los puntos de entrada sin tocar la lógica de negocio ni la interfaz, y el resto del sistema no se ve afectado |
+| Fuente del estímulo | El coordinador del banco de preguntas (cliente) |
+| Estímulo | Solicita una regla nueva de validación estructural: "la pregunta directa no debe superar 300 caracteres" |
+| Artefacto | El módulo de validación estructural (`modulo-preguntas`, paquete `domain.validation`) |
+| Entorno | Tiempo de desarrollo; el sistema ya está funcionando y las reglas RF-08 a RF-13 están implementadas |
+| Respuesta | El desarrollador crea una clase que implementa `ValidationRule` con la nueva regla y la agrega a la lista de `QuestionValidator.porDefecto()`. La regla se aplica automáticamente al guardar y al enviar a revisión, tanto en la aplicación de escritorio como en el servicio REST |
+| Medida de la respuesta | Se crea 1 clase (unas 15 líneas) y se modifica 1 línea; se modifican 0 líneas de `QuestionService`, de los controladores y de las vistas; el cambio y su prueba toman menos de una hora; las pruebas existentes siguen en verde |
+| Resultado esperado | La regla nueva funciona en todos los puntos de entrada sin tocar la lógica de negocio ni la interfaz, y el resto del sistema no se ve afectado |
 
-**Por qué se puede cumplir.** `QuestionValidator` recibe una lista de reglas y las
+Por qué se puede cumplir. `QuestionValidator` recibe una lista de reglas y las
 ejecuta todas; no conoce ninguna regla concreta. `QuestionService` solo llama al
 validador, y la interfaz solo muestra las violaciones que este devuelve. Las siete
 reglas actuales ya se construyeron así, cada una como una clase independiente, sin

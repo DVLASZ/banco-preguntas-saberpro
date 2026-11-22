@@ -4,24 +4,24 @@ Convierte los resultados de los simulacros en historial, estadísticas, fortalez
 
 | | |
 |---|---|
-| **Puerto** | 8087 (`TRACKING_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `tracking_db` (puerto 5439 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/tracking-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | `openapi-tracking-service.json` y colección de Postman |
-| **Pruebas** | 61 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8087 (`TRACKING_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `tracking_db` (puerto 5439 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/tracking-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | `openapi-tracking-service.json` y colección de Postman |
+| Pruebas | 61 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Seguimiento Académico** (RF-25 a RF-28, construido por adelantado del tercer corte). Consume `simulation.completed`, acumula los resultados de cada estudiante y responde las consultas del propio estudiante y del docente.
+Es el contexto de Seguimiento Académico (RF-25 a RF-28, construido por adelantado del tercer corte). Consume `simulation.completed`, acumula los resultados de cada estudiante y responde las consultas del propio estudiante y del docente.
 
 ## Reglas de negocio
 
 - El estudiante ve su historial (el más reciente primero), sus estadísticas con la tendencia y sus fortalezas y debilidades; un
   estudiante sin simulacros recibe ceros.
-- Una competencia es **fortaleza** con aciertos desde `TRACKING_STRENGTH_THRESHOLD` (70 % por defecto) y **debilidad** por debajo de
+- Una competencia es fortaleza con aciertos desde `TRACKING_STRENGTH_THRESHOLD` (70 % por defecto) y debilidad por debajo de
   `TRACKING_WEAKNESS_THRESHOLD` (50 %); las que quedan entre los dos umbrales son intermedias, y con menos de `TRACKING_MIN_ANSWERED`
   respuestas (5) no hay datos suficientes para clasificarla.
-- El docente y el administrador consultan a cualquier estudiante y descargan el **reporte del grupo** en JSON y en CSV.
+- El docente y el administrador consultan a cualquier estudiante y descargan el reporte del grupo en JSON y en CSV.
 - Un evento repetido no duplica el historial (idempotencia por `eventId`).
 
 ## API REST
@@ -42,9 +42,9 @@ comprobarlo con el usuario autenticado que recibe.
 
 ## Mensajería (RabbitMQ)
 
-**Publica:** nada; es un consumidor puro.
+Publica: nada; es un consumidor puro.
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -66,7 +66,7 @@ src/main/java/co/unicauca/bancopreguntas/tracking/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ
 ```
 
-**Patrones de diseño que usa:** Adapter y Observer. Detalle en [simulacros y seguimiento](../../../docs/corte-3/simulacros-y-seguimiento.md).
+Patrones de diseño que usa: Adapter y Observer. Detalle en [simulacros y seguimiento](../../../docs/corte-3/simulacros-y-seguimiento.md).
 
 ## Configuración
 

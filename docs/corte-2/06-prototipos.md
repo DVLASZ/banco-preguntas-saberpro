@@ -1,7 +1,7 @@
 # 06 · Prototipos
 
 El frontend del segundo corte es una aplicación web separada del backend. Los prototipos son de **alta
-fidelidad** (marcos de 1440 x 900) y están en Figma, en la página **Corte 2 - Prototipos web (alta
+fidelidad (marcos de 1440 x 900) y están en Figma, en la página Corte 2 - Prototipos web (alta
 fidelidad)** del archivo
 [Banco de Preguntas Saber Pro - Prototipos](https://www.figma.com/design/kk6g0a8B4gv7wqCsYRb4Xd/Banco-de-Preguntas-Saber-Pro---Prototipos?node-id=165-2).
 El mismo archivo conserva los prototipos anteriores en sus propias páginas:

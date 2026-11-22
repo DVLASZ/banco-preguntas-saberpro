@@ -3,7 +3,7 @@
 ## Contextos delimitados
 
 El docente propone ocho contextos como aproximación. Para esta iteración partimos de ellos y los dividimos hasta que cada servicio
-tiene **una sola responsabilidad y es pequeño**: son **10 servicios** más el gateway. Los contextos de simulacros y seguimiento
+tiene una sola responsabilidad y es pequeño: son 10 servicios más el gateway. Los contextos de simulacros y seguimiento
 académico los dejaron los docentes para el tercer corte y no forman parte de esta entrega.
 
 ```mermaid
@@ -49,17 +49,17 @@ flowchart TB
 | Administración y Trazabilidad | `history-service` | Línea de tiempo de cada pregunta (HU-06) |
 | Administración y Trazabilidad | `audit-service` | Auditoría de acciones e inicios de sesión |
 
-**Por qué se dividió así.** La regla fue que cada servicio tenga un motivo de cambio y sus datos propios: la validación cambia cuando
+Por qué se dividió así. La regla fue que cada servicio tenga un motivo de cambio y sus datos propios: la validación cambia cuando
 cambian los criterios de calidad; el ciclo de vida, cuando cambian los estados; la asignación y la evaluación, cuando cambia cómo se
 reparte y cómo se decide la revisión; el correo, cuando cambia el canal de envío; la auditoría y el historial, cuando cambian lo que se
 quiere saber de cada pregunta o de cada usuario. Cada división quitó de un servicio una responsabilidad que escalaba o fallaba distinto.
 
-**El costo y cómo se acota.** Dividir cuesta llamadas de red. Se evitó con eventos casi siempre; las únicas llamadas REST síncronas son
+El costo y cómo se acota. Dividir cuesta llamadas de red. Se evitó con eventos casi siempre; las únicas llamadas REST síncronas son
 dos, y todas propagan la identidad de quien hizo la petición para que el servicio llamado vuelva a comprobar el rol:
 
 | Llamada | Por qué es síncrona |
 |---|---|
-| `question-service` a `validation-service` | El autor necesita saber **ahora** qué campos corregir; la respuesta decide si se guarda |
+| `question-service` a `validation-service` | El autor necesita saber ahora qué campos corregir; la respuesta decide si se guarda |
 | `question-service` a `lifecycle-service` | Crear, enviar, reabrir y publicar deben cambiar el estado antes de contestarle al usuario |
 
 Si uno de esos servicios no responde, la operación no se hace y se informa 503 (la consulta de una pregunta sigue funcionando).
@@ -108,7 +108,7 @@ Cuerpo (`data`) de cada evento:
 
 El esquema formal está en [`api/eventos/eventos.schema.json`](api/eventos/eventos.schema.json).
 
-Garantías: mensajes persistentes con confirmación de entrega y consumidores **idempotentes** (se ignora un
+Garantías: mensajes persistentes con confirmación de entrega y consumidores idempotentes (se ignora un
 `eventId` ya procesado). El evento `question.state-changed` lleva también un número, `sequence`, que sirve para ignorar avisos atrasados sin llevar registro
 (quien guarda una copia del estado solo acepta un cambio más nuevo).
 
@@ -149,9 +149,9 @@ sequenceDiagram
 - La validación y el ciclo de vida salieron de `question-service`; la revisión se dividió en asignación y evaluación; y el correo salió
   de `notification-service`.
 - Se añadieron los eventos `question.reopened`, `question.published`, `notification.created` y `auth.*` (tabla de arriba). Los eventos
-  de revisión llevan el número de **ronda** y las banderas `automatic` (reasignación automática de revisores) y `late` (observación
-  recibida cuando la ronda ya se había cerrado); los de pregunta llevan su **versión**.
-- Los servicios que publican eventos (`lifecycle`, `assignment`, `evaluation`, `notification` y `user`) usan el **patrón Outbox**: el
+  de revisión llevan el número de ronda y las banderas `automatic` (reasignación automática de revisores) y `late` (observación
+  recibida cuando la ronda ya se había cerrado); los de pregunta llevan su versión.
+- Los servicios que publican eventos (`lifecycle`, `assignment`, `evaluation`, `notification` y `user`) usan el patrón Outbox: el
   evento se guarda en la misma transacción que el cambio y un relevo lo envía, así que no se pierde si RabbitMQ está caído. El detalle
   está en [08](08-implementacion-seguridad-y-resiliencia.md).
 - Un mensaje que falla tras 4 reintentos va a la cola de mensajes muertos `bancopreguntas.dead-letter`.

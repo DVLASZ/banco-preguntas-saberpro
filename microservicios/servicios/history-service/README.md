@@ -4,15 +4,15 @@ Arma la línea de tiempo de cada pregunta con lo que ocurre a lo largo de la rev
 
 | | |
 |---|---|
-| **Puerto** | 8085 (`HISTORY_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `history_db` (puerto 5437 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/history-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-history-service.json`](../../../docs/corte-2/api/openapi/openapi-history-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/history-service.postman_collection.json) |
-| **Pruebas** | 54 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8085 (`HISTORY_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `history_db` (puerto 5437 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/history-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | [`openapi-history-service.json`](../../../docs/corte-2/api/openapi/openapi-history-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/history-service.postman_collection.json) |
+| Pruebas | 54 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Historial** (RF-29). Escucha los eventos de preguntas y revisión y guarda una entrada por cada uno, para que el autor, los revisores y el administrador vean el recorrido de una pregunta. La auditoría de accesos y acciones es de `audit-service`.
+Es el contexto de Historial (RF-29). Escucha los eventos de preguntas y revisión y guarda una entrada por cada uno, para que el autor, los revisores y el administrador vean el recorrido de una pregunta. La auditoría de accesos y acciones es de `audit-service`.
 
 ## Reglas de negocio
 
@@ -32,9 +32,9 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ## Mensajería (RabbitMQ)
 
-**Publica:** nada; es un consumidor puro.
+Publica: nada; es un consumidor puro.
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -63,7 +63,7 @@ src/main/java/co/unicauca/bancopreguntas/history/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Adapter y Observer. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Adapter y Observer. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

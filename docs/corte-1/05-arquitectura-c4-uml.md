@@ -2,9 +2,9 @@
 
 ## 1. Estilo arquitectónico
 
-La aplicación es una **aplicación de escritorio en Java (Swing)** con una
-**arquitectura monolítica en tres capas**, organizada como un **monolito modular**
-(módulos Maven que se empaquetan en un solo `.jar`) y con el micropatrón **MVC** en
+La aplicación es una aplicación de escritorio en Java (Swing) con una
+arquitectura monolítica en tres capas, organizada como un monolito modular
+(módulos Maven que se empaquetan en un solo `.jar`) y con el micropatrón MVC en
 las ventanas. La docente pidió el monolito modular porque el proyecto migrará a
 microservicios: si cada módulo ya tiene límites explícitos, más adelante solo hay
 que cambiar las llamadas entre módulos por llamadas de red.
@@ -51,7 +51,7 @@ graph TD
 ## 2. Modelo C4
 
 Los diagramas C4 están en el archivo de diagrams.net
-**`03-TallerC4-SaberPro.drawio`**, con una página por nivel:
+`03-TallerC4-SaberPro.drawio`, con una página por nivel:
 [abrir el diagrama](https://app.diagrams.net/#G1P06v2Eww57q3xeCN8tEg0mBflO3VU5YR).
 
 ### Nivel 1: Contexto
@@ -60,7 +60,7 @@ Los diagramas C4 están en el archivo de diagrams.net
 
 *Figura C4-1. Contexto del sistema y sus cinco tipos de usuario.*
 
-El **Sistema de Banco de Preguntas Saber Pro** lo usan cinco tipos de persona:
+El Sistema de Banco de Preguntas Saber Pro lo usan cinco tipos de persona:
 
 | Persona | Qué hace con el sistema |
 |---|---|
@@ -76,13 +76,13 @@ El **Sistema de Banco de Preguntas Saber Pro** lo usan cinco tipos de persona:
 
 *Figura C4-2. Contenedores del sistema.*
 
-- **Aplicación monolítica Saber Pro** *(Java / Swing)*: contiene toda la lógica de
+- Aplicación monolítica Saber Pro *(Java / Swing)*: contiene toda la lógica de
   negocio, el control de acceso y la gestión de flujos.
-- **Base de datos** *(SQLite)*: información del sistema.
-- Aparte, y sin que la aplicación de escritorio dependa de él, el **microservicio REST**
+- Base de datos *(SQLite)*: información del sistema.
+- Aparte, y sin que la aplicación de escritorio dependa de él, el microservicio REST
   del Taller 6 *(Spring Boot, JPA y H2)* expone el CRUD de preguntas por HTTP.
 
-> **Diferencia entre el diseño y esta iteración.** En el diseño, la base SQLite guarda
+> Diferencia entre el diseño y esta iteración. En el diseño, la base SQLite guarda
 > usuarios, preguntas, revisiones y simulacros. En el primer corte solo los usuarios
 > están en SQLite; las preguntas, las asignaciones de revisores y los simulacros están
 > en repositorios en memoria detrás de interfaces (`QuestionRepository`,
@@ -127,7 +127,7 @@ del diagrama y las clases implementadas:
 
 Los diagramas siguientes muestran las clases implementadas en esta iteración (las diferencias con el diseño de la Figura C4-4 se explican en la sección de congruencia).
 
-**Dominio de preguntas y validación estructural**
+Dominio de preguntas y validación estructural
 
 ```mermaid
 classDiagram
@@ -218,7 +218,7 @@ classDiagram
     Observer <|.. GUIObserver2
 ```
 
-**MVC en las ventanas del Autor y del Revisor**
+MVC en las ventanas del Autor y del Revisor
 
 ```mermaid
 classDiagram
@@ -274,7 +274,7 @@ classDiagram
     RevisionController --> QuestionService : modelo
 ```
 
-**Asignación de revisores (HU-04)**
+Asignación de revisores (HU-04)
 
 ```mermaid
 classDiagram
@@ -317,7 +317,7 @@ classDiagram
     AsignacionRevisionRepository --> AsignacionRevision
 ```
 
-**Ciclo de vida de una pregunta (RF-14 y RF-15)**
+Ciclo de vida de una pregunta (RF-14 y RF-15)
 
 ```mermaid
 stateDiagram-v2
@@ -337,7 +337,7 @@ stateDiagram-v2
 Desde cualquier estado una pregunta puede pasar a Archivada, porque el requisito RNF-16
 prohíbe eliminarlas físicamente.
 
-**Secuencia: enviar una pregunta a revisión (HU-02)**
+Secuencia: enviar una pregunta a revisión (HU-02)
 
 ```mermaid
 sequenceDiagram

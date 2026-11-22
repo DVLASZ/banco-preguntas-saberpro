@@ -97,7 +97,7 @@ en `/swagger-ui.html`.
 - De 1 a 3 revisores por pregunta (el máximo es configurable con `ASSIGNMENT_MAX_REVIEWERS`, por defecto 3); el autor nunca es
   su revisor y un revisor no se repite en la misma ronda.
 - La pregunta pasa a "En revisión" en cuanto se asignan los revisores (evento `review.reviewers-assigned`).
-- Aprobación por **unanimidad**. Con un solo rechazo la ronda se cierra y la pregunta queda Rechazada; las observaciones que
+- Aprobación por unanimidad. Con un solo rechazo la ronda se cierra y la pregunta queda Rechazada; las observaciones que
   lleguen después se guardan como tardías.
 - Los revisores ven las observaciones de sus colegas; no hay puntaje rígido. Rechazar exige una observación.
 - Una pregunta solo se edita en Borrador; la rechazada se reabre (vuelve a Borrador con una versión nueva) y al reenviarla se

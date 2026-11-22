@@ -8,35 +8,35 @@
 > hipervínculos internos) no tienen equivalente en Markdown y aquí quedan
 > como texto plano.
 
-**Edward Esteban Dávila Salazar**
+Edward Esteban Dávila Salazar
 
-**Laura Isabel Sanchez Fernandez**
+Laura Isabel Sanchez Fernandez
 
-**Kevin Yesid Castaño Herrera**
+Kevin Yesid Castaño Herrera
 
-**Proyecto 1**
+Proyecto 1
 
-**Ingeniería de Software 2**
+Ingeniería de Software 2
 
-**Profesor:**
+Profesor:
 
-**Wilson Libardo Pantoja Yepez**
+Wilson Libardo Pantoja Yepez
 
-**Universidad del Cauca**
+Universidad del Cauca
 
-**Facultad de Ingeniería Electrónica y Telecomunicaciones**
+Facultad de Ingeniería Electrónica y Telecomunicaciones
 
-**Departamento de Sistemas**
+Departamento de Sistemas
 
-**Ingenieria de Software 2**
+Ingenieria de Software 2
 
-**Popayán, 09 2026**
+Popayán, 09 2026
 
-**Edward Esteban Dávila Salazar**
+Edward Esteban Dávila Salazar
 
-**Laura Isabel Sanchez Fernandez**
+Laura Isabel Sanchez Fernandez
 
-**DOCUMENTO DE ARQUITECTURA**
+DOCUMENTO DE ARQUITECTURA
 
 Proyecto 1 presentado en el curso de Ingeniería de Software 2
 

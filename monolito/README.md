@@ -3,7 +3,7 @@
 Proyecto de curso, Ingeniería de Software II, Universidad del Cauca
 (Periodo 2-2026).
 
-> Esta carpeta contiene el **monolito modular del primer corte**. La solución distribuida del segundo corte
+> Esta carpeta contiene el monolito modular del primer corte. La solución distribuida del segundo corte
 > está en [`../microservicios`](../microservicios/README.md). La visión general del proyecto está en el
 > [README de la raíz](../README.md).
 
@@ -22,7 +22,7 @@ REST del Taller 6), ver la sección
 ## Arquitectura: monolito modular
 
 Por indicación de la docente del curso, el proyecto se construye como un
-**monolito modular**: un único proceso desplegable (un solo `.jar`), pero
+monolito modular: un único proceso desplegable (un solo `.jar`), pero
 dividido internamente en módulos Maven con límites explícitos, cada uno
 declara en su propio `pom.xml` de qué otros módulos depende, en vez de
 que todo el código comparta paquetes y clases libremente. La razón:
@@ -81,7 +81,7 @@ mvn package   # genera app/target/banco-preguntas-saberpro.jar (con todas las de
 java -jar app/target/banco-preguntas-saberpro.jar
 ```
 
-Para levantar el **microservicio REST** (Taller 6) en `http://localhost:8080`:
+Para levantar el microservicio REST (Taller 6) en `http://localhost:8080`:
 
 ```bash
 cd modulos/modulo-api-rest
@@ -126,7 +126,7 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
 
 ## Estado actual del proyecto
 
-**Implementado:**
+Implementado:
 - Login, registro y roles (RF-01 a RF-03), con SQLite y hash Argon2id.
 - Redacción de preguntas por el Autor con todos sus campos (contexto,
   pregunta directa, cuatro opciones, respuesta correcta, justificación,
@@ -134,8 +134,8 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
   la validación estructural HU03 (RF-08 a RF-13), con una regla independiente
   por requisito, y los campos que incumplen se resaltan en rojo.
 - Ciclo de vida RF-14 con transiciones válidas (RF-15): el Autor guarda un
-  **borrador** (solo él puede modificarlo mientras lo sea, RF-06) y lo
-  **envía a revisión** con confirmación; los estados se muestran con color.
+  borrador (solo él puede modificarlo mientras lo sea, RF-06) y lo
+  envía a revisión con confirmación; los estados se muestran con color.
 - Listado "Mis preguntas" del Autor (RF-07): tabla paginada (5, 10 o 20 por
   página) con filtros por estado, competencia y texto (nombre, tema, subtema o
   pregunta, sin importar mayúsculas ni tildes), el estado de cada pregunta con
@@ -170,7 +170,7 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
   Data JPA + H2 detrás del puerto `QuestionRepository`, y DELETE que archiva
   en vez de borrar (RNF-16), ver `modulo-api-rest`.
 
-**Pendiente:**
+Pendiente:
 - Persistencia real de preguntas y simulacros (hoy son en memoria; solo
   usuarios usa SQLite).
 - Historial de revisiones con observaciones (HU-10/HU-11), hoy el Revisor
@@ -189,20 +189,20 @@ El flujo de ramas y de publicación está en [`docs/general/flujo-de-trabajo.md`
 Este proyecto nació de una serie de talleres sueltos de la materia, en
 el repositorio [`ingenieria-software-2`](https://github.com/DVLASZ/ingenieria-software-2):
 
-- **Taller 2**, módulo de usuarios (SOLID), origen de `modulo-usuarios`.
-- **Taller 3**, modelo de arquitectura C4 (Contexto/Contenedores/
+- Taller 2, módulo de usuarios (SOLID), origen de `modulo-usuarios`.
+- Taller 3, modelo de arquitectura C4 (Contexto/Contenedores/
   Componentes/Clases) de todo el sistema, incluyendo las historias de
   usuario (HU) y requisitos funcionales (RF) citados en este README.
-- **Taller 4**, capas + MVC + Observer sobre el banco de preguntas,
+- Taller 4, capas + MVC + Observer sobre el banco de preguntas,
   origen de `modulo-preguntas` y `modulo-simulacros`; se conserva intacto
   en ese repositorio como entregable del laboratorio, mientras este
   repositorio es donde el proyecto sigue avanzando.
-- **Taller 5**, arquitectura Microkernel combinada con Tuberías y Filtros:
+- Taller 5, arquitectura Microkernel combinada con Tuberías y Filtros:
   generación de preguntas por plugins cargados por Reflexión y validados por
   un pipeline de cuatro filtros; origen de `modulo-microkernel`. Desde este
   taller el código se desarrolla directamente en este repositorio; en
   `ingenieria-software-2` solo queda una carpeta con su README y el enlace.
-- **Taller 6**, API REST con Spring Boot y Spring Data JPA: microservicio con
+- Taller 6, API REST con Spring Boot y Spring Data JPA: microservicio con
   el CRUD de preguntas sobre la `Question` real del proyecto, con validación,
   manejo de errores y colección de Postman; origen de `modulo-api-rest`. Igual
   que el Taller 5, su carpeta en `ingenieria-software-2` solo deja el enlace.

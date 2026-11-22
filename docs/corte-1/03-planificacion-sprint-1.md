@@ -1,6 +1,6 @@
 # Planificación de tareas del Sprint 1
 
-La planificación se lleva en Jira, en el tablero **SCRUM Sprint 1**:
+La planificación se lleva en Jira, en el tablero SCRUM Sprint 1:
 [abrir el tablero](https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1).
 
 | Dato | Valor |

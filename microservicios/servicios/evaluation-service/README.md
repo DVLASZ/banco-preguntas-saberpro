@@ -4,21 +4,21 @@ Recibe la evaluación de cada revisor, decide la ronda por unanimidad y publica 
 
 | | |
 |---|---|
-| **Puerto** | 8096 (`EVALUATION_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `evaluation_db` (puerto 5446 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/evaluation-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-evaluation-service.json`](../../../docs/corte-2/api/openapi/openapi-evaluation-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
-| **Pruebas** | 121 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8096 (`EVALUATION_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `evaluation_db` (puerto 5446 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/evaluation-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | [`openapi-evaluation-service.json`](../../../docs/corte-2/api/openapi/openapi-evaluation-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
+| Pruebas | 121 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Evaluación** (HU-05). Guarda una copia de cada ronda (con los revisores que informa `assignment-service`) y las evaluaciones, que son definitivas. Decide con una política (patrón Strategy) y avisa el resultado.
+Es el contexto de Evaluación (HU-05). Guarda una copia de cada ronda (con los revisores que informa `assignment-service`) y las evaluaciones, que son definitivas. Decide con una política (patrón Strategy) y avisa el resultado.
 
 ## Reglas de negocio
 
 - Un revisor solo evalúa si está asignado a la ronda (403) y una sola vez (409); la observación es obligatoria al rechazar y tiene un máximo de 4000 caracteres.
-- **Unanimidad:** la ronda se aprueba cuando todos los revisores asignados aprueban; un solo rechazo la rechaza sin esperar a los demás.
-- Tras un rechazo la ronda sigue abierta: los revisores que faltaban pueden dejar una observación **tardía**, que no cambia el resultado, hasta que el autor reabre la pregunta.
+- Unanimidad: la ronda se aprueba cuando todos los revisores asignados aprueban; un solo rechazo la rechaza sin esperar a los demás.
+- Tras un rechazo la ronda sigue abierta: los revisores que faltaban pueden dejar una observación tardía, que no cambia el resultado, hasta que el autor reabre la pregunta.
 - El administrador y los revisores ven toda la revisión; el autor, el detalle de las rondas ya decididas.
 - Si dos revisores evalúan a la vez, la ronda se decide una sola vez (el caso se bloquea durante la transacción).
 
@@ -33,14 +33,14 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ## Mensajería (RabbitMQ)
 
-**Publica** (con Outbox transaccional, en el exchange `bancopreguntas.events`):
+Publica (con Outbox transaccional, en el exchange `bancopreguntas.events`):
 
 | Evento | Cuándo | Quién lo consume |
 |---|---|---|
 | `review.evaluation-submitted` | Un revisor envía su evaluación (`late` marca las tardías) | assignment, notification, history, audit |
 | `review.completed` | La ronda se decide (APPROVED o REJECTED) con las observaciones recibidas | assignment, lifecycle, notification, history, audit |
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -73,7 +73,7 @@ src/main/java/co/unicauca/bancopreguntas/evaluation/
 
 Es el servicio con arquitectura hexagonal y DDD del tercer corte. El diseño completo está en [hexagonal y DDD](../../../docs/corte-3/hexagonal-y-ddd.md).
 
-**Patrones de diseño que usa:** Strategy (`PoliticaDeDecision` y `Unanimidad`), Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Strategy (`PoliticaDeDecision` y `Unanimidad`), Adapter y Observer (eventos con Outbox). Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

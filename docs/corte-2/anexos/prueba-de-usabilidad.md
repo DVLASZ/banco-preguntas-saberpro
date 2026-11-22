@@ -1,11 +1,11 @@
 # Prueba de usabilidad (pensando en voz alta)
 
 Guion y plantillas para aplicar la prueba de usabilidad del proyecto. El enunciado la pide como parte de los
-prototipos y respalda el requisito **RNF-03** (un usuario nuevo aprende a usar el sistema en 30 minutos o menos). Este
-documento es el material de la prueba; los **resultados** se registran en la sección "Resultados" de
+prototipos y respalda el requisito RNF-03 (un usuario nuevo aprende a usar el sistema en 30 minutos o menos). Este
+documento es el material de la prueba; los resultados se registran en la sección "Resultados" de
 [06 · Prototipos](../06-prototipos.md) una vez aplicada.
 
-> Estado: material listo, prueba **pendiente de aplicar**. Debe hacerla alguien del equipo con personas que no conozcan el
+> Estado: material listo, prueba pendiente de aplicar. Debe hacerla alguien del equipo con personas que no conozcan el
 > sistema; los datos que se registren aquí deben ser reales.
 
 ## 1. Objetivo
@@ -25,8 +25,8 @@ Preguntas que debe responder la prueba:
 
 ## 2. Método
 
-Prueba **pensando en voz alta** (*thinking aloud*): la persona realiza las tareas en la aplicación real y dice en voz alta lo
-que piensa, lo que busca y lo que no entiende. El moderador **no ayuda**: solo recuerda que hable en voz alta y toma notas.
+Prueba pensando en voz alta (*thinking aloud*): la persona realiza las tareas en la aplicación real y dice en voz alta lo
+que piensa, lo que busca y lo que no entiende. El moderador no ayuda: solo recuerda que hable en voz alta y toma notas.
 Si la persona se bloquea más de 3 minutos, se anota "no completó" y se le indica la salida para seguir con la tarea
 siguiente.
 
@@ -35,7 +35,7 @@ siguiente.
 | Participantes | Entre 3 y 5 personas que no hayan visto el sistema. Idealmente: 2 con perfil de autor o docente, 1 o 2 con perfil de revisor y 1 sin experiencia en el tema |
 | Duración | 25 a 30 minutos por persona |
 | Lugar | Un equipo con el sistema levantado (ver "Preparación") y la grabación de pantalla y audio si la persona lo autoriza |
-| Roles del equipo | **Moderador** (habla con la persona) y **observador** (toma notas y tiempos; puede ser la misma persona si no hay otra) |
+| Roles del equipo | Moderador (habla con la persona) y observador (toma notas y tiempos; puede ser la misma persona si no hay otra) |
 | Qué se mide | Éxito por tarea, tiempo, errores, comentarios y puntaje SUS |
 
 ## 3. Preparación
@@ -49,19 +49,19 @@ siguiente.
    cuestionario SUS (sección 7).
 5. Tener lista una pregunta de ejemplo para copiar (la persona no debe inventar el contenido):
 
-   - **Nombre:** Idea principal de un texto
-   - **Contexto:** La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.
-   - **Pregunta:** ¿Cuál es la idea principal del texto?
-   - **Opciones:** A. La energía solar es costosa · B. La energía solar es una alternativa limpia y económica · C. Los combustibles fósiles son renovables · D. La energía solar solo sirve de día
-   - **Respuesta correcta:** B · **Competencia:** Lectura crítica · **Tema:** Idea principal · **Subtema:** Textos argumentativos · **Dificultad:** Básica
-   - **Justificación:** El texto presenta la energía solar como alternativa limpia y barata. · **Bibliografía:** Texto de ejemplo, 2026
+   - Nombre: Idea principal de un texto
+   - Contexto: La energía solar se ha vuelto una alternativa limpia y cada vez más barata frente a los combustibles fósiles.
+   - Pregunta: ¿Cuál es la idea principal del texto?
+   - Opciones: A. La energía solar es costosa · B. La energía solar es una alternativa limpia y económica · C. Los combustibles fósiles son renovables · D. La energía solar solo sirve de día
+   - Respuesta correcta: B · Competencia: Lectura crítica · Tema: Idea principal · Subtema: Textos argumentativos · Dificultad: Básica
+   - Justificación: El texto presenta la energía solar como alternativa limpia y barata. · Bibliografía: Texto de ejemplo, 2026
 
 ## 4. Guion del moderador
 
-**Antes (2 minutos).**
+Antes (2 minutos).
 
 > "Gracias por ayudarnos. Estamos probando un sistema para gestionar un banco de preguntas de las pruebas Saber Pro. Lo que
-> evaluamos es el sistema, **no a usted**: si algo no se entiende, el problema es nuestro. Le voy a pedir que haga algunas
+> evaluamos es el sistema, no a usted: si algo no se entiende, el problema es nuestro. Le voy a pedir que haga algunas
 > tareas y que vaya diciendo en voz alta lo que piensa: qué busca, qué espera que pase, qué no entiende. No le puedo ayudar
 > mientras hace la tarea, pero puede preguntar lo que quiera: lo anoto y lo hablamos al final. Si quiere parar, puede hacerlo
 > en cualquier momento. Con su permiso grabo la pantalla y el audio solo para analizar la prueba; no se publicará."
@@ -69,11 +69,11 @@ siguiente.
 Pedir el consentimiento verbal (o con la hoja de la sección 8) y anotar el perfil: rol, experiencia con aplicaciones web,
 experiencia con bancos de preguntas.
 
-**Durante.** Entregar una tarea a la vez, leída en voz alta. Frases permitidas: "¿Qué está pensando?", "¿Qué esperaba que
-pasara?", "Siga hablando, por favor". Frases que **no** se dicen: dónde está un botón, qué significa un mensaje, "casi lo
+Durante. Entregar una tarea a la vez, leída en voz alta. Frases permitidas: "¿Qué está pensando?", "¿Qué esperaba que
+pasara?", "Siga hablando, por favor". Frases que no se dicen: dónde está un botón, qué significa un mensaje, "casi lo
 logra".
 
-**Después (5 minutos).** Aplicar el cuestionario SUS y hacer estas preguntas:
+Después (5 minutos). Aplicar el cuestionario SUS y hacer estas preguntas:
 
 1. ¿Qué fue lo más fácil? ¿Qué fue lo más difícil o confuso?
 2. ¿Hubo algún mensaje o palabra que no entendió?
@@ -102,13 +102,13 @@ de error del sistema, volver atrás).
 | T13 | Estudiante | "Vaya a su progreso y diga en qué competencia le va mejor y en cuál peor" | Identifica fortalezas y debilidades | 3 min |
 | T14 | Docente | "Entre como docente, abra el reporte del grupo y diga qué estudiante necesita más apoyo" | Ubica al estudiante con menor desempeño y abre su detalle | 4 min |
 
-Cada participante hace las tareas de **su rol**; si hay pocas personas, una persona puede hacer más de un rol, en ese
+Cada participante hace las tareas de su rol; si hay pocas personas, una persona puede hacer más de un rol, en ese
 orden. El flujo completo de T1 a T10 debe poder recorrerse con 3 personas (autor, administrador y revisor); T11 a T13 las hace una persona
 con rol de estudiante (`estudiante1`) y T14 una con rol de docente (`docente1`). Antes de T11 debe haber preguntas publicadas.
 
 ## 6. Hoja de observación (una por participante)
 
-**Participante:** ______ **Fecha:** ______ **Rol de la sesión:** ______ **Experiencia web (1 a 5):** ___ **Modera / observa:** ______
+Participante: ______ Fecha: ______ Rol de la sesión: ______ Experiencia web (1 a 5): ___ Modera / observa: ______
 
 | Tarea | ¿Completó? (sí / con ayuda / no) | Tiempo (min:seg) | Errores | Lo que dijo o dudó (frases textuales) | Problema detectado |
 |---|---|---|---|---|---|
@@ -127,7 +127,7 @@ con rol de estudiante (`estudiante1`) y T14 una con rol de docente (`docente1`).
 | T13 | | | | | |
 | T14 | | | | | |
 
-**Respuestas finales:** (lo más fácil / lo más difícil / mensajes que no entendió / sugerencias / cuánto cree que tardaría en aprender)
+Respuestas finales: (lo más fácil / lo más difícil / mensajes que no entendió / sugerencias / cuánto cree que tardaría en aprender)
 
 ## 7. Cuestionario SUS (System Usability Scale)
 
@@ -146,7 +146,7 @@ La persona califica cada afirmación de 1 (totalmente en desacuerdo) a 5 (totalm
 | 9 | Me sentí muy seguro(a) usando el sistema | |
 | 10 | Necesité aprender muchas cosas antes de poder usar el sistema | |
 
-**Cómo se calcula:** a las preguntas impares (1, 3, 5, 7, 9) se les resta 1 al puntaje; a las pares (2, 4, 6, 8, 10) se les
+Cómo se calcula: a las preguntas impares (1, 3, 5, 7, 9) se les resta 1 al puntaje; a las pares (2, 4, 6, 8, 10) se les
 resta el puntaje a 5. Se suman los diez valores y se multiplica por 2,5: resulta un número de 0 a 100. Referencia habitual: por
 encima de 68 se considera usabilidad aceptable; por encima de 80, buena.
 
@@ -162,15 +162,15 @@ encima de 68 se considera usabilidad aceptable; por encima de 80, buena.
 
 Después de todas las sesiones:
 
-1. **Tabla de éxito por tarea:** porcentaje de participantes que completó cada tarea sin ayuda, tiempo promedio y número
+1. Tabla de éxito por tarea: porcentaje de participantes que completó cada tarea sin ayuda, tiempo promedio y número
    total de errores.
-2. **Puntaje SUS** de cada persona y promedio.
-3. **Lista de problemas** con severidad: *crítico* (impide completar la tarea), *grave* (la completan con mucha dificultad),
+2. Puntaje SUS de cada persona y promedio.
+3. Lista de problemas con severidad: *crítico* (impide completar la tarea), *grave* (la completan con mucha dificultad),
    *menor* (confunde pero no impide) y *sugerencia*. Agrupar los problemas repetidos y contar cuántas personas los
    tuvieron.
-4. **Tiempo total** de aprendizaje: suma de los tiempos de las tareas de cada persona; comprobar la meta de RNF-03 (menos
+4. Tiempo total de aprendizaje: suma de los tiempos de las tareas de cada persona; comprobar la meta de RNF-03 (menos
    de 30 minutos).
-5. **Acciones:** por cada problema crítico o grave, la corrección propuesta y la historia o tarea de Jira que la recoge.
+5. Acciones: por cada problema crítico o grave, la corrección propuesta y la historia o tarea de Jira que la recoge.
 
 Plantilla de la lista de problemas:
 

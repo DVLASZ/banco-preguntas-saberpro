@@ -12,21 +12,21 @@ aceptación y sus subtareas.
 | HU-03 | Autor de preguntas | 3. Listar las preguntas creadas, con paginación y filtros | SCRUM-9 |
 | HU-04 | Administrador | 4. Asignar al menos un revisor a las preguntas pendientes | SCRUM-24 |
 
-> **Nota sobre la numeración.** Las HU-01 a HU-04 son las del backlog del equipo.
+> Nota sobre la numeración. Las HU-01 a HU-04 son las del backlog del equipo.
 > En el documento del proyecto de curso, "HU03. Validación estructural" (RF-08 a
 > RF-13) es otro conjunto de requisitos: la validación estructural se aplica al
 > guardar una pregunta y por eso hace parte de los criterios de HU-01 y HU-02.
 
-En todas, una **pregunta** tiene: nombre, contexto, pregunta directa, **cuatro
+En todas, una pregunta tiene: nombre, contexto, pregunta directa, **cuatro
 opciones (A a D)** de las cuales una es la respuesta correcta, justificación de la
 respuesta, bibliografía, competencia, tema, subtema y nivel de dificultad.
 
 ## HU-01: Crear pregunta de selección múltiple
 
-**Como** autor de preguntas **quiero** crear una pregunta de selección múltiple con
-única respuesta **para** alimentar el banco de preguntas Saber Pro.
+Como autor de preguntas quiero crear una pregunta de selección múltiple con
+única respuesta para alimentar el banco de preguntas Saber Pro.
 
-**Criterios de aceptación**
+Criterios de aceptación
 
 1. Con todos los campos obligatorios diligenciados (contexto, pregunta, opciones,
    respuesta correcta, justificación, competencia, tema, nivel) y clic en Guardar,
@@ -37,7 +37,7 @@ respuesta, bibliografía, competencia, tema, subtema y nivel de dificultad.
    muestra el error.
 4. Al cancelar se pide confirmación antes de descartar lo escrito.
 
-**Reglas de validación estructural (RF-08 a RF-13).** Cada una es una clase
+Reglas de validación estructural (RF-08 a RF-13). Cada una es una clase
 independiente (`ValidationRule`) y el `QuestionValidator` las ejecuta todas para
 mostrarle al autor lo que debe corregir de una sola vez:
 
@@ -53,10 +53,10 @@ mostrarle al autor lo que debe corregir de una sola vez:
 
 ## HU-02: Cambiar el estado de "Borrador" a "Pendiente de revisión"
 
-**Como** autor de preguntas **quiero** cambiar el estado de mis preguntas a
-"Pendiente de revisión" **para** que el administrador asigne un revisor.
+Como autor de preguntas quiero cambiar el estado de mis preguntas a
+"Pendiente de revisión" para que el administrador asigne un revisor.
 
-**Criterios de aceptación**
+Criterios de aceptación
 
 1. Si la pregunta está en "Borrador" y pasa la validación estructural, al hacer clic
    en Enviar a revisión el estado cambia a "Pendiente de revisión" (color amarillo en
@@ -73,10 +73,10 @@ están definidas en `EstadoPregunta.puedePasarA` (RF-14 y RF-15).
 
 ## HU-03: Listar preguntas creadas
 
-**Como** autor de preguntas **quiero** ver el listado de las preguntas que he creado
-**para** poder verlas o editarlas más adelante.
+Como autor de preguntas quiero ver el listado de las preguntas que he creado
+para poder verlas o editarlas más adelante.
 
-**Criterios de aceptación**
+Criterios de aceptación
 
 1. Con al menos una pregunta creada, al entrar a "Mis preguntas" se muestra la tabla
    paginada de a 10 (también se puede ver de a 5 o de a 20).
@@ -89,11 +89,11 @@ están definidas en `EstadoPregunta.puedePasarA` (RF-14 y RF-15).
 
 ## HU-04: Asignar revisor a preguntas pendientes de revisión
 
-**Como** administrador **quiero** asignar al menos un revisor a una pregunta
-"Pendiente de revisión" **para** que otro docente la revise. Una vez asignados los
+Como administrador quiero asignar al menos un revisor a una pregunta
+"Pendiente de revisión" para que otro docente la revise. Una vez asignados los
 revisores, el sistema envía un correo para notificarlos (simulado).
 
-**Criterios de aceptación**
+Criterios de aceptación
 
 1. Al entrar a "Asignación de Revisores" se muestran las preguntas "Pendiente de
    revisión" con su autor.

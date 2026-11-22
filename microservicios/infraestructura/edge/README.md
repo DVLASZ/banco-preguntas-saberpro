@@ -1,6 +1,6 @@
 # edge · Balanceador de entrada (nginx)
 
-Único punto de entrada de la pila: recibe las peticiones en el puerto **8080** y las reparte entre las réplicas del
+Único punto de entrada de la pila: recibe las peticiones en el puerto 8080 y las reparte entre las réplicas del
 [`api-gateway`](../api-gateway/). Con él se puede escalar el gateway con `docker compose up -d --scale api-gateway=3`.
 
 Toda su configuración está en [`nginx.conf`](nginx.conf):

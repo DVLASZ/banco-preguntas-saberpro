@@ -16,8 +16,8 @@ El token dura 15 minutos. El cliente de la aplicación (`bancopreguntas-web`) es
 
 La autorización se revisa dos veces, como acordamos con los docentes.
 
-1. **En el gateway.** `RoleRules` es una tabla de método y camino contra roles. Si el token no tiene el rol, la petición no pasa.
-2. **En cada servicio.** Cada servicio vuelve a validar la firma y el emisor del token con la clave pública de Keycloak y exige el rol de la operación
+1. En el gateway. `RoleRules` es una tabla de método y camino contra roles. Si el token no tiene el rol, la petición no pasa.
+2. En cada servicio. Cada servicio vuelve a validar la firma y el emisor del token con la clave pública de Keycloak y exige el rol de la operación
    (`requireAnyRole`). Así, si el gateway tuviera un error, el servicio no abre la operación.
 
 El gateway también borra las cabeceras `X-User-Id` y `X-User-Roles` de la petición que llega de afuera. En modo `jwt` los servicios las ignoran, de

@@ -18,9 +18,9 @@ mvn test
 | `modulo-microkernel` | 39 | Microkernel, plugins, filtros y pipeline, solicitud de generación |
 | `modulo-revision` | 23 | `Revisor`, `AsignacionRevision`, el repositorio y el correo simulados, `DirectorioRevisoresDeUsuarios`, `FuenteDePreguntasAsignadas` y `AsignacionRevisionService` (una prueba por regla de HU-04) |
 | `modulo-api-rest` | 52 | Controlador REST, servicio, mapper, adaptador JPA, integración |
-| **Total** | **330** | |
+| Total | 330 | |
 
-**Estilo de las pruebas.** Cada prueba sigue *Given / When / Then* y tiene un nombre que
+Estilo de las pruebas. Cada prueba sigue *Given / When / Then* y tiene un nombre que
 describe el comportamiento (por ejemplo,
 `enviarARevision_sinConfirmacion_laPreguntaSigueEnBorrador`). Los servicios se prueban
 con dobles de sus dependencias (Mockito) o con el repositorio en memoria; los
@@ -45,7 +45,7 @@ banco-preguntas-saberpro/
 Cada módulo tiene su propio `pom.xml` y, dentro, los paquetes `domain`, `access` y
 `presentation` de las tres capas.
 
-**Cómo compilar y ejecutar**
+Cómo compilar y ejecutar
 
 ```bash
 mvn test                                            # todas las pruebas
@@ -58,9 +58,9 @@ Usuarios de prueba (contraseña `Saber2026!`): `autor1` (Autor), `revisor1` (Rev
 
 ## 3. Trabajo en equipo
 
-- **Tablero de tareas:** las historias, sus criterios y sus subtareas están en el
+- Tablero de tareas: las historias, sus criterios y sus subtareas están en el
   tablero de Jira del Sprint 1.
-- **Commits:** cada integrante del equipo trabaja con su propia identidad de Git, de
+- Commits: cada integrante del equipo trabaja con su propia identidad de Git, de
   modo que cada commit queda a nombre de quien lo hizo.
-- **Mensajes de commit:** describen el cambio en una línea y, cuando corresponde,
+- Mensajes de commit: describen el cambio en una línea y, cuando corresponde,
   indican la historia (por ejemplo, "(HU-04)").

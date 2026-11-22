@@ -2,7 +2,7 @@
 
 Cada evento relevante genera una notificación en la bandeja del sistema (`notification-service`) y un correo (`email-service`,
 puerto `EmailSender`). Al crear el aviso, `notification-service` publica `notification.created` y `email-service` lo escucha para
-enviar el correo. **El correo es simulado**, como indicó el profesor Libardo (consulta 16 de las
+enviar el correo. El correo es simulado, como indicó el profesor Libardo (consulta 16 de las
 [consultas a los docentes](../../general/consultas-a-docentes.md)): el servicio de notificaciones reacciona al evento y deja el aviso en la
 bandeja; el de correo registra el "envío" (`SimulatedEmailSender`, con reintentos y registro por decoradores) en lugar de salir a un servidor de correo, para no bloquear
 cuentas en las pruebas. Si algún día se pide correo real, solo cambia el adaptador del puerto `EmailSender`. Se notifica
@@ -33,7 +33,7 @@ Los consumidores son idempotentes: un evento repetido (mismo `eventId`) no dupli
 
 ## Cómo se redactan: Factory Method
 
-Cada tipo de aviso tiene su propio **creador** (patrón Factory Method, ver [05 · Patrones](../05-patrones.md)):
+Cada tipo de aviso tiene su propio creador (patrón Factory Method, ver [05 · Patrones](../05-patrones.md)):
 `CreadorDeAviso` define cómo se arma la notificación y cada subclase fabrica su mensaje.
 
 | Tipo | Creador | Asunto |
@@ -53,30 +53,30 @@ Si no se conoce el título, la pregunta se nombra por su identificador ("la preg
 
 Los textos entre llaves se reemplazan con los datos del evento. Las observaciones solo se listan si tienen texto.
 
-**Asignación al revisor.** "Tienes pendiente evaluar {pregunta}. {motivo} Entra a tu bandeja de revisión para aprobarla o
+Asignación al revisor. "Tienes pendiente evaluar {pregunta}. {motivo} Entra a tu bandeja de revisión para aprobarla o
 rechazarla." El motivo es "El administrador te asignó como revisor (ronda {n})." o, en la reasignación automática, "El
 autor corrigió la pregunta y la envió de nuevo; como ya la habías revisado, quedas asignado otra vez (ronda {n})."
 
-**Pregunta en revisión (autor).** "Se asignaron revisores a {pregunta} (ronda {n}) y su estado ahora es "En revisión". Te
+Pregunta en revisión (autor). "Se asignaron revisores a {pregunta} (ronda {n}) y su estado ahora es "En revisión". Te
 avisaremos cuando termine la revisión."
 
-**Evaluación recibida (administrador).** "El revisor {revisor} evaluó {pregunta} en la ronda {n}: {decisión}." y, si la
+Evaluación recibida (administrador). "El revisor {revisor} evaluó {pregunta} en la ronda {n}: {decisión}." y, si la
 hay, "Observación: {texto}".
 
-**Aprobada (autor).** "Los revisores aprobaron {pregunta} (ronda {n}). Queda lista para que el administrador la
+Aprobada (autor). "Los revisores aprobaron {pregunta} (ronda {n}). Queda lista para que el administrador la
 publique." seguido de la lista de observaciones.
 
-**Rechazada (autor).** "Un revisor rechazó {pregunta} (ronda {n}). Puedes reabrirla, corregirla y enviarla de nuevo; los
+Rechazada (autor). "Un revisor rechazó {pregunta} (ronda {n}). Puedes reabrirla, corregirla y enviarla de nuevo; los
 demás revisores aún pueden dejar sus observaciones." seguido de la lista de observaciones.
 
-**Resultado de la revisión (administrador y revisores).** "La revisión de {pregunta} terminó: los revisores la aprobaron
+Resultado de la revisión (administrador y revisores). "La revisión de {pregunta} terminó: los revisores la aprobaron
 (ronda {n}). Queda lista para que el administrador la publique." o "...terminó: fue rechazada (ronda {n}). El autor puede
 corregirla y enviarla de nuevo.", con la lista de observaciones.
 
-**Observación tardía (autor).** "El revisor {revisor} dejó su evaluación ({decisión}) sobre {pregunta} en la ronda {n}, que
+Observación tardía (autor). "El revisor {revisor} dejó su evaluación ({decisión}) sobre {pregunta} en la ronda {n}, que
 ya había sido rechazada." y, si la hay, "Observación: {texto}".
 
-**Publicada (autor).** "El administrador publicó {pregunta}. Ya hace parte del banco de preguntas."
+Publicada (autor). "El administrador publicó {pregunta}. Ya hace parte del banco de preguntas."
 
 ## Configuración
 

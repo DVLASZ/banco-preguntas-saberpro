@@ -1,7 +1,7 @@
 # Documentación del segundo corte
 
-Documentación de la **segunda iteración** del Sistema de Banco de Preguntas Saber Pro: refactorización
-del monolito del primer corte a una solución distribuida con **microservicios orientados a eventos**.
+Documentación de la segunda iteración del Sistema de Banco de Preguntas Saber Pro: refactorización
+del monolito del primer corte a una solución distribuida con microservicios orientados a eventos.
 Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 2026.2.
 
 > Estado: la iteración está implementada y verificada: 10 microservicios pequeños, gateway, Keycloak, frontend Angular con las

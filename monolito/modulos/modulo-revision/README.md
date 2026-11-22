@@ -2,7 +2,7 @@
 
 Asignación de revisores a las preguntas que esperan revisión: el
 Administrador elige al menos un revisor por pregunta, la pregunta pasa a
-**En revisión** y el sistema avisa a cada revisor por correo (simulado, ya que
+En revisión y el sistema avisa a cada revisor por correo (simulado, ya que
 el proyecto acepta simular las integraciones externas).
 
 > Estado: implementado.
@@ -56,13 +56,13 @@ Usuarios (contraseña `Saber2026!` para todos): `autor1`, `revisor1`, `admin1`.
 Las preguntas viven en memoria: se pierden al cerrar la app. Para cambiar de
 usuario no reinicies: cierra la ventana principal del rol y vuelve el login.
 
-1. Con `autor1`, en "Mis preguntas" abre **P-001** (Borrador), pulsa **Enviar a
+1. Con `autor1`, en "Mis preguntas" abre P-001 (Borrador), pulsa **Enviar a
    revisión** y confirma. Queda "Pendiente de revisión".
-2. Con `admin1`, en la ventana "Asignación de Revisores" aparecen **P-001 y P-003**
+2. Con `admin1`, en la ventana "Asignación de Revisores" aparecen P-001 y P-003
    con su autor `autor1` (criterio 1).
-3. Elige una pregunta y pulsa **Asignar** sin marcar a nadie. Sale
+3. Elige una pregunta y pulsa Asignar sin marcar a nadie. Sale
    "Debe seleccionar al menos un revisor" (criterio 3).
-4. Elige P-001, marca a `revisor1` y pulsa **Asignar**. Sale un mensaje de éxito, el
+4. Elige P-001, marca a `revisor1` y pulsa Asignar. Sale un mensaje de éxito, el
    "correo" aparece en la consola y P-001 ya no está como pendiente
    (criterio 2).
 5. Con `revisor1` se ve solo P-001, y se puede aprobar o rechazar.

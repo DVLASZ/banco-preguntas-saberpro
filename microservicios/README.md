@@ -5,7 +5,7 @@ corte se conserva en la rama `corte-1`. El diseño está en [`docs/corte-2`](../
 
 ## Servicios
 
-La solución son **doce microservicios** que se comunican por eventos en RabbitMQ, detrás de un API Gateway, cada uno con su propia base de
+La solución son doce microservicios que se comunican por eventos en RabbitMQ, detrás de un API Gateway, cada uno con su propia base de
 datos PostgreSQL (menos `validation-service`, que no guarda datos). Diez son del banco de preguntas y dos, `simulation-service` y `tracking-service`,
 son de simulacros y seguimiento académico (tercer corte). `evaluation-service` está organizado como arquitectura hexagonal con DDD.
 

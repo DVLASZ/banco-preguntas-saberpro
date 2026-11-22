@@ -1,6 +1,6 @@
 # Documentación del proyecto
 
-Documentación de arquitectura del **Sistema de Banco de Preguntas Saber Pro**, primera
+Documentación de arquitectura del Sistema de Banco de Preguntas Saber Pro, primera
 iteración (primer corte). Proyecto de curso de Ingeniería de Software II, Universidad
 del Cauca, periodo 2026.2.
 

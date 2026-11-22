@@ -4,21 +4,21 @@ Mantiene el directorio de usuarios del banco, sincronizado desde Keycloak, y avi
 
 | | |
 |---|---|
-| **Puerto** | 8081 (`USER_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `user_db` (puerto 5433 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/user-service/v3/api-docs` (a través del gateway) |
-| **Contrato exportado** | [`openapi-user-service.json`](../../../docs/corte-2/api/openapi/openapi-user-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/user-service.postman_collection.json) |
-| **Pruebas** | 62 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8081 (`USER_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `user_db` (puerto 5433 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/user-service/v3/api-docs` (a través del gateway) |
+| Contrato exportado | [`openapi-user-service.json`](../../../docs/corte-2/api/openapi/openapi-user-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/user-service.postman_collection.json) |
+| Pruebas | 62 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Gestión de Usuarios**. Keycloak autentica y emite los tokens; este servicio guarda una copia de los usuarios con sus roles (administrador, autor, revisor, docente y estudiante) y su perfil, para que el resto del sistema consulte quién es quién. Detecta los inicios de sesión y los publica para la auditoría.
+Es el contexto de Gestión de Usuarios. Keycloak autentica y emite los tokens; este servicio guarda una copia de los usuarios con sus roles (administrador, autor, revisor, docente y estudiante) y su perfil, para que el resto del sistema consulte quién es quién. Detecta los inicios de sesión y los publica para la auditoría.
 
 ## Reglas de negocio
 
 - La sincronización con Keycloak usa la API de administración con una cuenta de servicio (`bancopreguntas-admin`), de forma
   periódica y bajo demanda (`POST /api/users/sync`, solo administrador). Se puede apagar con `USER_SYNC_ENABLED=false`.
-- `GET /api/users/me` responde a **cualquier rol** del sistema, incluidos docente y estudiante.
+- `GET /api/users/me` responde a cualquier rol del sistema, incluidos docente y estudiante.
 - Los usuarios nuevos de Keycloak aparecen en el directorio sin tocar código.
 - Los inicios de sesión se detectan leyendo los eventos `LOGIN` y `LOGIN_ERROR` de Keycloak, con un cursor para no repetirlos, y se
   publican; nunca se guarda ni se publica una contraseña.
@@ -36,14 +36,14 @@ comprobarlo con el usuario autenticado que recibe.
 
 ## Mensajería (RabbitMQ)
 
-**Publica** (con Outbox transaccional):
+Publica (con Outbox transaccional):
 
 | Evento | Cuándo | Quién lo consume |
 |---|---|---|
 | `auth.login-succeeded` | Un usuario inicia sesión | history |
 | `auth.login-failed` | Un intento de inicio de sesión falla | history |
 
-**Consume:** nada.
+Consume: nada.
 
 ## Base de datos
 
@@ -62,7 +62,7 @@ src/main/java/co/unicauca/bancopreguntas/user/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, cliente de la API de administración de Keycloak
 ```
 
-**Patrones de diseño que usa:** Adapter (`KeycloakIdentityProvider` oculta la API de Keycloak detrás de un puerto) y Observer.
+Patrones de diseño que usa: Adapter (`KeycloakIdentityProvider` oculta la API de Keycloak detrás de un puerto) y Observer.
 
 ## Configuración
 

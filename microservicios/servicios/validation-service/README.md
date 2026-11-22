@@ -4,14 +4,14 @@ Revisa el contenido de una pregunta contra las reglas de calidad y reporta todos
 
 | | |
 |---|---|
-| **Puerto** | 8095 (`VALIDATION_SERVICE_PORT`) |
-| **Base de datos** | No tiene (servicio sin estado) |
-| **Swagger** | `http://localhost:8095/swagger-ui.html` (directo; el servicio es interno) |
-| **Pruebas** | 53 pruebas (unitarias, de API, de arquitectura con ArchUnit) |
+| Puerto | 8095 (`VALIDATION_SERVICE_PORT`) |
+| Base de datos | No tiene (servicio sin estado) |
+| Swagger | `http://localhost:8095/swagger-ui.html` (directo; el servicio es interno) |
+| Pruebas | 53 pruebas (unitarias, de API, de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Validación estructural** (HU-03, RF-08 a RF-13). Lo llama `question-service` al crear, modificar y enviar a revisión; el gateway no tiene rutas hacia él. Es un servicio **sin estado**: no tiene base de datos ni se conecta al broker.
+Es el contexto de Validación estructural (HU-03, RF-08 a RF-13). Lo llama `question-service` al crear, modificar y enviar a revisión; el gateway no tiene rutas hacia él. Es un servicio sin estado: no tiene base de datos ni se conecta al broker.
 
 ## Reglas de negocio
 
@@ -22,7 +22,7 @@ Es el contexto de **Validación estructural** (HU-03, RF-08 a RF-13). Lo llama `
 
 ## API REST
 
-Las rutas **no pasan por el gateway**: las llaman otros servicios con la identidad de quien hizo la petición, y el servicio vuelve a comprobar el token y el rol.
+Las rutas no pasan por el gateway: las llaman otros servicios con la identidad de quien hizo la petición, y el servicio vuelve a comprobar el token y el rol.
 
 | Método | Ruta | Qué hace |
 |---|---|---|
@@ -42,7 +42,7 @@ src/main/java/co/unicauca/bancopreguntas/validation/
 └── infrastructure/   Adaptadores: configuración
 ```
 
-**Patrones de diseño que usa:** Strategy (cada `ValidationRule` es una estrategia), Template Method (`ReglaPorOpcion`) y Adapter. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Strategy (cada `ValidationRule` es una estrategia), Template Method (`ReglaPorOpcion`) y Adapter. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

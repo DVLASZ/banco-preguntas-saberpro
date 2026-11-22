@@ -1,6 +1,6 @@
 # Banco de Preguntas Saber Pro
 
-Sistema para la **gestión, validación y administración de un banco de preguntas** para la preparación de las pruebas
+Sistema para la gestión, validación y administración de un banco de preguntas para la preparación de las pruebas
 Saber Pro. Proyecto de curso de Ingeniería de Software II, Universidad del Cauca, periodo 2026.2.
 
 Los autores redactan preguntas de selección múltiple que el sistema valida estructuralmente; un administrador asigna de 1 a 3 revisores;
@@ -32,7 +32,7 @@ simulacros con tiempo y calificación automática, y los docentes ven el desempe
 ## Arquitectura
 
 Microservicios orientados a eventos: cada servicio tiene su propia base de datos y se comunican por RabbitMQ a través de un API Gateway. Son
-**doce servicios pequeños**, cada uno con una sola responsabilidad: usuarios, preguntas, validación, ciclo de vida, asignación de revisores,
+doce servicios pequeños, cada uno con una sola responsabilidad: usuarios, preguntas, validación, ciclo de vida, asignación de revisores,
 evaluación, notificaciones, correo, historial, auditoría, simulacros y seguimiento. `evaluation-service` está organizado con arquitectura hexagonal
 y DDD.
 
@@ -67,7 +67,7 @@ El diseño está en la [documentación del segundo corte](docs/corte-2/README.md
 
 ## Cómo ejecutarlo
 
-**La pila completa** (bases de datos, RabbitMQ, Keycloak, los servicios, el gateway y el frontend), con Docker Desktop:
+La pila completa (bases de datos, RabbitMQ, Keycloak, los servicios, el gateway y el frontend), con Docker Desktop:
 
 ```bash
 cd microservicios
@@ -78,7 +78,7 @@ La aplicación queda en http://localhost:4200 y la API en http://localhost:8080 
 `/swagger-ui.html`). Los usuarios de prueba y las demás direcciones están en el
 [README de microservicios](microservicios/README.md).
 
-**Monolito de escritorio (primer corte)**, con Java 17 y Maven:
+Monolito de escritorio (primer corte), con Java 17 y Maven:
 
 ```bash
 cd monolito

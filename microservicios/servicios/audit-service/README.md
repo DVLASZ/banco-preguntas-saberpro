@@ -4,14 +4,14 @@ Guarda una entrada de auditoría por cada acción relevante: cambios de las preg
 
 | | |
 |---|---|
-| **Puerto** | 8091 (`AUDIT_SERVICE_PORT`) |
-| **Base de datos** | PostgreSQL `audit_db` (puerto 5441 en local), con migraciones de Flyway |
-| **Swagger** | `http://localhost:8080/docs/audit-service/v3/api-docs` (a través del gateway) |
-| **Pruebas** | 38 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Puerto | 8091 (`AUDIT_SERVICE_PORT`) |
+| Base de datos | PostgreSQL `audit_db` (puerto 5441 en local), con migraciones de Flyway |
+| Swagger | `http://localhost:8080/docs/audit-service/v3/api-docs` (a través del gateway) |
+| Pruebas | 38 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
-Es el contexto de **Auditoría** (RNF de trazabilidad). Escucha los eventos de preguntas, revisión y autenticación y deja un registro que solo el administrador consulta, con filtros.
+Es el contexto de Auditoría (RNF de trazabilidad). Escucha los eventos de preguntas, revisión y autenticación y deja un registro que solo el administrador consulta, con filtros.
 
 ## Reglas de negocio
 
@@ -30,9 +30,9 @@ Las rutas pasan por el gateway, que valida el token de Keycloak y comprueba el r
 
 ## Mensajería (RabbitMQ)
 
-**Publica:** nada; es un consumidor puro.
+Publica: nada; es un consumidor puro.
 
-**Consume:**
+Consume:
 
 | Cola | Routing key | Efecto |
 |---|---|---|
@@ -62,7 +62,7 @@ src/main/java/co/unicauca/bancopreguntas/audit/
 └── infrastructure/   Adaptadores: JPA, RabbitMQ, clientes REST y configuración
 ```
 
-**Patrones de diseño que usa:** Adapter y Observer. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
+Patrones de diseño que usa: Adapter y Observer. Detalle en [patrones](../../../docs/corte-2/05-patrones.md).
 
 ## Configuración
 

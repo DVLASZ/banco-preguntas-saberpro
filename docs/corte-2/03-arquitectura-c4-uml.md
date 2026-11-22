@@ -88,8 +88,8 @@ flowchart TB
 ## C4 · Nivel 3: componentes
 
 Todos los servicios siguen la misma organización interna: `api`, `application`, `domain` e
-`infrastructure`. La capa de aplicación declara **puertos** (interfaces) y la de infraestructura los implementa con
-**adaptadores** (JPA, RabbitMQ, clientes REST): es una organización hexagonal. Una prueba de arquitectura
+`infrastructure`. La capa de aplicación declara puertos (interfaces) y la de infraestructura los implementa con
+adaptadores (JPA, RabbitMQ, clientes REST): es una organización hexagonal. Una prueba de arquitectura
 (`ArquitecturaTest`, con ArchUnit) hace fallar la compilación si el dominio depende de Spring, de JPA o de las otras
 capas. Se muestran los servicios con más lógica; los demás (`user`, `history`, `audit` y `email`) siguen el
 mismo esquema con un controlador, un servicio de aplicación, sus puertos y adaptadores.
@@ -456,7 +456,7 @@ erDiagram
 
 ### assignment_db
 
-Una **ronda** es una vuelta de revisión de una versión de la pregunta; si el autor corrige y reenvía, se abre otra.
+Una ronda es una vuelta de revisión de una versión de la pregunta; si el autor corrige y reenvía, se abre otra.
 
 ```mermaid
 erDiagram

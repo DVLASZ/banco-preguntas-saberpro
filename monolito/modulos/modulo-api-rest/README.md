@@ -1,13 +1,13 @@
 # Módulo API REST (Taller 6)
 
-Microservicio REST construido con **Spring Boot 3.5** y **Spring Data JPA**
+Microservicio REST construido con Spring Boot 3.5 y Spring Data JPA
 que expone el CRUD de las preguntas del banco. Reutiliza el dominio real del
 proyecto (`Question`, `QuestionService` de `modulo-preguntas`): no es una
 entidad de juguete aparte, y por eso una pregunta creada por la API pasa por
 las mismas reglas de validación que una creada desde la aplicación de
 escritorio.
 
-El monolito de escritorio (`app`) **no depende** de este módulo, así que el
+El monolito de escritorio (`app`) no depende de este módulo, así que el
 primer corte (monolito en capas) queda intacto. Este módulo es, también, un
 primer paso concreto hacia la migración a microservicios del Corte 2: sale de
 `modulo-preguntas` solo lo que ya era su contrato (`QuestionRepository`) y se
@@ -45,23 +45,23 @@ model/       QuestionEntity (@Entity) ◀── QuestionMapper ──▶ Questio
 
 ### Decisiones de diseño
 
-- **La entidad JPA está separada del dominio.** `Question` no tiene
+- La entidad JPA está separada del dominio. `Question` no tiene
   anotaciones de persistencia; `QuestionEntity` (solo en este módulo) las
   lleva y el adaptador las convierte. Así el dominio no arrastra JPA ni
   Spring (RNF-12: separación entre lógica de negocio y persistencia) y la app
   de escritorio no incorpora Hibernate por accidente. El costo es que un campo
   nuevo del dominio se agrega también en la entidad y el mapper.
-- **DELETE archiva, no borra.** RNF-16 prohíbe eliminar físicamente una
+- DELETE archiva, no borra. RNF-16 prohíbe eliminar físicamente una
   pregunta: `DELETE /api/questions/{id}` la pasa al estado `ARCHIVADA` y
   responde `204`. La pregunta sigue existiendo y se puede consultar.
-- **El servidor decide el id y el estado.** El cuerpo de POST/PUT no incluye
+- El servidor decide el id y el estado. El cuerpo de POST/PUT no incluye
   `id` ni `estado`: el id (`P-013`, `P-014`, ...) lo genera el adaptador
   continuando el mayor consecutivo guardado, y una pregunta nueva nace siempre
   en `BORRADOR`, como en la aplicación de escritorio.
-- **PUT solo cambia el contenido**, nunca el estado, y solo mientras la
+- PUT solo cambia el contenido, nunca el estado, y solo mientras la
   pregunta esté en `BORRADOR` y lo pida su autor (igual que
   `QuestionService.actualizarContenido`).
-- **La validación estructural es la misma del dominio** (contexto obligatorio,
+- La validación estructural es la misma del dominio (contexto obligatorio,
   una única pregunta directa, cuatro opciones distintas, sin "todas/ninguna de
   las anteriores", longitud y estructura), aplicada al crear y al actualizar.
 
@@ -141,7 +141,7 @@ java -jar target/banco-preguntas-api.jar   # arranca en http://localhost:8080
 
 Al arrancar por primera vez se crean las tablas y se cargan las **12
 preguntas de ejemplo** del monolito (`SampleDataSeeder`), para que el primer
-GET ya devuelva datos. La base de datos es **H2 en archivo**
+GET ya devuelva datos. La base de datos es H2 en archivo
 (`modulo-api-rest/data/`, ignorado por Git), de modo que los datos sobreviven a
 reinicios. Consola de la base de datos: <http://localhost:8080/h2-console>
 (JDBC URL `jdbc:h2:file:./data/banco-preguntas-api`, usuario `sa`, sin

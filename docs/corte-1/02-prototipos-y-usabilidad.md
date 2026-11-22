@@ -90,15 +90,15 @@ Capturas de la aplicación en ejecución (usuario `autor1`).
 
 ## 3. Evaluación de usabilidad
 
-Se aplican dos técnicas complementarias: una **evaluación heurística** hecha por el
-equipo sobre la aplicación de esta iteración, y un **test de usabilidad con usuarios**
+Se aplican dos técnicas complementarias: una evaluación heurística hecha por el
+equipo sobre la aplicación de esta iteración, y un test de usabilidad con usuarios
 con tareas y cuestionario SUS.
 
 ### 3.1 Evaluación heurística (heurísticas de Nielsen)
 
 Severidad: 0 = no es un problema, 1 = cosmético, 2 = menor, 3 = mayor, 4 = catastrófico.
 
-**Lo que cumple**
+Lo que cumple
 
 | Heurística | Evidencia en la aplicación |
 |---|---|
@@ -108,7 +108,7 @@ Severidad: 0 = no es un problema, 1 = cosmético, 2 = menor, 3 = mayor, 4 = cata
 | 5. Prevención de errores | Solo se edita en Borrador; los botones se deshabilitan según el estado; competencia, dificultad y respuesta se eligen de una lista. |
 | 9. Ayudar a reconocer y corregir errores | Un mensaje por cada regla incumplida y los campos afectados en rojo (Figuras 2 y 3). |
 
-**Problemas encontrados y mejoras propuestas**
+Problemas encontrados y mejoras propuestas
 
 | # | Problema | Heurística | Severidad | Mejora propuesta |
 |---|---|---|---|---|
@@ -120,17 +120,17 @@ Severidad: 0 = no es un problema, 1 = cosmético, 2 = menor, 3 = mayor, 4 = cata
 
 ### 3.2 Test de usabilidad con usuarios
 
-**Objetivo.** Comprobar que un autor de preguntas puede crear, enviar a revisión y
+Objetivo. Comprobar que un autor de preguntas puede crear, enviar a revisión y
 encontrar sus preguntas sin ayuda, y que un administrador puede asignar revisores.
 
-**Participantes.** De 3 a 5 personas con el perfil del sistema: docentes o estudiantes
+Participantes. De 3 a 5 personas con el perfil del sistema: docentes o estudiantes
 de últimos semestres que no participaron en el desarrollo.
 
-**Preparación.** Ejecutar la aplicación (`java -jar app/target/banco-preguntas-saberpro.jar`).
+Preparación. Ejecutar la aplicación (`java -jar app/target/banco-preguntas-saberpro.jar`).
 Usuarios de prueba (contraseña `Saber2026!`): `autor1` (Autor), `admin1` (Administrador).
 La persona evaluadora no explica cómo se usa el sistema: solo lee la tarea y observa.
 
-**Tareas**
+Tareas
 
 | Tarea | Enunciado que se le lee al participante | Éxito si... |
 |---|---|---|
@@ -140,10 +140,10 @@ La persona evaluadora no explica cómo se usa el sistema: solo lee la tarea y ob
 | T4 | "Abra una pregunta ya enviada y diga si puede modificarla." | Reconoce que es de solo lectura |
 | T5 | "Ingrese como `admin1` y asigne un revisor a una pregunta pendiente." | Asigna al menos un revisor |
 
-**Métricas por tarea:** completó sin ayuda (sí/no), tiempo en segundos, número de
+Métricas por tarea: completó sin ayuda (sí/no), tiempo en segundos, número de
 errores y comentarios.
 
-**Cuestionario SUS** (escala de 1 = totalmente en desacuerdo a 5 = totalmente de acuerdo):
+Cuestionario SUS (escala de 1 = totalmente en desacuerdo a 5 = totalmente de acuerdo):
 
 1. Creo que me gustaría usar este sistema con frecuencia.
 2. Encontré el sistema innecesariamente complejo.
@@ -156,23 +156,23 @@ errores y comentarios.
 9. Me sentí muy seguro/a usando el sistema.
 10. Necesité aprender muchas cosas antes de poder usarlo.
 
-**Cálculo del puntaje SUS.** Para las preguntas impares se resta 1 a la respuesta; para
+Cálculo del puntaje SUS. Para las preguntas impares se resta 1 a la respuesta; para
 las pares se resta la respuesta de 5. Se suman los diez valores y se multiplican por
 2,5: el resultado va de 0 a 100 (68 se considera el promedio; por encima de 80, muy bueno).
 
-**Resultados**
+Resultados
 
 | Participante | T1 | T2 | T3 | T4 | T5 | Puntaje SUS | Observaciones |
 |---|---|---|---|---|---|---|---|
 | P1 | Sí (52s) | Sí (15s) | Sí (20s) | No (50s) | Sí (40s) | 77,5 | 1 error en T1 (dejó la bibliografía vacía; corrigió solo al ver el aviso). En T4 pensó que la app se había bloqueado al no poder editar los campos y necesitó una pista para entender que la pregunta quedaba protegida por estar enviada. Sugirió un aviso visual de "Solo lectura" en vez de solo deshabilitar los campos. |
 | P2 | Sí (30s) | Sí (10s) | Sí (10s) | Sí (15s) | Sí (20s) | 97,5 | Completó las 5 tareas sin dudar ni pedir ayuda. Reconoció de inmediato el estado de solo lectura por el comportamiento de los campos. Sugirió agregar atajos de teclado (p. ej. Ctrl+S) para agilizar el diligenciamiento del formulario. |
 | P3 | Sí (80s) | Sí (25s) | Sí (35s) | Sí (30s) | No (70s) | 62,5 | En T1 dudó varias veces por la cantidad de campos del formulario. En T3 no usó el filtro por estado: bajó manualmente por la tabla hasta encontrar los borradores. En T5 no encontró el botón de cerrar sesión y necesitó una pista para cambiar de usuario. Sugirió dividir el formulario de creación en pasos y hacer más visible el botón de cerrar sesión. |
-| **Promedio / % de éxito** | 100% | 100% | 100% | 67% | 67% | 79,2 | T3 se completó siempre, pero 1 de 3 no usó el filtro previsto. T4 y T5 tuvieron 1 caso cada uno que necesitó una pista del evaluador (visibilidad del estado de solo lectura y ubicación del botón de cerrar sesión). |
+| Promedio / % de éxito | 100% | 100% | 100% | 67% | 67% | 79,2 | T3 se completó siempre, pero 1 de 3 no usó el filtro previsto. T4 y T5 tuvieron 1 caso cada uno que necesitó una pista del evaluador (visibilidad del estado de solo lectura y ubicación del botón de cerrar sesión). |
 
 - P1 = Sebastián Ruiz Segura (7° Ing. Sistemas)
 - P2 = Jhoiner Alberto Puentes Figueroa (8° Ing. Sistemas)
 - P3 = José David Ospina (8° Ing. Electrónica)
 
-**Cómo se usan los resultados.** Los problemas que aparezcan en dos o más
+Cómo se usan los resultados. Los problemas que aparezcan en dos o más
 participantes se agregan a la tabla de problemas de la evaluación heurística con su severidad y se priorizan
 para la siguiente iteración.
