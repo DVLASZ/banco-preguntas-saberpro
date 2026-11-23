@@ -8,7 +8,7 @@ Convierte los resultados de los simulacros en historial, estadísticas, fortalez
 | Base de datos | PostgreSQL `tracking_db` (puerto 5439 en local), con migraciones de Flyway |
 | Swagger | `http://localhost:8080/docs/tracking-service/v3/api-docs` (a través del gateway) |
 | Contrato exportado | `openapi-tracking-service.json` y colección de Postman |
-| Pruebas | 61 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Pruebas | 67 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 

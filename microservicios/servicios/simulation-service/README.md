@@ -7,7 +7,7 @@ El estudiante practica con simulacros armados al azar con preguntas publicadas, 
 | Puerto | 8086 (`SIMULATION_SERVICE_PORT`) |
 | Base de datos | PostgreSQL `simulation_db` (puerto 5438 en local), con migraciones de Flyway |
 | Swagger | `http://localhost:8080/docs/simulation-service/v3/api-docs` (a través del gateway) |
-| Pruebas | 88 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Pruebas | 93 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 

@@ -8,7 +8,7 @@ Recibe la evaluación de cada revisor, decide la ronda por unanimidad y publica 
 | Base de datos | PostgreSQL `evaluation_db` (puerto 5446 en local), con migraciones de Flyway |
 | Swagger | `http://localhost:8080/docs/evaluation-service/v3/api-docs` (a través del gateway) |
 | Contrato exportado | [`openapi-evaluation-service.json`](../../../docs/corte-2/api/openapi/openapi-evaluation-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
-| Pruebas | 121 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Pruebas | 122 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 

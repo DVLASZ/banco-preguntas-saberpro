@@ -8,7 +8,7 @@ Lleva el estado de cada pregunta: sus transiciones válidas, el historial de cam
 | Base de datos | PostgreSQL `lifecycle_db` (puerto 5444 en local), con migraciones de Flyway |
 | Swagger | `http://localhost:8080/docs/lifecycle-service/v3/api-docs` (a través del gateway; el servicio es interno y solo publica su documentación) |
 | Contrato exportado | [`openapi-lifecycle-service.json`](../../../docs/corte-2/api/openapi/openapi-lifecycle-service.json) |
-| Pruebas | 99 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Pruebas | 143 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 

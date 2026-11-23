@@ -8,7 +8,7 @@ Abre una ronda de revisión por cada envío de una pregunta, deja que el adminis
 | Base de datos | PostgreSQL `assignment_db` (puerto 5445 en local), con migraciones de Flyway |
 | Swagger | `http://localhost:8080/docs/assignment-service/v3/api-docs` (a través del gateway) |
 | Contrato exportado | [`openapi-assignment-service.json`](../../../docs/corte-2/api/openapi/openapi-assignment-service.json) y [colección de Postman](../../../docs/corte-2/api/postman/assignment-evaluation-services.postman_collection.json) |
-| Pruebas | 96 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
+| Pruebas | 101 pruebas (unitarias, de API, de persistencia y de arquitectura con ArchUnit) |
 
 ## Responsabilidad
 
