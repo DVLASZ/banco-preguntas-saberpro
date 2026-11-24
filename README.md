@@ -25,8 +25,8 @@ simulacros con tiempo y calificación automática, y los docentes ven el desempe
 | Backend | Java 21, Spring Boot 3, Spring Data JPA, Flyway, PostgreSQL, RabbitMQ |
 | Seguridad | Keycloak (OAuth2 con PKCE, JWT) |
 | Frontend | Angular, TypeScript |
-| Infraestructura | Docker y Docker Compose |
-| Calidad | JUnit 5, MockMvc, ArchUnit, PostgreSQL embebido en las pruebas |
+| Infraestructura | Docker y Docker Compose, con un volumen con nombre por cada base de datos y por Keycloak |
+| Calidad | JUnit 5, MockMvc, ArchUnit, JaCoCo, PostgreSQL embebido en las pruebas |
 | Monolito del primer corte | Java 17, Swing, SQLite |
 
 ## Arquitectura
@@ -56,6 +56,9 @@ flowchart LR
 ```
 
 El diseño está en la [documentación del segundo corte](docs/corte-2/README.md) y la del [tercer corte](docs/corte-3/README.md).
+
+Los servicios tienen cada uno su README con la API, los eventos, la base de datos y la configuración. El avance del trabajo se ve en el historial de
+Git (un commit por cambio, con la autoría de quien lo hizo) y en el tablero de Jira, como se explica en el [flujo de trabajo](docs/general/flujo-de-trabajo.md).
 
 ## Estructura del repositorio
 
@@ -95,15 +98,15 @@ Más detalles en el [README del monolito](monolito/README.md).
 | [`docs/general`](docs/general/README.md) | Visión general, flujo de trabajo, convenciones, respuestas de los docentes y enunciados |
 | [`docs/corte-1`](docs/corte-1/README.md) | Monolito: historias de usuario, C4, patrones, pruebas |
 | [`docs/corte-2`](docs/corte-2/README.md) | Microservicios: contextos y eventos, arquitectura, patrones, prototipos y contratos de la API |
-| [`docs/corte-3`](docs/corte-3/README.md) | Hexagonal y DDD, seguridad, simulacros y seguimiento, y cobertura de pruebas |
+| [`docs/corte-3`](docs/corte-3/README.md) | Hexagonal y DDD, seguridad, simulacros y seguimiento, cobertura de pruebas y el [documento final de arquitectura](docs/corte-3/Documento-Arquitectura-Final.md) con los diagramas C4 |
 
 ## Estado
 
 | Corte | Estado |
 |---|---|
 | 1. Monolito | Entregado |
-| 2. Microservicios | Entregado: diez servicios, gateway, frontend web, Docker Compose y pruebas de carga |
-| 3. Hexagonal y DDD, seguridad, simulacros y seguimiento | Construido. Faltan el documento final en PDF y la sustentación |
+| 2. Microservicios | Entregado: siete servicios, gateway, frontend web, Docker Compose y pruebas de carga |
+| 3. Hexagonal y DDD, seguridad, simulacros y seguimiento | Construido y documentado: doce servicios, 1102 pruebas en verde, cobertura del dominio entre 97 % y 100 % y la pila completa en Docker Compose. Falta la sustentación |
 
 ## Autores
 
