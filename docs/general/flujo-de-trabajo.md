@@ -29,8 +29,7 @@ git log --oneline --graph corte-3
 git shortlog -sn corte-3
 ```
 
-La primera línea da la lista de cambios en orden y la segunda cuenta los commits de cada integrante. Al cerrar cada corte se deja un tag
-(`corte-1`, `corte-2`, `corte-3`) para poder volver a la entrega exacta.
+La primera línea da la lista de cambios en orden y la segunda cuenta los commits de cada integrante. La rama de cada corte queda como foto de esa entrega.
 
 ## Cómo se ve el avance en Jira
 
