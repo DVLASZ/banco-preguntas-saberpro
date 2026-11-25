@@ -358,7 +358,7 @@ Al medir se encontraron y se corrigieron cuatro problemas:
 | Hallazgo | Causa | Corrección |
 |---|---|---|
 | Consultas de preguntas muy lentas con muchas filas | El filtro opcional con `OR ... IS NULL` impedía usar índices | Búsqueda dinámica con consulta construida según los filtros e índices `(autor, fecha, id)`, `(fecha, id)` y `(estado, fecha, id)` |
-| El gateway rechazaba llamadas sanas con carga | El *bulkhead* por defecto admite 25 llamadas simultáneas | Tope de 1000 con espera máxima de 200 ms |
+| El gateway rechazaba llamadas sanas con carga | El bulkhead por defecto admite 25 llamadas simultáneas | Tope de 1000 con espera máxima de 200 ms |
 | Errores por agotamiento de puertos en `edge` | Una conexión nueva por petición hacia el gateway | Upstream con `keepalive` |
 | `edge` descartaba réplicas sanas | Tomaba los `503` del circuit breaker como réplica caída | Solo `error` y `timeout` activan el reintento |
 
