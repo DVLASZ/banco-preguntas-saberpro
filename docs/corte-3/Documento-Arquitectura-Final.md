@@ -935,7 +935,7 @@ Cada corte vive en su rama, que se integra a main cuando se entrega. Las ramas d
 | main | Entregas estables. Recibe cada corte con un merge | Rama de integración |
 | corte-1 | Monolito del primer corte, congelado | 31 commits, del 2026-09-07 al 2026-10-19 |
 | corte-2 | Microservicios y frontend del segundo corte | 103 commits en total, 74 sobre corte-1, hasta el 2026-11-03 |
-| corte-3 | Tercer corte: hexagonal con DDD, simulacros y seguimiento, cobertura, seguridad, Docker y documentos | 48 commits sobre corte-2 |
+| corte-3 | Tercer corte: hexagonal con DDD, simulacros y seguimiento, cobertura, seguridad, Docker y documentos | 50 commits sobre corte-2 |
 
 Los commits del tercer corte se prepararon en la rama local y se publican por partes, como pide el flujo de trabajo del equipo: primero la documentación y después cada servicio, de modo que cada parte compile.
 
@@ -947,10 +947,10 @@ La autoría de un commit es la de quien escribió esa parte. El archivo .mailmap
 
 | Integrante | Corte 1 | Corte 2 | Corte 3 | Total |
 |---|---|---|---|---|
-| Edward Esteban Dávila Salazar | 22 | 41 | 23 | 86 |
+| Edward Esteban Dávila Salazar | 22 | 41 | 25 | 88 |
 | Laura Isabel Sánchez Fernández | 4 | 17 | 12 | 33 |
 | Kevin Yesid Castaño Herrera | 2 | 16 | 13 | 31 |
-| Total | 28 | 74 | 48 | 150 |
+| Total | 28 | 74 | 50 | 152 |
 
 ### 8.3 De Jira a Git
 
@@ -973,7 +973,7 @@ Cada historia de Jira tiene una carpeta del repositorio donde vive su código. C
 | SCRUM-92 | simulation-service | servicios/simulation-service | 10 | Kevin 4, Edward 3, Laura 3 |
 | SCRUM-93 | tracking-service | servicios/tracking-service | 8 | Laura 4, Edward 3, Kevin 1 |
 | SCRUM-105 | Hexagonal y DDD en evaluation-service | servicios/evaluation-service/src/main/java/co/unicauca/bancopreguntas/evaluation/adapter | 2 | Kevin 2 |
-| SCRUM-108 | Documentos de arquitectura y README | docs, README.md | 60 | Edward 34, Laura 19, Kevin 6 |
+| SCRUM-108 | Documentos de arquitectura y README | docs, README.md | 62 | Edward 36, Laura 19, Kevin 6 |
 
 La columna de commits cuenta todos los commits de la rama corte-3 que tocaron la carpeta, desde el primero. Los de las historias del segundo corte vienen heredados de corte-2.
 
