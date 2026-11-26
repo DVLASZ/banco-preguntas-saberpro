@@ -35,7 +35,7 @@ npx ng serve        # http://localhost:4200
 ## Pruebas
 
 ```bash
-npx ng test --watch=false    # 162 pruebas con Vitest
+npx ng test --watch=false    # 190 pruebas con Vitest
 npx ng build                 # compilación de producción
 ```
 
