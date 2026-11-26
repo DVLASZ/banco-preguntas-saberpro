@@ -105,7 +105,7 @@ Más detalles en el [README del monolito](monolito/README.md).
 | Corte | Estado |
 |---|---|
 | 1. Monolito | Entregado |
-| 2. Microservicios | Entregado: siete servicios, gateway, frontend web, Docker Compose y pruebas de carga |
+| 2. Microservicios | Entregado: diez servicios, gateway, frontend web, Docker Compose y pruebas de carga |
 | 3. Hexagonal y DDD, seguridad, simulacros y seguimiento | Construido y documentado: doce servicios, 1102 pruebas en verde, cobertura del dominio entre 97 % y 100 % y la pila completa en Docker Compose. Falta la sustentación |
 
 ## Autores
