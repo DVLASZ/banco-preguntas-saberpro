@@ -273,7 +273,7 @@ https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1.
 | SCRUM-105 | HU-T31 Arquitectura hexagonal con DDD en evaluation-service | Kevin | Finalizada |
 | SCRUM-106 | HU-T32 Pruebas del dominio de todos los servicios y cobertura con JaCoCo | Laura | Finalizada |
 | SCRUM-107 | HU-T33 Seguridad con Keycloak y JWT documentada y verificada con todos los roles | Laura | Finalizada |
-| SCRUM-108 | HU-T34 Documento final de arquitectura en PDF y README del repositorio | Edward | En curso |
+| SCRUM-108 | HU-T34 Documento final de arquitectura en PDF y README del repositorio | Edward | Finalizada |
 | SCRUM-109 | HU-T35 Sustentación presencial del tercer corte | Edward, Laura y Kevin | Por hacer |
 | SCRUM-92 | HU-T20 simulation-service | Kevin | Finalizada |
 | SCRUM-93 | HU-T21 tracking-service | Laura | Finalizada |
@@ -935,7 +935,7 @@ Cada corte vive en su rama, que se integra a main cuando se entrega. Las ramas d
 | main | Entregas estables. Recibe cada corte con un merge | Rama de integración |
 | corte-1 | Monolito del primer corte, congelado | 31 commits, del 2026-09-07 al 2026-10-19 |
 | corte-2 | Microservicios y frontend del segundo corte | 103 commits en total, 74 sobre corte-1, hasta el 2026-11-03 |
-| corte-3 | Tercer corte: hexagonal con DDD, simulacros y seguimiento, cobertura, seguridad, Docker y documentos | 53 commits sobre corte-2 |
+| corte-3 | Tercer corte: hexagonal con DDD, simulacros y seguimiento, cobertura, seguridad, Docker y documentos | 55 commits sobre corte-2 |
 
 Los commits del tercer corte se prepararon en la rama local y se publican por partes, como pide el flujo de trabajo del equipo: primero la documentación y después cada servicio, de modo que cada parte compile.
 
@@ -947,10 +947,10 @@ La autoría de un commit es la de quien escribió esa parte. El archivo .mailmap
 
 | Integrante | Corte 1 | Corte 2 | Corte 3 | Total |
 |---|---|---|---|---|
-| Edward Esteban Dávila Salazar | 22 | 41 | 27 | 90 |
+| Edward Esteban Dávila Salazar | 22 | 41 | 29 | 92 |
 | Laura Isabel Sánchez Fernández | 4 | 17 | 12 | 33 |
 | Kevin Yesid Castaño Herrera | 2 | 16 | 14 | 32 |
-| Total | 28 | 74 | 53 | 155 |
+| Total | 28 | 74 | 55 | 157 |
 
 ### 8.3 De Jira a Git
 
@@ -973,7 +973,7 @@ Cada historia de Jira tiene una carpeta del repositorio donde vive su código. C
 | SCRUM-92 | simulation-service | servicios/simulation-service | 10 | Kevin 4, Edward 3, Laura 3 |
 | SCRUM-93 | tracking-service | servicios/tracking-service | 8 | Laura 4, Edward 3, Kevin 1 |
 | SCRUM-105 | Hexagonal y DDD en evaluation-service | servicios/evaluation-service/src/main/java/co/unicauca/bancopreguntas/evaluation/adapter | 2 | Kevin 2 |
-| SCRUM-108 | Documentos de arquitectura y README | docs, README.md | 64 | Edward 38, Laura 19, Kevin 6 |
+| SCRUM-108 | Documentos de arquitectura y README | docs, README.md | 66 | Edward 40, Laura 19, Kevin 6 |
 
 La columna de commits cuenta todos los commits de la rama corte-3 que tocaron la carpeta, desde el primero. Los de las historias del segundo corte vienen heredados de corte-2.
 
@@ -1002,4 +1002,4 @@ El frontend queda en http://localhost:4200 y el panel de RabbitMQ en http://loca
 |---|---|
 | URL del repositorio Git | https://github.com/DVLASZ/banco-preguntas-saberpro |
 | Tablero de Jira | https://dvlasz.atlassian.net/jira/software/projects/SCRUM/boards/1 |
-| Documentación del tercer corte | https://github.com/DVLASZ/banco-preguntas-saberpro/tree/main/docs/corte-3 |
+| Documentación del tercer corte | https://github.com/DVLASZ/banco-preguntas-saberpro/tree/corte-3/docs/corte-3 |
