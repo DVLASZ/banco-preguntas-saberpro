@@ -153,7 +153,7 @@ y cambiar el estado a Aprobada o Rechazada.
 6. Se notifica a los implicados (bandeja y correo simulado): al revisor, su asignación; al administrador que
    asignó, cada evaluación recibida; al autor, el resultado con las observaciones; y al administrador y a los
    revisores que evaluaron, el resultado de la revisión. Detalle en
-   [notificaciones y correos](anexos/notificaciones-y-correos.md).
+   [notificaciones y correos](../corte-2/anexos/notificaciones-y-correos.md).
 7. Una vez enviada, la evaluación queda en el historial y no se borra físicamente.
 
 ### 1.3 Tercera iteración
@@ -167,7 +167,7 @@ La HU-06 es la historia nueva del tercer corte. Los criterios son estos:
 4. Recibe una notificación por cada cambio relevante: resultado, observación tardía y publicación.
 5. Nada se borra: cada ronda y cada evaluación quedan en el historial.
 
-Los criterios de HU-06 los comprueba el recorrido funcional con tokens reales (sección 5.3). Además de HU-06, esta iteración trae los simulacros y el
+Los criterios de HU-06 los comprueba el recorrido funcional con tokens reales (sección 5.3). Junto con HU-06, esta iteración trae los simulacros y el
 seguimiento académico, que los docentes ubicaron en el tercer corte aunque los entregables no los listan como requisito. Están en simulation-service y
 tracking-service y cubren los requisitos RF-21 a RF-28:
 
@@ -485,7 +485,7 @@ servicio, balanceo y descubrimiento) es el que hace posible ese escalado en un e
 #### Tolerancia a fallos (extra)
 
 Verificado a mano: detener una réplica del gateway o de un servicio no interrumpe el servicio; detener RabbitMQ no
-impide guardar ni enviar a revisión (Outbox, ver [08](08-implementacion-seguridad-y-resiliencia.md)); un servicio
+impide guardar ni enviar a revisión (Outbox, ver [08](../corte-2/08-implementacion-seguridad-y-resiliencia.md)); un servicio
 caído devuelve 503 inmediato por el circuit breaker en lugar de dejar al usuario esperando.
 
 
@@ -604,7 +604,7 @@ de autorización y PKCE, Keycloak devuelve un JWT firmado con los roles del usua
 
 La autorización se revisa dos veces, como acordamos con los docentes. El gateway aplica una tabla de reglas, de método y camino contra roles, y si el token no tiene el rol la petición no pasa. Después
 cada servicio vuelve a validar la firma y el emisor del token con la clave pública de Keycloak y exige el rol de la operación, de modo que si el gateway tuviera un error el servicio no abre la operación.
-El gateway además borra las cabeceras X-User-Id y X-User-Roles de la petición que llega de afuera, para que nadie se haga pasar por otro usuario escribiendo una cabecera.
+El gateway también borra las cabeceras X-User-Id y X-User-Roles de la petición que llega de afuera, para que nadie se haga pasar por otro usuario escribiendo una cabecera.
 
 **Tabla 20.** Qué puede hacer cada rol.
 
@@ -636,7 +636,7 @@ Esta es la evidencia con el sistema corriendo en contenedores. Primero la pantal
 
 **Figura 17.** El gateway responde 401 sin token, 403 con un rol que no corresponde y 200 con el rol correcto. Abajo, el contenido del token del autor.
 
-Además de esto, los servicios propagan el token en las llamadas entre ellos, así que un servicio intermedio no da permisos que el usuario no tiene. Las contraseñas las guarda Keycloak con hash y los inicios de sesión
+Los servicios también propagan el token en las llamadas entre ellos, así que un servicio intermedio no da permisos que el usuario no tiene. Las contraseñas las guarda Keycloak con hash y los inicios de sesión
 correctos y fallidos llegan a audit-service, que el administrador ve en la pantalla de auditoría. Los secretos de desarrollo van en un archivo .env que no se versiona.
 
 **Tabla 21.** Pruebas de la seguridad.
@@ -935,7 +935,7 @@ Cada corte vive en su rama, que se integra a main cuando se entrega. Las ramas d
 | main | Entregas estables. Recibe cada corte con un merge | Rama de integración |
 | corte-1 | Monolito del primer corte, congelado | 31 commits, del 2026-09-07 al 2026-10-19 |
 | corte-2 | Microservicios y frontend del segundo corte | 103 commits en total, 74 sobre corte-1, hasta el 2026-11-03 |
-| corte-3 | Tercer corte: hexagonal con DDD, simulacros y seguimiento, cobertura, seguridad, Docker y documentos | 50 commits sobre corte-2 |
+| corte-3 | Tercer corte: hexagonal con DDD, simulacros y seguimiento, cobertura, seguridad, Docker y documentos | 53 commits sobre corte-2 |
 
 Los commits del tercer corte se prepararon en la rama local y se publican por partes, como pide el flujo de trabajo del equipo: primero la documentación y después cada servicio, de modo que cada parte compile.
 
@@ -947,10 +947,10 @@ La autoría de un commit es la de quien escribió esa parte. El archivo .mailmap
 
 | Integrante | Corte 1 | Corte 2 | Corte 3 | Total |
 |---|---|---|---|---|
-| Edward Esteban Dávila Salazar | 22 | 41 | 25 | 88 |
+| Edward Esteban Dávila Salazar | 22 | 41 | 27 | 90 |
 | Laura Isabel Sánchez Fernández | 4 | 17 | 12 | 33 |
-| Kevin Yesid Castaño Herrera | 2 | 16 | 13 | 31 |
-| Total | 28 | 74 | 50 | 152 |
+| Kevin Yesid Castaño Herrera | 2 | 16 | 14 | 32 |
+| Total | 28 | 74 | 53 | 155 |
 
 ### 8.3 De Jira a Git
 
@@ -967,13 +967,13 @@ Cada historia de Jira tiene una carpeta del repositorio donde vive su código. C
 | SCRUM-45, 61 a 63 | user-service | servicios/user-service | 6 | Laura 4, Edward 2 |
 | SCRUM-46, 78, 79 | notification-service y email-service | servicios/notification-service, servicios/email-service | 12 | Edward 7, Laura 4, Kevin 1 |
 | SCRUM-47, 64 a 66 | api-gateway | infraestructura/api-gateway | 7 | Edward 5, Laura 2 |
-| SCRUM-49, 80 a 83 | Frontend web | frontend | 20 | Edward 18, Kevin 1, Laura 1 |
+| SCRUM-49, 80 a 83 | Frontend web | frontend | 21 | Edward 18, Kevin 2, Laura 1 |
 | SCRUM-72, 84, 85 | history-service | servicios/history-service | 8 | Kevin 4, Edward 2, Laura 2 |
 | SCRUM-74, 87, 88 | Keycloak y entrada con nginx | infraestructura/keycloak, infraestructura/edge | 6 | Edward 4, Laura 2 |
 | SCRUM-92 | simulation-service | servicios/simulation-service | 10 | Kevin 4, Edward 3, Laura 3 |
 | SCRUM-93 | tracking-service | servicios/tracking-service | 8 | Laura 4, Edward 3, Kevin 1 |
 | SCRUM-105 | Hexagonal y DDD en evaluation-service | servicios/evaluation-service/src/main/java/co/unicauca/bancopreguntas/evaluation/adapter | 2 | Kevin 2 |
-| SCRUM-108 | Documentos de arquitectura y README | docs, README.md | 62 | Edward 36, Laura 19, Kevin 6 |
+| SCRUM-108 | Documentos de arquitectura y README | docs, README.md | 64 | Edward 38, Laura 19, Kevin 6 |
 
 La columna de commits cuenta todos los commits de la rama corte-3 que tocaron la carpeta, desde el primero. Los de las historias del segundo corte vienen heredados de corte-2.
 
